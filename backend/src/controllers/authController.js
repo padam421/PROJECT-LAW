@@ -78,6 +78,28 @@ exports.login = async (req, res) => {
   );
 };
 
+exports.forgotPassword = async (req, res) => {
+  const email = String((req.body || {}).email || '').trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid email address.' });
+  }
+  const result = await authService.requestPasswordReset(email);
+  return res.status(result.ok ? 200 : result.code).json(
+    result.ok ? { message: result.message } : { error: result.error }
+  );
+};
+
+exports.resetPassword = (req, res) => {
+  const { token, newPassword } = req.body || {};
+  if (!token || typeof token !== 'string') {
+    return res.status(400).json({ error: 'Reset link is incomplete. Please use the link from your email.' });
+  }
+  const result = authService.resetPassword(token, newPassword);
+  return res.status(result.ok ? 200 : result.code).json(
+    result.ok ? { ok: true } : { error: result.error }
+  );
+};
+
 exports.resendOTP = (req, res) => {
   const result = authService.resendOTP(req.body ? req.body.challengeId : '');
   return res.status(result.ok ? 200 : result.code).json(result.ok ? { resent: true, devOtp: result.devOtp } : { error: result.error });

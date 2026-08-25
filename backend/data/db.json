@@ -64,6 +64,88 @@
    "passwordHash": "$2a$10$eH.cyy2ipwlneomGG.d2gu6PlYWfEHH5JNhBuDY/KYmEO1KrX78/G",
    "accountStatus": "active",
    "createdAt": "2026-08-24T19:18:51.703Z"
+  },
+  {
+   "id": "law_mt89vc6bwzzj4f",
+   "role": "lawyer",
+   "fullName": "Real Test Advocate",
+   "professionalName": "Adv. Real Test Advocate",
+   "email": "real.user.1787638605757@example.com",
+   "emailHash": "d6c8f086761aa8affe64d66433a6620e",
+   "phone": "9638605757",
+   "phoneNormalized": "9638605757",
+   "phoneHash": "049f840e31883d7e1a357ba3bc866f51",
+   "passwordHash": "$2a$10$oUfgVmO7QiHF.adZMxU16eLXH22iYnbf7tboeY15ADXQSCGJEiqr2",
+   "gender": "Female",
+   "dob": "1992-02-02",
+   "address": "1 Real Street",
+   "city": "Mumbai",
+   "state": "Maharashtra",
+   "profilePhoto": null,
+   "barCouncil": "MH/5757/2018",
+   "barNumberHash": "3d6781c87e1ec6815c114724755e95b0",
+   "stateBarCouncil": "Bar Council of Maharashtra & Goa",
+   "enrollmentDate": "2018-05-01",
+   "enrollmentYear": "2018",
+   "qualification": "LLB (3 Years)",
+   "university": "Mumbai University",
+   "yearsOfPractice": 6,
+   "practiceType": "Independent Advocate & Litigation Counsel",
+   "primarySpecialization": "Civil Law",
+   "additionalSpecializations": [],
+   "courts": [],
+   "languages": [],
+   "bio": "",
+   "accountStatus": "active",
+   "verificationStatus": "pending",
+   "verificationId": null,
+   "verificationDate": null,
+   "rating": 0,
+   "totalReviews": 0,
+   "profileDeactivated": false,
+   "sensitiveActionsLockedUntil": null,
+   "createdAt": "2026-08-25T06:16:45.923Z"
+  },
+  {
+   "id": "law_mt89zf695oh98n",
+   "role": "lawyer",
+   "fullName": "Flow Check",
+   "professionalName": "Adv. Flow Check",
+   "email": "flow.check.1787638796232@example.com",
+   "emailHash": "803e3917937c2f2168293aa0c1baf89b",
+   "phone": "8638796233",
+   "phoneNormalized": "8638796233",
+   "phoneHash": "8952035168ae14dd4e1a5ed3e3b6d6a3",
+   "passwordHash": "$2a$10$FzlwlHa525TJn1ANUNYcxOsmvs4xsBL59POFDL8JPDyrRXMQmx4yy",
+   "gender": "Male",
+   "dob": "1991-01-01",
+   "address": "2 Check Ave",
+   "city": "Delhi",
+   "state": "Delhi",
+   "profilePhoto": null,
+   "barCouncil": "DL/6233/2019",
+   "barNumberHash": "e328b24474a8eaa2dd5b98eda27a03e9",
+   "stateBarCouncil": "Bar Council of Delhi",
+   "enrollmentDate": "2019-05-01",
+   "enrollmentYear": "2019",
+   "qualification": "LLB",
+   "university": "DU",
+   "yearsOfPractice": 5,
+   "practiceType": "Independent Advocate & Litigation Counsel",
+   "primarySpecialization": "Civil Law",
+   "additionalSpecializations": [],
+   "courts": [],
+   "languages": [],
+   "bio": "",
+   "accountStatus": "active",
+   "verificationStatus": "pending",
+   "verificationId": null,
+   "verificationDate": null,
+   "rating": 0,
+   "totalReviews": 0,
+   "profileDeactivated": false,
+   "sensitiveActionsLockedUntil": null,
+   "createdAt": "2026-08-25T06:19:56.434Z"
   }
  ],
  "otpChallenges": [
@@ -117,12 +199,186 @@
    "expiresAt": "2026-08-25T04:39:21.151Z",
    "consumed": false,
    "createdAt": "2026-08-25T04:34:21.151Z"
+  },
+  {
+   "id": "otp_mt89vcd6txeccd",
+   "userId": "law_mt89vc6bwzzj4f",
+   "codeHash": "5ccab4ba2beaf504a01b9d5706a2743b",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "attempts": 1,
+   "expiresAt": "2026-08-25T06:21:46.170Z",
+   "consumed": true,
+   "createdAt": "2026-08-25T06:16:46.170Z"
+  },
+  {
+   "id": "otp_mt89zfc5np85gh",
+   "userId": "law_mt89zf695oh98n",
+   "codeHash": "f414fa52d35bae5d21e76b9b04b178c8",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "attempts": 1,
+   "expiresAt": "2026-08-25T06:24:56.645Z",
+   "consumed": true,
+   "createdAt": "2026-08-25T06:19:56.645Z"
   }
  ],
- "sessions": [],
+ "sessions": [
+  {
+   "id": "sess_mt89vce1n0yi7w",
+   "userId": "law_mt89vc6bwzzj4f",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-08-25T06:16:46.206Z",
+   "lastSeenAt": "2026-08-25T06:16:46.206Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mt89zfd2hg0h8h",
+   "userId": "law_mt89zf695oh98n",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-08-25T06:19:56.685Z",
+   "lastSeenAt": "2026-08-25T06:19:56.685Z",
+   "revoked": false
+  }
+ ],
  "trustedDevices": [],
- "loginActivity": [],
- "verificationRecords": [],
+ "loginActivity": [
+  {
+   "id": "act_mt89zfdmp09w8i",
+   "userId": "law_mt89zf695oh98n",
+   "type": "login_new_device",
+   "description": "Signed in from a new device (pending confirmation)",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-08-25T06:19:56.698Z"
+  },
+  {
+   "id": "act_mt89vcogxmsxaa",
+   "userId": "law_mt89vc6bwzzj4f",
+   "type": "login_failed",
+   "description": "Incorrect password (attempt 1/5)",
+   "result": "bad_password",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-08-25T06:16:46.576Z"
+  },
+  {
+   "id": "act_mt89vceh19gmjw",
+   "userId": "law_mt89vc6bwzzj4f",
+   "type": "login_new_device",
+   "description": "Signed in from a new device (pending confirmation)",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-08-25T06:16:46.218Z"
+  }
+ ],
+ "verificationRecords": [
+  {
+   "id": "ver_mt89vc6bar9uvk",
+   "lawyerId": "law_mt89vc6bwzzj4f",
+   "stages": {
+    "barCouncil": {
+     "status": "pending",
+     "checkedAt": null
+    },
+    "documents": {
+     "status": "pending",
+     "docsSubmitted": 0
+    },
+    "identity": {
+     "status": "not_started",
+     "livenessAt": null
+    },
+    "duplicate": {
+     "status": "clear",
+     "checkedAt": "2026-08-25T06:16:45.923Z",
+     "collisionLawyerId": null
+    },
+    "manualReview": {
+     "status": "not_required",
+     "reviewerId": null,
+     "decidedAt": null
+    }
+   },
+   "overallStatus": "pending",
+   "fraudStatus": "low_risk",
+   "riskSignals": [],
+   "createdAt": "2026-08-25T06:16:45.923Z"
+  },
+  {
+   "id": "ver_mt89zf6adrgqr5",
+   "lawyerId": "law_mt89zf695oh98n",
+   "stages": {
+    "barCouncil": {
+     "status": "pending",
+     "checkedAt": null
+    },
+    "documents": {
+     "status": "pending",
+     "docsSubmitted": 0
+    },
+    "identity": {
+     "status": "not_started",
+     "livenessAt": null
+    },
+    "duplicate": {
+     "status": "clear",
+     "checkedAt": "2026-08-25T06:19:56.434Z",
+     "collisionLawyerId": null
+    },
+    "manualReview": {
+     "status": "not_required",
+     "reviewerId": null,
+     "decidedAt": null
+    }
+   },
+   "overallStatus": "pending",
+   "fraudStatus": "low_risk",
+   "riskSignals": [],
+   "createdAt": "2026-08-25T06:19:56.434Z"
+  }
+ ],
  "documents": [],
  "adminActions": [],
  "fraudRiskRecords": [],
@@ -1835,6 +2091,32 @@
     "riskLevel": "low",
     "lastUpdated": "2024-01-20"
    }
+  },
+  "law_mt89vc6bwzzj4f": {
+   "notifications": [
+    {
+     "id": "notif_mt89vcezzpq28w",
+     "type": "security",
+     "title": "New Device Sign-In",
+     "message": "A sign-in from Unknown browser on Unknown OS (Desktop) is awaiting your confirmation. If this wasn't you, secure your account immediately.",
+     "link": "/settings/tab/security",
+     "read": false,
+     "time": "2026-08-25T06:16:46.235Z"
+    }
+   ]
+  },
+  "law_mt89zf695oh98n": {
+   "notifications": [
+    {
+     "id": "notif_mt89zfeihlfemy",
+     "type": "security",
+     "title": "New Device Sign-In",
+     "message": "A sign-in from Unknown browser on Unknown OS (Desktop) is awaiting your confirmation. If this wasn't you, secure your account immediately.",
+     "link": "/settings/tab/security",
+     "read": false,
+     "time": "2026-08-25T06:19:56.730Z"
+    }
+   ]
   }
  }
 }

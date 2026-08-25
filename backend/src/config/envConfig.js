@@ -40,6 +40,18 @@ const config = {
   otpExpiryMs: 5 * 60 * 1000,
   otpMaxAttempts: 5,
 
+  // Outbound email (real SMTP delivery when configured)
+  smtp: {
+    host: env.SMTP_HOST || '',
+    port: parseInt(env.SMTP_PORT || '465', 10),
+    secure: String(env.SMTP_SECURE || 'true') === 'true',
+    user: env.SMTP_USER || '',
+    pass: env.SMTP_PASS || '',
+    from: env.MAIL_FROM || ''
+  },
+  appBaseUrl: env.APP_BASE_URL || `http://localhost:${parseInt(env.PORT || '3000', 10)}`,
+  resetTokenExpiryMs: 30 * 60 * 1000, // password-reset links
+
   // Platform economics
   platformFeePct: 0.10
 };

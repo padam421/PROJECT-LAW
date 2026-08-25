@@ -12,13 +12,36 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const config = require('../config/envConfig');
 const db = require('../config/dbConfig');
-const { maskEmail, maskPhone, normalizePhone, sha256Short } = require('../utils/helpers');
+const mailer = require('./mailService');
+const { maskEmail, maskPhone, normalizePhone, sha256Short, validatePassword } = require('../utils/helpers');
 
 /* ---------------- Helpers ---------------- */
 function publicUser(user) {
   if (!user) return null;
-  const { passwordHash, emailHash, phoneHash, barNumberHash, ...safe } = user;
+  const { passwordHash, emailHash, phoneHash, barNumberHash, resetTokenHash, ...safe } = user;
   return safe;
+}
+
+/**
+ * Real OTP delivery. When SMTP is configured the code is emailed;
+ * the raw code is then NEVER included in API responses.
+ * Without SMTP (local development only) the code is surfaced so
+ * the flow stays usable — clearly labelled as simulated.
+ */
+async function deliverOTP(user, otp) {
+  const mailed = await mailer.send({
+    to: user.email,
+    subject: 'LegalConnect sign-in code',
+    html: mailer.otpEmailHtml(otp, Math.round(config.otpExpiryMs / 60000)),
+    text: `Your LegalConnect verification code is ${otp}. It expires in ${Math.round(config.otpExpiryMs / 60000)} minutes.`
+  });
+  console.log(`[auth] OTP for ${user.email}: ${mailed.sent ? 'emailed via SMTP' : `NOT delivered (${mailed.error})`}`);
+  return mailed.sent;
+}
+
+/** Only expose codes in responses while no real channel exists AND not production. */
+function shouldSurfaceDevCode(mailedSuccessfully) {
+  return !config.isProd && !mailedSuccessfully;
 }
 
 function generateOTP() {
@@ -277,7 +300,7 @@ async function login(identifierRaw, password, req) {
   if (data.otpChallenges.length > 50) data.otpChallenges.splice(0, data.otpChallenges.length - 50);
   db.save();
 
-  console.log(`[auth] OTP for ${user.email}: ${otp} (simulated delivery — no SMS/email provider configured)`);
+  const mailed = await deliverOTP(user, otp);
 
   return {
     ok: true,
@@ -285,11 +308,11 @@ async function login(identifierRaw, password, req) {
     maskedEmail: maskEmail(user.email),
     maskedPhone: maskPhone(user.phone),
     isNewDevice,
-    devOtp: config.isProd ? undefined : otp
+    devOtp: shouldSurfaceDevCode(mailed) ? otp : undefined
   };
 }
 
-function resendOTP(challengeId) {
+async function resendOTP(challengeId) {
   const data = db.get();
   const challenge = data.otpChallenges.find(c => c.id === challengeId && !c.consumed);
   if (!challenge) return { ok: false, code: 404, error: 'Verification session expired. Please sign in again.' };
@@ -299,8 +322,72 @@ function resendOTP(challengeId) {
   challenge.attempts = 0;
   challenge.expiresAt = new Date(Date.now() + config.otpExpiryMs).toISOString();
   db.save();
-  console.log(`[auth] Resent OTP for ${user.email}: ${otp}`);
-  return { ok: true, devOtp: config.isProd ? undefined : otp };
+  const mailed = await deliverOTP(user, otp);
+  return { ok: true, devOtp: shouldSurfaceDevCode(mailed) ? otp : undefined };
+}
+
+/* ---------------- Password reset (real email flow) ---------------- */
+const crypto = require('crypto');
+
+async function requestPasswordReset(email) {
+  if (!mailer.isConfigured()) {
+    return {
+      ok: false,
+      code: 503,
+      error: 'The email service is not configured yet. Please set SMTP_HOST, SMTP_USER and SMTP_PASS in your .env file, then restart the server.'
+    };
+  }
+  const data = db.get();
+  const user = data.users.find(u => u.email === String(email).toLowerCase().trim());
+
+  // Enumeration-safe: identical response whether or not the account exists
+  const genericMessage = 'If an account exists for this address, a password reset link is on its way. It expires in 30 minutes.';
+  if (user && user.role !== 'admin') {
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetTokenHash = sha256Short(token + user.id);
+    user.resetTokenExpiresAt = new Date(Date.now() + config.resetTokenExpiryMs).toISOString();
+    db.save();
+
+    const link = `${config.appBaseUrl}/frontend/lawyer/index.html#/reset-password?token=${token}`;
+    await mailer.send({
+      to: user.email,
+      subject: 'Reset your LegalConnect password',
+      html: mailer.resetEmailHtml(link, Math.round(config.resetTokenExpiryMs / 60000)),
+      text: `Reset your LegalConnect password: ${link} (expires in ${Math.round(config.resetTokenExpiryMs / 60000)} minutes)`
+    });
+  }
+  return { ok: true, message: genericMessage };
+}
+
+function resetPassword(token, newPassword) {
+  if (!validatePassword(newPassword)) {
+    return { ok: false, code: 400, error: 'Password must be at least 8 characters with letters and numbers.' };
+  }
+  const data = db.get();
+  const user = data.users.find(u =>
+    u.resetTokenHash &&
+    u.resetTokenExpiresAt &&
+    new Date(u.resetTokenExpiresAt).getTime() > Date.now() &&
+    u.resetTokenHash === sha256Short(String(token || '') + u.id)
+  );
+  if (!user) {
+    return { ok: false, code: 400, error: 'This reset link is invalid or has expired. Please request a fresh one.' };
+  }
+
+  // Consume the token immediately (single-use)
+  user.resetTokenHash = null;
+  user.resetTokenExpiresAt = null;
+  user.passwordHash = bcrypt.hashSync(newPassword, config.bcryptRounds);
+  user.passwordChangeRequired = false;
+  user.sensitiveActionsLockedUntil = null;
+  revokeAllSessions(user.id); // every signed-in device must re-authenticate
+
+  logActivity('password_reset', 'Password changed via email reset link', user);
+  notifyUser(user.id, 'security', 'Password Reset Completed',
+    'Your password was changed using an email reset link. All sessions were signed out.',
+    '/settings/tab/security');
+  db.save();
+  return { ok: true };
 }
 
 function verifyOTP(challengeId, code, req) {
@@ -450,6 +537,8 @@ module.exports = {
   login,
   resendOTP,
   verifyOTP,
+  requestPasswordReset,
+  resetPassword,
   confirmNewDevice,
   listSessions,
   revokeSession,

@@ -15,6 +15,8 @@ const { authenticate, requireRole, ensureNotLocked } = require('../middlewares/a
 /* ---------------- Public auth flow ---------------- */
 router.post('/auth/register', auth.register);
 router.post('/auth/login', auth.login);
+router.post('/auth/forgot-password', auth.forgotPassword);
+router.post('/auth/reset-password', auth.resetPassword);
 router.post('/auth/otp/resend', auth.resendOTP);
 router.post('/auth/otp/verify', auth.verifyOTP);
 

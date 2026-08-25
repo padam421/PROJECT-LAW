@@ -195,17 +195,43 @@ const AuthManager = {
   },
 
   /* --------------------------------------------------------
-     FORGOT PASSWORD (honest placeholder — no mailer attached)
-     -------------------------------------------------------- */
+      FORGOT PASSWORD (server-issued reset link via email)
+      -------------------------------------------------------- */
   async forgotPassword(email) {
     if (!Utils.validateEmail(email)) {
-      return { success: false, error: 'Please enter a valid email address.' };
+      return { sent: false, message: 'Please enter a valid email address.' };
     }
-    await new Promise(r => setTimeout(r, 700));
-    return {
-      success: true,
-      message: 'If an account exists for this address, a reset link will be emailed once the mail service is connected. Meanwhile, contact support@legalconnect.in for manual assistance.'
-    };
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { sent: false, message: data.error || 'Could not send the reset email. Please try again shortly.' };
+      }
+      return { sent: true, message: data.message || 'If an account exists for this address, a reset link is on its way.' };
+    } catch (_e) {
+      return { sent: false, message: 'Cannot reach LegalConnect servers. Check your connection and retry.' };
+    }
+  },
+
+  async resetPassword(token, newPassword) {
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return { success: false, error: data.error || 'Reset failed.' };
+      this.clearSession();
+      if (window.Store) Store.resetLocal();
+      return { success: true };
+    } catch (_e) {
+      return { success: false, error: 'Network error while resetting password.' };
+    }
   },
 
   /* --------------------------------------------------------

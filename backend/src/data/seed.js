@@ -266,14 +266,13 @@ async function hashPassword(plain) {
   return bcrypt.hash(plain, config.bcryptRounds);
 }
 
-/** Seeds only when the database is empty. Safe to call on every boot. */
-async function seedIfEmpty() {
-  const data = db.get();
-
-  if (data.users.length > 0) return false;
-
-  const demoPasswordHash = await hashPassword('Demo@1234');
-  const adminPasswordHash = await hashPassword('Admin@1234');
+/* ------------------------------------------------------------
+   Demo advocate (OPT-IN: SEED_DEMO_DATA=true) — rich sample
+   workspace for evaluating the product. Never seeded in real
+   deployments.
+   ------------------------------------------------------------ */
+async function seedDemoAdvocate(data) {
+  const demoPasswordHash = await hashPassword(process.env.DEMO_PASSWORD || 'Demo@1234');
 
   data.users.push({
     id: 'law_demo_001',
@@ -306,34 +305,58 @@ async function seedIfEmpty() {
     courts: ['Supreme Court of India', 'High Court of Delhi', 'District & Sessions Courts'],
     languages: ['English', 'Hindi'],
     bio: 'A seasoned criminal law practitioner with over 14 years of experience handling complex criminal, civil, and cyber law matters. Successfully represented clients before the Supreme Court and various High Courts across India.',
-    accountStatus: 'active',           // active | suspended | deactivated
-    verificationStatus: 'verified',    // pending | verified | rejected | info_mismatch | manual_review
+    accountStatus: 'active',
+    verificationStatus: 'verified',
     verificationId: 'LC-VER-2024-0001',
     verificationDate: '2024-01-20',
     rating: 4.8,
     totalReviews: 127,
     profileDeactivated: false,
     sensitiveActionsLockedUntil: null,
-    createdAt: '2024-01-10T09:00:00.000Z'
-  });
-
-  data.users.push({
-    id: 'adm_001',
-    role: 'admin',
-    fullName: 'Verification Desk',
-    email: 'admin@legalconnect.in',
-    passwordHash: adminPasswordHash,
-    accountStatus: 'active',
     createdAt: new Date().toISOString()
   });
 
-  // Rich workspace for the demo advocate
   data.workspace['law_demo_001'] = buildDemoWorkspace();
+  console.log('[seed] Demo advocate seeded (SEED_DEMO_DATA=true): demo@legalconnect.in');
+}
 
-  db.save();
-  db.flushNow();
-  console.log('[seed] Database seeded: demo advocate (demo@legalconnect.in / Demo@1234) + admin desk (admin@legalconnect.in / Admin@1234)');
-  return true;
+/**
+ * Boot-time provisioning.
+ * • Verification-desk admin is ensured from ADMIN_EMAIL / ADMIN_PASSWORD
+ *   so the review console always works (override in .env for production).
+ * • Demo advocate + sample workspace seed ONLY when SEED_DEMO_DATA=true
+ *   and no advocate exists yet. Real deployments stay clean by default.
+ */
+async function seedIfEmpty() {
+  const data = db.get();
+  let changed = false;
+
+  if (!data.users.some(u => u.role === 'admin')) {
+    const adminEmail = String(process.env.ADMIN_EMAIL || 'admin@legalconnect.in').toLowerCase();
+    data.users.push({
+      id: db.uid('adm'),
+      role: 'admin',
+      fullName: 'Verification Desk',
+      email: adminEmail,
+      passwordHash: await hashPassword(process.env.ADMIN_PASSWORD || 'Admin@1234'),
+      accountStatus: 'active',
+      createdAt: new Date().toISOString()
+    });
+    changed = true;
+    console.log(`[seed] Verification-desk admin ready: ${adminEmail}`);
+  }
+
+  const demoWanted = String(process.env.SEED_DEMO_DATA || '').toLowerCase() === 'true';
+  if (demoWanted && !data.users.some(u => u.role === 'lawyer')) {
+    await seedDemoAdvocate(data);
+    changed = true;
+  }
+
+  if (changed) {
+    db.save();
+    db.flushNow();
+  }
+  return changed;
 }
 
 module.exports = { seedIfEmpty, buildDemoWorkspace, hashPassword };

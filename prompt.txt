@@ -1,153 +1,52 @@
-Please inspect this project folder before making any changes.
+Connect my LegalConnect website login system with Google/Gmail authentication only.
 
-Project path:
-/mnt/c/Users/Padam Kishore/Pictures/PROJECT-LAW
+I have already created a Google OAuth Client ID in Google Cloud Console. First inspect my existing frontend, backend, authentication pages, environment files, routes, API structure, and database/user model.
 
-Very important:
-- Do not modify any files.
-- Run only one real bash command at a time.
-- Do not use markdown code fences in commands.
-- Show visible progress after every command.
-- After every command, explain briefly what you found.
-- If a command may take time, tell me before running it.
+Use my Google OAuth Client ID to add “Continue with Google” login on the website. The user should be able to click Continue with Google, select their Gmail account, and then enter the website after successful Google verification.
 
-Inspection rules:
-1. First confirm the current folder with pwd.
-2. Show the top-level directory listing.
-3. Count all project files.
-4. Show directory tree up to depth 2.
-5. Exclude these folders: node_modules, .git, __pycache__, venv, .venv, dist, build, .next, coverage.
-6. Identify main parts: frontend, backend, ai-service, database, docs, config files, package files, environment files.
-7. Read only important source/config/docs files first: README, package.json, requirements.txt, pyproject.toml, Docker files, .env.example, app entry files, routes, controllers, services, database schema or migrations, and main frontend pages/components.
-8. Do not read images, videos, PDFs, zip files, binary files, or generated build files.
-9. At the end, give a clear summary:
-   - tech stack
-   - folder structure
-   - frontend overview
-   - backend overview
-   - AI service overview
-   - database overview
-   - how the app runs
-   - where future changes should likely be made
+Do not implement OTP right now. Do not add OTP screens, OTP APIs, OTP email sending, OTP database tables, or any OTP-related logic in this task.
 
-Start now with pwd and top-level directory listing only.
+The login should work like this:
 
+1. User opens the LegalConnect login page.
+2. User clicks “Continue with Google”.
+3. Google authentication window opens.
+4. User selects or signs in with a Gmail account.
+5. Frontend receives the Google credential/token.
+6. Frontend sends the token to the backend.
+7. Backend verifies the Google token using the Google Client ID.
+8. Backend extracts the user’s name, email, Google account ID, and profile image.
+9. Backend allows only Gmail addresses if the project requirement is Gmail-only.
+10. Backend checks whether the user already exists in the database.
+11. If the user exists, update last login and continue.
+12. If the user does not exist, create a new user account.
+13. Backend creates the website session/JWT.
+14. Frontend stores the auth token/session safely.
+15. User is redirected to the correct dashboard based on role.
+16. Add logout support if missing.
+17. Add proper loading, success, and error states.
+18. Make the Google login button responsive and professionally designed.
 
-You are a senior full-stack developer, UI/UX designer, product architect, QA engineer, and security-focused legal-tech engineer. I am building a website called LegalConnect. Your task is to deeply audit, improve, redesign, and complete my existing website so it matches a high-quality professional legal-tech platform.
+Use the Google Client ID in the frontend environment file. If backend token verification requires it, also use the same Client ID in the backend environment file.
 
-First, carefully inspect the entire existing project folder, including frontend code, backend code, database structure, routes, APIs, components, styles, authentication logic, forms, dashboard screens, assets, environment files, and any existing documentation. Do not make assumptions. Understand the current code structure before changing anything.
+Never put the Google Client Secret in frontend code. If the Client Secret is needed, keep it only in the backend .env file.
 
-Before modifying the project, preserve the existing work safely. Create a clear backup/checkpoint or use version control if available. Do not destroy useful existing logic. You have permission to add, delete, modify, refactor, redesign, and restructure files where needed, but preserve the valuable work already done and improve it professionally.
+Also check and confirm:
+- Authorized JavaScript origins match my local frontend URL.
+- Redirect URI is correct only if the project uses backend callback OAuth.
+- The app may currently be limited to test users in Google Cloud, so explain if it needs to be published for all users.
+- The current Google OAuth credentials are connected correctly.
 
-Your main goal is to check whether all required LegalConnect lawyer-side features are already covered in the website. If something is missing, incomplete, buggy, badly designed, not connected to database/backend, not responsive, or not production-quality, fix it automatically. Do not only give suggestions. Implement the required changes.
+After implementation, run the project locally and test:
+- Continue with Google button
+- Successful Gmail login
+- Non-Gmail blocking if Gmail-only is required
+- New user creation
+- Existing user login
+- Dashboard redirect
+- Logout
+- Browser console errors
+- Backend errors
 
-Important rule: The website must not display raw checklist text like “Point 16”, “Point 17”, “Step 1”, or copied requirement paragraphs. These requirements are for implementation only. The UI should feel natural, polished, and professional, not like a requirement document pasted into the website.
-
-Design direction:
-Create a premium, modern, senior-developer-level UI. The visual style should be inspired by Apple’s liquid glass feel and Google’s clean, advanced, rounded, intelligent interface language, but it must not be an exact copy of Apple or Google. Use a refined glassmorphism/liquid-glass theme, soft transparency, layered depth, smooth motion, clean typography, beautiful spacing, professional legal-tech colors, and accessible contrast. The website must not look AI-generated or template-like. It should look like a real product built by an experienced product team.
-
-Every search bar, input field, icon button, quick action, filter chip, and important control should have a modern rounded style. Use circular or pill-shaped search/input patterns where appropriate, similar to modern Google-style UX. Keep the interface clean, elegant, and usable.
-
-The complete website must be responsive for mobile, tablet, laptop, desktop, and larger screens. Test all major screens in different viewport sizes. Fix overflow, broken layouts, text overlap, bad spacing, unreadable text, broken modals, broken navigation, and any mobile usability issues.
-
-Live testing requirement:
-Run the website locally, open it in a browser, and manually inspect every major screen. Check authentication flows, forms, dashboard pages, buttons, navigation, modals, database operations, API calls, loading states, error states, empty states, success states, validation, responsiveness, and console/network errors. Fix all detected issues. Do not claim completion unless you have actually tested it live.
-
-Core platform flow:
-LegalConnect should support role-based usage. On opening the application, show a professional splash/loading experience with the LegalConnect logo, the idea of an AI-powered legal assistant and virtual court simulator, and a trust-focused justice message. After loading, check the user session. A verified logged-in lawyer should go to the Lawyer Dashboard. A new visitor should go to Role Selection. A logged-out existing user should go to Login.
-
-Role selection must let the user choose between User/Client and Lawyer/Advocate. When Lawyer/Advocate is selected, the system must route the user into the lawyer authentication and onboarding experience.
-
-Lawyer login must include registered email/mobile, password, remember me, forgot password, login, and optionally Google/Apple login if supported by the project. The backend must check whether the account exists, is active, verified, suspended, coming from a recognized device, and whether suspicious login attempts exist. Add proper UI feedback and backend validation.
-
-Two-factor authentication must exist after valid password login. The lawyer receives or simulates a 6-digit OTP by registered email/mobile depending on current project capability. Check OTP correctness, expiration, failed attempts, suspicious device/location signals, and apply temporary restriction/security notification after too many failures. Show “Identity Verified” only after successful verification.
-
-New-device security must be handled. If login is from an unfamiliar device, show a New Device Detected screen with device type, approximate location, and login time. Require confirmation and OTP/2FA. After success, mark the device trusted and notify the lawyer that a new device was added.
-
-Lawyer registration must include “Register as Lawyer” and collect basic personal information: full legal name, professional name, date of birth, gender, mobile number, email address, profile photograph, current address, city, and state. Store this in the database with proper validation. The legal name should later be compared with official documents.
-
-Professional information must collect Bar Council Registration Number, State Bar Council, enrollment date/year, LLB qualification, university/college, years of practice, current practice type, primary specialization, additional specializations, courts practiced in, and languages known.
-
-Professional registration verification must not simply trust typed data. Implement a verification status flow for Bar Council/government/API/manual verification. If no real API is available, build a clean internal/manual verification workflow with statuses: Verified, Information Mismatch, Unable to Verify, and Manual Verification Required. A lawyer must not receive a verified badge only because the registration number looks valid.
-
-Document verification must allow upload of required documents: Bar Council Enrollment Certificate, Practice Certificate where applicable, LLB Degree Certificate, and Government Identity Proof. Optional uploads should include LLM Certificate, additional legal certifications, mediation/arbitration certifications, and other professional qualifications.
-
-Document authenticity checks must include document readability, name, registration number, certificate number, institution, dates, document type, duplicate document detection, obvious tampering indicators, and matching against registration/profile details. If AI/OCR is not truly available, implement the database fields, admin review states, and UI flow honestly without pretending real AI verification exists.
-
-Identity verification must support a flow for government ID, selfie, and liveness check where technically possible. If real biometric/liveness service is unavailable, create a structured verification UI and backend status model with Completed, Pending, Failed, and Manual Review Required. Do not falsely claim real biometric verification unless implemented.
-
-Duplicate/fraud account checking must compare professional identifiers such as Bar Council Registration Number, verified email, verified mobile, government ID reference/hash where appropriate, and other professional identifiers. If the same registration number is already attached to another verified account, prevent automatic duplicate approval and send it for investigation.
-
-Fraud risk assessment must generate internal statuses such as Low Risk, Medium Risk - Manual Review, and High Risk - Verification Failed. Sensitive fraud-detection details should not be exposed to the lawyer unnecessarily.
-
-Manual admin verification must exist or be structurally supported. Admin reviewers should be able to review registration details, uploaded certificates, identity information, verification results, duplicate-account signals, and suspicious inconsistencies. Admin actions should include Approve, Reject, and Request Additional Documents.
-
-Verification result flow must show the lawyer whether verification is approved, rejected, pending, or needs more documents. If approved, generate a Lawyer Verification ID, verified profile status, verification date, and verified badge. If rejected, show a professional reason and allow upload of corrected documents or contact support.
-
-After verification, the lawyer must be able to create a professional portfolio. The profile should include profile photo, professional name, verified badge, years of experience, specializations, languages, location, courts practiced in, and professional bio.
-
-Professional experience management must allow adding law firm/organization, position, start year, end year, role, and area of practice.
-
-Case experience management must allow adding previous case experience with case type, legal area, court, year, lawyer role, case status, outcome, and brief description. The UI and validation must prevent public exposure of confidential client information.
-
-Additional legal certificates must be manageable. Lawyers should be able to add certificates such as Cyber Law, Mediation, Arbitration, or other qualifications. Certificates should have verification states and show a verified label only when approved.
-
-Pricing and availability must be implemented. Lawyers should be able to define services such as initial consultation, detailed consultation, document review, case representation, and court appearance. Pricing should support fixed price, starting price, negotiable, and depends on case complexity. Availability must support day/time slots and unavailable days. This availability must be used for booking consultations.
-
-The Lawyer Dashboard must be a polished central workspace. It should greet the lawyer by name, show verified status, and display active clients, new requests, today’s appointments, monthly earnings, rating, today’s schedule, new client requests, and AI case insights requiring review.
-
-Client request handling must exist. When a client selects a lawyer, the lawyer receives a new consultation request with client name, case category, brief problem, preferred date, preferred time, consultation type, estimated fee, and uploaded documents. Actions must include Accept, Reject, and View Details.
-
-Client case detail view must show case summary, client description, documents, preferred consultation time, consultation fee, and accept/reject actions.
-
-AI case analysis should provide preliminary information such as legal category, important facts, relevant legal topics, documents provided, missing documents, possible questions to ask, and urgency indicator. It must clearly state that AI-generated preliminary information does not replace professional legal judgment. If real AI is not implemented, create the UI/backend structure and mark it honestly as pending/simulated/internal.
-
-When a lawyer accepts a client, the client should receive acceptance status, and the appointment should be added to both calendars or appointment records.
-
-Appointment reminders must support 24-hour and 30-minute reminders. Implement database fields, notification logic, and UI states where possible.
-
-Consultation screen must support or structurally prepare for video, audio, chat, document sharing, screen sharing if implemented, and end call. If real video/audio is not available, create a professional consultation room UI with clear placeholders and future-ready structure.
-
-Secure client chat must allow sending/receiving messages, uploading documents, viewing case documents, and adding notes. Store messages properly and separate private lawyer notes from client-visible messages.
-
-Case documents must be organized in one place. Lawyers should be able to view, upload, download if permitted, and add notes to documents such as property documents, ID proof, agreements, court documents, and evidence.
-
-Case management must allow creating a case file after accepting a client. Case file fields should include Case ID, client, case type, legal category, court, filing date, case status, next hearing, documents, and notes.
-
-Case status tracking must support states such as New, Under Review, Consultation Completed, Documents Pending, Filed, Hearing Scheduled, Ongoing, Resolved, and Closed. Clients should see appropriate status updates, while private lawyer notes remain hidden.
-
-Private lawyer notes must be clearly marked as private/lawyer-only and must never automatically become visible to clients.
-
-Payment tracking must record consultation fee, platform fee, total paid, lawyer earnings, and payment status. Lawyer earnings must show today, this week, this month, total earnings, and transaction history with client, service, date, amount, platform fee, net earnings, and payment status.
-
-Review system must allow clients to submit rating, written review, and recommendation status after consultation or case milestone. Lawyers can view reviews but cannot edit client reviews.
-
-Verification Center must show identity verification, Bar Council verification, education verification, practice certificate verification, professional profile verification, verification ID, and verification date.
-
-Security Center must allow managing two-factor authentication, password, trusted devices, login activity, active sessions, and security alerts. If suspicious login is reported as “This wasn’t me,” the system should end the suspicious session, temporarily lock sensitive actions, require password change/additional verification, and notify admin/security.
-
-Notification system must include client requests, appointment reminders, payments, verification updates, security alerts, and case/hearing updates. Add professional empty states and read/unread states.
-
-Profile management must allow updating profile photo, bio, experience, specialization, languages, location, case experience, pricing, and availability. Important professional changes such as Bar Council Registration Number must trigger re-verification and must not be treated like normal profile edits.
-
-Settings must include Account, Professional, Security, Privacy, Notifications, and Support sections. Account should include personal info, professional info, password, email, and mobile. Professional should include specialization, experience, pricing, availability, and credentials. Security should include 2FA, login activity, devices, and sessions. Privacy should include profile visibility, client data, and document permissions. Notifications should include client requests, payments, appointments, and security alerts. Support should include help center, contact support, and report problem.
-
-Deactivate profile must allow a lawyer to stop receiving new clients. The profile becomes unavailable for new bookings, while existing active cases remain handled through the case closure process. Reactivation should require authentication.
-
-Logout must show confirmation and securely terminate the session, then return to the lawyer login screen.
-
-Fraud-prevention layer must be complete and visible in system design: mobile/email verification, password authentication, OTP/2FA, government ID verification, selfie/liveness check where available, Bar Council verification, certificate verification, OCR/information matching where available, duplicate lawyer detection, fraud/risk screening, manual verification when required, and only then verified lawyer approval. Even after verification, monitor suspicious activity, account takeover, duplicate identities, and changes to important professional credentials.
-
-Database/backend requirement:
-Create or improve database schemas/models/tables for users, lawyer profiles, verification records, uploaded documents, certificates, professional experience, case experience, services/pricing, availability slots, client requests, appointments, consultations, chats, case files, case documents, private notes, payments, reviews, notifications, trusted devices, login activity, active sessions, fraud risk records, and admin verification actions. Ensure relationships are correct and data is not duplicated unnecessarily.
-
-Security requirement:
-Use proper password hashing, session/token handling, input validation, server-side authorization, role-based access control, secure upload handling, file type/size validation, private document permissions, and protection against unauthorized access. Never expose private lawyer notes, sensitive verification data, government ID details, internal fraud signals, or admin-only fields to normal clients.
-
-Quality requirement:
-Refactor messy code where needed. Remove dead code, broken UI, duplicate components, unused styles, fake buttons, non-working routes, and placeholder behavior unless it is clearly marked as future/pending. Make all forms validated. Add loading, success, error, empty, disabled, and pending states. Improve accessibility, keyboard navigation, readable labels, color contrast, and responsive behavior.
-
-Final deliverable:
-After implementation, provide a clear report in text format explaining what existed, what was missing, what was fixed, what was added, what database/backend changes were made, what UI/UX improvements were made, what tests were run, what still requires external APIs or production services, and whether every lawyer-side workflow is now covered. Do not make false claims. If something is only structurally prepared but not connected to a real external service, clearly say that.
-
-Work like a professional full-stack engineer. Do the audit, implement the missing features, redesign the experience, run the website live, test everything in detail, fix errors automatically, and deliver a polished LegalConnect lawyer-side platform.
+Fix all issues automatically and give me a final report of what changed.
+{"web":{"client_id":"508760219507-8pn77gjn77ifanpno18tcaoa3qt7klv0.apps.googleusercontent.com","project_id":"lawmate-506519","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["http://localhost:3000"],"javascript_origins":["http://localhost:3000"]}}
