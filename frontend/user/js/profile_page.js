@@ -123,7 +123,8 @@ const UserProfilePage = {
     user.city = document.getElementById('prof-city')?.value.trim() || user.city;
     UserStore.setUser(user);
     try {
-      await fetch('/api/users/profile', {
+      const url = window.AuthManager ? AuthManager.getApiUrl('/api/users/profile') : '/api/users/profile';
+      await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -272,7 +273,8 @@ const UserProfilePage = {
     for (const n of notifs) {
       n.read = true;
       if (n.id) {
-        fetch(`/api/notifications/${n.id}/read`, { method: 'PATCH' }).catch(() => {});
+        const notifUrl = window.AuthManager ? AuthManager.getApiUrl(`/api/notifications/${n.id}/read`) : `/api/notifications/${n.id}/read`;
+        fetch(notifUrl, { method: 'PATCH' }).catch(() => {});
       }
     }
     UserStore.set('notifications', notifs);
@@ -419,7 +421,8 @@ const UserProfilePage = {
 
     if (btn) btn.disabled = true;
     try {
-      const res = await fetch('/api/auth/change-password', {
+      const changePassUrl = window.AuthManager ? AuthManager.getApiUrl('/api/auth/change-password') : '/api/auth/change-password';
+      const res = await fetch(changePassUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

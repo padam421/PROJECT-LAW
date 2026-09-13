@@ -103,9 +103,23 @@ const UserStore = {
    USER API CLIENT — Live Nyay Setu API client
    ============================================================ */
 const UserApiClient = {
+  getUrl(endpoint) {
+    if (window.AuthManager && typeof window.AuthManager.getApiUrl === 'function') {
+      return window.AuthManager.getApiUrl(endpoint);
+    }
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+      if (window.location.port !== '3000' && (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')) {
+        return `${window.location.protocol}//${window.location.hostname}:3000${endpoint}`;
+      }
+    } else if (window.location.protocol === 'file:') {
+      return 'http://localhost:3000' + endpoint;
+    }
+    return endpoint;
+  },
+
   async searchLawyers(filters = {}) {
     try {
-      const res = await fetch('/api/lawyers');
+      const res = await fetch(this.getUrl('/api/lawyers'));
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.lawyers) && data.lawyers.length > 0) {
@@ -193,7 +207,7 @@ const UserApiClient = {
 
   async getLawyerById(id) {
     try {
-      const res = await fetch(`/api/lawyers/${id}`);
+      const res = await fetch(this.getUrl(`/api/lawyers/${id}`));
       if (res.ok) {
         const data = await res.json();
         if (data.lawyer) return data.lawyer;
@@ -205,7 +219,7 @@ const UserApiClient = {
 
   async bookConsultation(payload) {
     try {
-      const res = await fetch('/api/consultations/book', {
+      const res = await fetch(this.getUrl('/api/consultations/book'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -234,7 +248,7 @@ const UserApiClient = {
 
   async fetchNotifications() {
     try {
-      const res = await fetch('/api/notifications', { credentials: 'include' });
+      const res = await fetch(this.getUrl('/api/notifications'), { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         return data.notifications || [];
@@ -245,7 +259,7 @@ const UserApiClient = {
 
   async fetchUserConsultations() {
     try {
-      const res = await fetch('/api/consultations/user', { credentials: 'include' });
+      const res = await fetch(this.getUrl('/api/consultations/user'), { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         return data.consultations || [];
