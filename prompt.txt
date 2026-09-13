@@ -1,52 +1,55 @@
-Connect my LegalConnect website login system with Google/Gmail authentication only.
+Role: Senior Full-Stack Authentication & Security Engineer
 
-I have already created a Google OAuth Client ID in Google Cloud Console. First inspect my existing frontend, backend, authentication pages, environment files, routes, API structure, and database/user model.
+Objective:
+Build a robust, globally available, production-ready Email + Password + 6-Digit Numeric Email OTP Verification & Login System for a modern web application.
 
-Use my Google OAuth Client ID to add “Continue with Google” login on the website. The user should be able to click Continue with Google, select their Gmail account, and then enter the website after successful Google verification.
+Target Architecture & Stack:
+- Frontend: HTML5, CSS3/TailwindCSS, Vanilla JavaScript (or React/Next.js)
+- Backend: Node.js with Express.js
+- Database/Cache: MongoDB/PostgreSQL for user data + Redis (or In-Memory/DB fallback) for temporary OTP storage with auto-expiry
+- Email Delivery: Transactional Email API (Resend / SendGrid / Brevo API) to ensure 99.9% inbox delivery worldwide (Gmail, Yahoo, Outlook, custom domains)
 
-Do not implement OTP right now. Do not add OTP screens, OTP APIs, OTP email sending, OTP database tables, or any OTP-related logic in this task.
+Requirements & Detailed Specifications:
 
-The login should work like this:
+1. Database Schema & Models:
+   - User Schema: id, email, passwordHash, isVerified, createdAt, updatedAt.
+   - OTP Verification Schema / Redis Key:
+     - key: `otp:${email}`
+     - values: hashedOtp, attemptsCount (max 3-5), expiresAt (5 minutes), isUsed (boolean).
 
-1. User opens the LegalConnect login page.
-2. User clicks “Continue with Google”.
-3. Google authentication window opens.
-4. User selects or signs in with a Gmail account.
-5. Frontend receives the Google credential/token.
-6. Frontend sends the token to the backend.
-7. Backend verifies the Google token using the Google Client ID.
-8. Backend extracts the user’s name, email, Google account ID, and profile image.
-9. Backend allows only Gmail addresses if the project requirement is Gmail-only.
-10. Backend checks whether the user already exists in the database.
-11. If the user exists, update last login and continue.
-12. If the user does not exist, create a new user account.
-13. Backend creates the website session/JWT.
-14. Frontend stores the auth token/session safely.
-15. User is redirected to the correct dashboard based on role.
-16. Add logout support if missing.
-17. Add proper loading, success, and error states.
-18. Make the Google login button responsive and professionally designed.
+2. Security & Rate Limiting:
+   - Rate Limiting: Max 3 OTP requests per email per 15 minutes to prevent email flooding/spam.
+   - Maximum Failed Attempts: Lock the OTP after 5 consecutive incorrect attempts.
+   - Cryptographic Randomness: Use crypto.randomInt(100000, 999999) for unpredictable 6-digit generation.
+   - Passwords & OTPs must never be stored in plain text (use bcrypt).
 
-Use the Google Client ID in the frontend environment file. If backend token verification requires it, also use the same Client ID in the backend environment file.
+3. Backend API Endpoints (Express.js):
+   - `POST /api/auth/register-initiate`:
+     - Receives `email`, `password`.
+     - Validates format, hashes password, generates 6-digit OTP, stores OTP in Redis/DB with 5 min TTL.
+     - Triggers transactional email with the 6-digit code inside a responsive HTML template.
+   - `POST /api/auth/verify-otp`:
+     - Receives `email`, `otp`.
+     - Validates OTP against stored hash, checks expiry and attempts count.
+     - If valid: marks user verified, clears the temporary OTP, issues a JWT auth token in an HttpOnly secure cookie.
+   - `POST /api/auth/resend-otp`:
+     - Allows resending OTP only if at least 60 seconds have elapsed since last send.
+   - `POST /api/auth/login`:
+     - Standard credentials check, triggers OTP if 2FA is required, or logs in directly if verified.
 
-Never put the Google Client Secret in frontend code. If the Client Secret is needed, keep it only in the backend .env file.
+4. Email Template:
+   - Provide a clean, dark-mode compatible HTML email template containing:
+     - Clear sender branding.
+     - Bold 6-digit code box with large typography.
+     - Expiry warning (5 minutes) and security disclaimer.
 
-Also check and confirm:
-- Authorized JavaScript origins match my local frontend URL.
-- Redirect URI is correct only if the project uses backend callback OAuth.
-- The app may currently be limited to test users in Google Cloud, so explain if it needs to be published for all users.
-- The current Google OAuth credentials are connected correctly.
+5. Frontend UI/UX:
+   - Step 1 Screen: Responsive clean form for Email & Password input.
+   - Step 2 Screen: 6 separate individual digit input boxes with auto-focus movement, paste functionality (pasting full 6 digits fills all boxes), a countdown timer (05:00), and an enabled/disabled "Resend Code" state.
+   - Asynchronous fetch API calls handling all success, error, and rate-limit states with informative UI alerts.
 
-After implementation, run the project locally and test:
-- Continue with Google button
-- Successful Gmail login
-- Non-Gmail blocking if Gmail-only is required
-- New user creation
-- Existing user login
-- Dashboard redirect
-- Logout
-- Browser console errors
-- Backend errors
-
-Fix all issues automatically and give me a final report of what changed.
-{"web":{"client_id":"508760219507-8pn77gjn77ifanpno18tcaoa3qt7klv0.apps.googleusercontent.com","project_id":"lawmate-506519","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["http://localhost:3000"],"javascript_origins":["http://localhost:3000"]}}
+Please provide:
+1. Complete, copy-paste ready backend code with modular structure.
+2. Complete frontend HTML, CSS, and JS code.
+3. Step-by-step setup guide for configuring the Email API keys and running the project locally.
+sab yah mere website me real mein hona chahiye jo bhi demo hai uss ko remove karo or wroking website means ready karo jis me yah sab ho or live time me hona chahiye user means lawayer ko lag fill nahi hona chahiye mere website ok real production level ka create karo abhi otp or login or e=register vala ok sab link hona chahiye ek dusere se koi bhi jese real world me kese login or register hota hai uss type se hi bass abhi mere wen=bsite ke according hona chahiye ok jo yah rate limit or time of otp or baki sab kese hota hai real website me uss type ise mere bhi website me hona chahiye

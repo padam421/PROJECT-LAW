@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — SPA ROUTER
+   Nyay Setu — SPA ROUTER
    router.js — Hash routing with auth guards, dynamic ':param'
    segments, page transitions and lifecycle hooks
    ============================================================ */
@@ -19,7 +19,7 @@ const Router = {
       path,
       handler,
       requiresAuth: options.requiresAuth || false,
-      title: options.title || 'LegalConnect',
+      title: options.title || 'Nyay Setu',
       onEnter: options.onEnter || null,
       onLeave: options.onLeave || null,
       pattern: this.compilePattern(path)
@@ -60,7 +60,17 @@ const Router = {
   /* --------------------------------------------------------
      NAVIGATION
      -------------------------------------------------------- */
-  async navigate(path, params = {}) {
+  async navigate(rawPath, params = {}) {
+    let full = String(rawPath || '').replace(/^#/, '').trim();
+    let query = '';
+    let path = full;
+    if (full.includes('?')) {
+      const parts = full.split('?');
+      path = parts[0];
+      query = '?' + parts.slice(1).join('?');
+    }
+    if (!path.startsWith('/')) path = '/' + path;
+
     for (const guard of this._guards) {
       const result = guard(path, this.currentRoute);
       if (result === false) return;
@@ -70,7 +80,8 @@ const Router = {
     let resolved = this.resolve(path);
     if (!resolved) {
       console.warn(`[Router] Route not found: ${path}`);
-      resolved = this.resolve(AuthManager.isLoggedIn() ? '/dashboard' : '/login');
+      const defaultAuthRoute = this.routes['/home'] ? '/home' : '/dashboard';
+      resolved = this.resolve(AuthManager.isLoggedIn() ? defaultAuthRoute : '/login');
       if (!resolved) return;
     }
 
@@ -91,12 +102,12 @@ const Router = {
     this.previousRoute = this.currentRoute;
     this.currentRoute = target.path;
 
-    const cleanHash = '#' + path;
+    const cleanHash = '#' + path + query;
     if (window.location.hash !== cleanHash) {
-      window.location.hash = path;
+      window.location.hash = cleanHash;
     }
 
-    document.title = `${target.title} — LegalConnect`;
+    document.title = `${target.title} — Nyay Setu`;
 
     await this.transitionPage(path, mergedParams);
 
@@ -121,7 +132,7 @@ const Router = {
     await new Promise(resolve => setTimeout(resolve, 120));
 
     try {
-      const content = route.handler(renderParams);
+      const content = await route.handler(renderParams);
       if (typeof content === 'string') app.innerHTML = content;
     } catch (err) {
       console.error(`[Router] Error rendering ${this.currentRoute}:`, err);
@@ -148,17 +159,21 @@ const Router = {
      -------------------------------------------------------- */
   init() {
     window.addEventListener('hashchange', () => {
+      const full = window.location.hash.replace(/^#/, '').trim();
       const path = this.getPathFromHash();
-      if (path !== this.currentRoute) this.navigate(path);
+      if (path !== this.currentRoute) this.navigate(full);
     });
 
-    const initialPath = this.getPathFromHash();
-    this.navigate(initialPath);
+    const initial = window.location.hash.replace(/^#/, '').trim();
+    this.navigate(initial || '/splash');
   },
 
   getPathFromHash() {
-    const raw = window.location.hash.replace(/^#/, '');
-    return raw || '/splash';
+    let raw = window.location.hash.replace(/^#/, '').trim();
+    if (raw.includes('?')) raw = raw.split('?')[0];
+    if (!raw) return '/splash';
+    if (!raw.startsWith('/')) raw = '/' + raw;
+    return raw;
   },
 
   back() {

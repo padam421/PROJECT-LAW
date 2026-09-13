@@ -1,14 +1,34 @@
 /* ============================================================
-   LEGALCONNECT — API CLIENT
+   Nyay Setu — API CLIENT
    api_client.js — Authenticated bridge between the SPA and the
-   LegalConnect API. Workspace mutations flow through Store
+   Nyay Setu API. Workspace mutations flow through Store
    (auto-synced server-side); credential/verification actions
    hit dedicated endpoints.
    ============================================================ */
 
 const ApiClient = {
+  apiUrl(endpoint) {
+    return window.AuthManager ? AuthManager.getApiUrl(endpoint) : endpoint;
+  },
+
+  /**
+   * Authentication rides on the HttpOnly session cookie issued by
+   * /api/auth/otp/verify — fetch() sends it automatically for
+   * same-origin requests. No tokens in JS-readable storage or URLs.
+   */
   headers() {
-    return { Authorization: `Bearer ${localStorage.getItem('lc_token') || ''}` };
+    return {};
+  },
+
+  /** Central 401 guard — expired/terminated sessions bounce to login. */
+  handleAuthFailure(res) {
+    if (res && res.status === 401) {
+      AuthManager.clearSession();
+      window.location.hash = '#/login';
+      Utils.showToast('Your session ended. Please sign in again.', 'warning');
+      return true;
+    }
+    return false;
   },
 
   delay(ms = 250) {
@@ -21,8 +41,9 @@ const ApiClient = {
   async lookupBarCouncil(barNumber, stateCouncil) {
     await this.delay(700);
     try {
-      const res = await fetch('/api/lawyer/verification/bar-lookup', {
+      const res = await fetch(this.apiUrl('/api/lawyer/verification/bar-lookup'), {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json', ...this.headers() },
         body: JSON.stringify({ barNumber, stateCouncil })
       });
@@ -57,8 +78,9 @@ const ApiClient = {
     form.append('document', file);
     form.append('category', category || 'other');
     form.append('label', label || file.name);
-    const res = await fetch('/api/lawyer/documents/upload', {
+    const res = await fetch(this.apiUrl('/api/lawyer/documents/upload'), {
       method: 'POST',
+      credentials: 'include',
       headers: this.headers(),
       body: form
     });
@@ -68,19 +90,21 @@ const ApiClient = {
   },
 
   async listDocuments() {
-    const res = await fetch('/api/lawyer/documents', { headers: this.headers() });
+    const res = await fetch(this.apiUrl('/api/lawyer/documents'), { credentials: 'include', headers: this.headers() });
     if (!res.ok) return [];
     const data = await res.json();
     return data.documents || [];
   },
 
   documentDownloadUrl(docId) {
-    return `/api/lawyer/documents/${docId}/download?token=${encodeURIComponent(localStorage.getItem('lc_token') || '')}`;
+    // The session cookie authorizes the download — no token in the URL.
+    return this.apiUrl(`/api/lawyer/documents/${docId}/download`);
   },
 
   async deleteDocument(docId) {
-    const res = await fetch(`/api/lawyer/documents/${docId}`, {
+    const res = await fetch(this.apiUrl(`/api/lawyer/documents/${docId}`), {
       method: 'DELETE',
+      credentials: 'include',
       headers: this.headers()
     });
     return res.ok;
@@ -91,8 +115,9 @@ const ApiClient = {
      -------------------------------------------------------- */
   async submitIdentityCheck(selfieCaptured, idDocSubmitted) {
     await this.delay(600);
-    const res = await fetch('/api/lawyer/identity-check', {
+    const res = await fetch(this.apiUrl('/api/lawyer/identity-check'), {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...this.headers() },
       body: JSON.stringify({ selfieCaptured: !!selfieCaptured, idDocSubmitted: !!idDocSubmitted })
     });
@@ -100,7 +125,7 @@ const ApiClient = {
   },
 
   async fetchVerificationSummary() {
-    const res = await fetch('/api/lawyer/verification-summary', { headers: this.headers() });
+    const res = await fetch(this.apiUrl('/api/lawyer/verification-summary'), { credentials: 'include', headers: this.headers() });
     if (!res.ok) return null;
     return res.json();
   },
@@ -112,6 +137,17 @@ const ApiClient = {
      -------------------------------------------------------- */
   async acceptClientRequest(clientId) {
     await this.delay(300);
+    try {
+      await fetch(this.apiUrl(`/api/consultations/${clientId}/status`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...this.headers() },
+        credentials: 'include',
+        body: JSON.stringify({ status: 'accepted' })
+      });
+    } catch (e) {
+      console.warn('[ApiClient] Consultation status update error:', e.message);
+    }
+
     const clients = Store.getState('clients') || [];
     const client = clients.find(c => c.id === clientId);
     if (!client) return { success: false };
@@ -214,6 +250,17 @@ const ApiClient = {
 
   async rejectClientRequest(clientId, reason = 'Schedule conflict') {
     await this.delay(250);
+    try {
+      await fetch(this.apiUrl(`/api/consultations/${clientId}/status`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...this.headers() },
+        credentials: 'include',
+        body: JSON.stringify({ status: 'rejected' })
+      });
+    } catch (e) {
+      console.warn('[ApiClient] Consultation rejection status error:', e.message);
+    }
+
     const clients = Store.getState('clients') || [];
     const client = clients.find(c => c.id === clientId);
     if (client) {
@@ -234,6 +281,28 @@ const ApiClient = {
       Store.setState('notifications', notifs);
     }
     return { success: true };
+  },
+
+  async fetchLiveConsultations() {
+    try {
+      const res = await fetch(this.apiUrl('/api/consultations/lawyer'), { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        return data.consultations || [];
+      }
+    } catch (_) {}
+    return [];
+  },
+
+  async fetchLiveNotifications() {
+    try {
+      const res = await fetch(this.apiUrl('/api/notifications?role=lawyer'), { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        return data.notifications || [];
+      }
+    } catch (_) {}
+    return [];
   },
 
   /* --------------------------------------------------------
@@ -326,7 +395,7 @@ const ApiClient = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `legalconnect-statement-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `Nyay Setu-statement-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();

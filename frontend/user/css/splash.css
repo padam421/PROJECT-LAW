@@ -1,0 +1,130 @@
+/* ============================================================
+   Nyay Setu USER — SPLASH SCREEN
+   splash.css — Clean, Realistic Legal Portal Introduction
+   Harmonized with Advocate Portal (Professional Navy & Teal)
+   ============================================================ */
+
+.u-splash {
+  position: fixed;
+  inset: 0;
+  z-index: var(--u-z-splash);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--u-bg-deep);
+  overflow: hidden;
+}
+
+/* --- Subtle Background Ambient --- */
+.u-splash::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.05) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.u-splash::after {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(26, 39, 68, 0.03) 0%, transparent 70%);
+  top: 40%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+}
+
+/* --- Particles & Glow Lines (Disabled for realistic professional theme) --- */
+.u-splash-particles,
+.u-splash-lines {
+  display: none !important;
+}
+
+/* --- Content --- */
+.u-splash-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  animation: splashReveal 0.8s ease-out forwards;
+  opacity: 0;
+  padding: var(--u-space-6);
+}
+
+.u-splash-logo {
+  width: 76px;
+  height: 76px;
+  border-radius: var(--u-radius-xl);
+  background: var(--u-accent-gradient);
+  display: grid;
+  place-items: center;
+  margin: 0 auto var(--u-space-6);
+  box-shadow: 0 4px 16px rgba(26, 39, 68, 0.2);
+  position: relative;
+}
+
+.u-splash-logo .material-symbols-rounded {
+  font-size: 38px;
+  color: #fff;
+}
+
+.u-splash-title {
+  font-family: var(--u-font-display);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 800;
+  color: var(--u-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--u-space-2);
+}
+
+.u-splash-title span {
+  color: var(--u-accent);
+}
+
+.u-splash-subtitle {
+  font-size: 0.95rem;
+  color: var(--u-text-secondary);
+  font-weight: 500;
+  margin-bottom: var(--u-space-2);
+  letter-spacing: 0.01em;
+}
+
+.u-splash-tagline {
+  font-size: 0.82rem;
+  color: var(--u-accent);
+  font-weight: 600;
+  margin-bottom: var(--u-space-8);
+}
+
+/* --- Progress Bar --- */
+.u-splash-progress {
+  width: 220px;
+  height: 4px;
+  background: var(--u-border);
+  border-radius: var(--u-radius-full);
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.u-splash-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--u-accent);
+  border-radius: var(--u-radius-full);
+  transition: width 2.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.u-splash-progress-bar.loading {
+  width: 100%;
+}
+
+/* --- Animations --- */
+@keyframes splashReveal {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

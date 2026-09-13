@@ -1,9 +1,39 @@
+# Dependencies
 node_modules/
+*/node_modules/
+
+# Environment and sensitive configuration
 .env
+.env.*
+!.env.example
+
+# Temporary test sessions, cookies and scratch scripts
+.tmp-test/
+backend/alter_notifications.js
+backend/check_client_js.js
+backend/check_schema.js
+backend/test_all_remaining.js
+backend/test_interlink_flow.js
+database/test_mysql_pass.js
+
+# Python cache & virtual environments
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/
+venv/
+.venv/
+
+# AI models & data uploads
 ai-service/models/saved_models/*
 !ai-service/models/saved_models/.keep
+backend/data/uploads/*
+!backend/data/uploads/.gitkeep
 
-# Runtime user uploads (created on boot)
-backend/data/uploads/
+# System & IDE files
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

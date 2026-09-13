@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — WORKSPACE STATE CONTROLLER
+   Nyay Setu — WORKSPACE STATE CONTROLLER
    Bulk hydration + per-collection sync for the SPA store.
    ============================================================ */
 

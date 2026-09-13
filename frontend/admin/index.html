@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LegalConnect — Verification Desk</title>
+  <title>Nyay Setu — Verification Desk</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
   <style>
@@ -47,13 +47,12 @@
   <div id="login-view" class="login-box">
     <div class="card">
       <div class="brand"><div class="brand-icon"><span class="material-symbols-rounded">gavel</span></div> Verification Desk</div>
-      <p class="sub" style="margin:8px 0 12px">Admin reviewer sign-in</p>
+      <p class="sub" style="margin:8px 0 12px">Admin reviewer sign-in — protected by email OTP verification</p>
       <form onsubmit="Admin.login(event)">
-        <input type="email" id="adm-email" placeholder="admin@legalconnect.in" required>
+        <input type="email" id="adm-email" placeholder="Admin email" required>
         <input type="password" id="adm-pass" placeholder="Password" required>
         <button class="primary w-full" style="width:100%;margin-top:14px">Sign In</button>
       </form>
-      <p class="sub" style="margin-top:12px">Seeded credentials: admin@legalconnect.in / Admin@1234</p>
     </div>
   </div>
 
@@ -75,7 +74,6 @@
 
   <script>
     const Admin = {
-      token: '',
       async login(e) {
         e.preventDefault();
         const res = await fetch('/api/auth/login', {
@@ -85,21 +83,28 @@
         });
         const data = await res.json();
         if (!res.ok) return alert(data.error || 'Sign-in failed');
+        // The 6-digit code arrives by email — it is never auto-filled.
+        const code = prompt('Enter the 6-digit verification code sent to your email:');
+        if (!code) return;
         const otp = await fetch('/api/auth/otp/verify', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ challengeId: data.challengeId, code: data.devOtp || prompt('Enter the OTP printed in the server console:') })
+          body: JSON.stringify({ challengeId: data.challengeId, code })
         });
         const otpData = await otp.json();
         if (!otp.ok) return alert(otpData.error || 'OTP failed');
-        this.token = otpData.token;
         if (otpData.user.role !== 'admin') return alert('This console is for admins only.');
-        sessionStorage.setItem('lc_admin_token', this.token);
         this.showDesk();
       },
       async showDesk() {
         document.getElementById('login-view').classList.add('hidden');
         document.getElementById('desk-view').classList.remove('hidden');
-        const res = await fetch('/api/admin/queue', { headers: { Authorization: 'Bearer ' + this.token } });
+        const res = await fetch('/api/admin/queue');   // authorized via HttpOnly session cookie
+        if (res.status === 401) {
+          sessionStorage.removeItem('lc_admin_token');
+          document.getElementById('desk-view').classList.add('hidden');
+          document.getElementById('login-view').classList.remove('hidden');
+          return alert('Your session ended. Please sign in again.');
+        }
         if (!res.ok) return alert('Failed to load queue');
         const { queue } = await res.json();
         const tbody = document.querySelector('#queue-table tbody');
@@ -127,7 +132,7 @@
         if (!confirm('Confirm decision: ' + decision.replace('_', ' ') + '?')) return;
         const res = await fetch(`/api/admin/decide/${id}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + this.token },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ decision, reason })
         });
         const data = await res.json().catch(() => ({}));
@@ -136,10 +141,7 @@
       }
     };
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = sessionStorage.getItem('lc_admin_token');
-      if (saved) { Admin.token = saved; Admin.showDesk(); }
-    });
+    window.addEventListener('DOMContentLoaded', () => { /* cookie session restores automatically */ });
   </script>
 </body>
 </html>

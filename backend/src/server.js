@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — SERVER ENTRYPOINT
+   Nyay Setu — SERVER ENTRYPOINT
    server.js — Boot sequence: seed database, start listener
    ============================================================ */
 
@@ -15,11 +15,12 @@ async function main() {
   const PORT = envConfig.port;
   app.listen(PORT, envConfig.host, () => {
     console.log('──────────────────────────────────────────────');
-    console.log('  LegalConnect — Advocate Portal API');
+    console.log('  Nyay Setu — Advocate Portal API');
     console.log(`  Environment : ${envConfig.env}`);
     console.log(`  Portal      : http://localhost:${PORT}/  (lawyer SPA)`);
     console.log(`  Admin desk  : http://localhost:${PORT}/admin`);
     console.log(`  Database    : ${db.DB_FILE}`);
+    console.log(`  Email       : ${require('./services/mailService').activeChannel() || 'NOT CONFIGURED (dev: OTPs print to this console)'}`);
     console.log('──────────────────────────────────────────────');
   });
 }

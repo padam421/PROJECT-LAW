@@ -1,101 +1,489 @@
 {
  "meta": {
   "version": 2,
-  "createdAt": "2026-08-24T19:18:51.319Z"
+  "createdAt": "2026-08-27T16:15:00.000Z"
  },
  "users": [
   {
-   "id": "law_demo_001",
-   "role": "lawyer",
-   "fullName": "Adv. Rajesh Kumar Sharma",
-   "professionalName": "Adv. R.K. Sharma",
-   "email": "demo@legalconnect.in",
+   "id": "adm_mtl76cvm68jtgu",
+   "role": "admin",
+   "fullName": "Verification Desk",
+   "email": "admin@Nyay Setu.in",
+   "passwordHash": "$2a$10$/GAnlPnC7oFg/E2f/dRL8O3SAXAfDwRj45h7pqoaydsWux80mJNES",
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:22:21.582Z"
+  },
+  {
+   "id": "usr_mtl797uikzos4u",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420274757@Nyay Setu.in",
+   "emailHash": "7bd1eff49d7adbb3fc4c004ea25fc0b4",
    "phone": "9876543210",
    "phoneNormalized": "9876543210",
-   "emailHash": "0cf92c16240b23f5cb9e99a43a1b5adc",
-   "phoneHash": "7619ee8cea49187f309616e30ecf54be",
-   "passwordHash": "$2a$10$xIYRhXBdRkyoqSFYSMEemeYGpbQxdXRFMBH73MJjYAAtIL/Ms9H0y",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$v4XskHiQzOC784PInExpg.UN5vrExAA1INiECyqFh6FrpKOM71WD2",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:24:34.939Z",
+   "updatedAt": "2026-09-03T07:24:39.495Z"
+  },
+  {
+   "id": "usr_mtl797uikzos4u",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420274757@Nyay Setu.in",
+   "emailHash": "7bd1eff49d7adbb3fc4c004ea25fc0b4",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$v4XskHiQzOC784PInExpg.UN5vrExAA1INiECyqFh6FrpKOM71WD2",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:24:34.939Z",
+   "updatedAt": "2026-09-03T07:24:39.495Z"
+  },
+  {
+   "id": "usr_mtl7ejulwfcci7",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420523627@Nyay Setu.in",
+   "emailHash": "c0b259d08ff76a8880eb52aad834bec9",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$IgX3EuXNLN.B9HGErpEUO.ww3YVE.IH/apgN74wTZxhJkub6WLlYa",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:28:43.773Z",
+   "updatedAt": "2026-09-03T07:28:47.867Z"
+  },
+  {
+   "id": "usr_mtl7ejulwfcci7",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420523627@Nyay Setu.in",
+   "emailHash": "c0b259d08ff76a8880eb52aad834bec9",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$IgX3EuXNLN.B9HGErpEUO.ww3YVE.IH/apgN74wTZxhJkub6WLlYa",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:28:43.773Z",
+   "updatedAt": "2026-09-03T07:28:47.867Z"
+  },
+  {
+   "id": "usr_mtl7gpougjh59v",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420624508@Nyay Setu.in",
+   "emailHash": "fb68f44b11fc0443fc190cd2ceec060c",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$J3ZJj7rvjp3kxmcLTsiNL.SvTInZamj8u830fcumv23Sxlcq6lXgO",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:30:24.654Z",
+   "updatedAt": "2026-09-03T07:30:29.009Z"
+  },
+  {
+   "id": "usr_mtl7gpougjh59v",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420624508@Nyay Setu.in",
+   "emailHash": "fb68f44b11fc0443fc190cd2ceec060c",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$J3ZJj7rvjp3kxmcLTsiNL.SvTInZamj8u830fcumv23Sxlcq6lXgO",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:30:24.654Z",
+   "updatedAt": "2026-09-03T07:30:29.009Z"
+  },
+  {
+   "id": "usr_mtl7htj610as2u",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420676162@Nyay Setu.in",
+   "emailHash": "4a51869802ebb037d55cdc5f657cc7ca",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$o11MO0UCp5I4SucsKcg4iOYLaETDEz8Ok3ixYR163/Q5PoKUZKBPq",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:31:16.290Z",
+   "updatedAt": "2026-09-03T07:31:20.871Z"
+  },
+  {
+   "id": "usr_mtl7htj610as2u",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420676162@Nyay Setu.in",
+   "emailHash": "4a51869802ebb037d55cdc5f657cc7ca",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$o11MO0UCp5I4SucsKcg4iOYLaETDEz8Ok3ixYR163/Q5PoKUZKBPq",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:31:16.290Z",
+   "updatedAt": "2026-09-03T07:31:20.871Z"
+  },
+  {
+   "id": "law_mtl7hzlq9kncpu",
+   "role": "lawyer",
+   "fullName": "",
+   "professionalName": "",
+   "email": "test.advocate.1788420684068@Nyay Setu.in",
+   "emailHash": "db6648d0f1b0d15e7506926b82af5b89",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$SRclBj7BDclcDdyWs5EqReC.V0sHU/AywGbZ/qHwvGM./SQwQkLSm",
+   "gender": "",
+   "dob": null,
+   "address": "",
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "barCouncil": "",
+   "barNumberHash": "",
+   "stateBarCouncil": "",
+   "enrollmentDate": null,
+   "enrollmentYear": null,
+   "qualification": "",
+   "university": "",
+   "yearsOfPractice": 0,
+   "practiceType": "",
+   "primarySpecialization": "",
+   "additionalSpecializations": [],
+   "courts": [],
+   "languages": [],
+   "bio": "",
+   "isVerified": true,
+   "registrationStage": "awaiting_profile",
+   "accountStatus": "active",
+   "verificationStatus": "pending",
+   "verificationId": null,
+   "verificationDate": null,
+   "rating": 0,
+   "totalReviews": 0,
+   "profileDeactivated": false,
+   "sensitiveActionsLockedUntil": null,
+   "createdAt": "2026-09-03T07:31:24.158Z",
+   "updatedAt": "2026-09-03T07:31:27.127Z"
+  },
+  {
+   "id": "law_mtl7hzlq9kncpu",
+   "role": "lawyer",
+   "fullName": "",
+   "professionalName": "",
+   "email": "test.advocate.1788420684068@Nyay Setu.in",
+   "emailHash": "db6648d0f1b0d15e7506926b82af5b89",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$SRclBj7BDclcDdyWs5EqReC.V0sHU/AywGbZ/qHwvGM./SQwQkLSm",
+   "gender": "",
+   "dob": null,
+   "address": "",
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "barCouncil": "",
+   "barNumberHash": "",
+   "stateBarCouncil": "",
+   "enrollmentDate": null,
+   "enrollmentYear": null,
+   "qualification": "",
+   "university": "",
+   "yearsOfPractice": 0,
+   "practiceType": "",
+   "primarySpecialization": "",
+   "additionalSpecializations": [],
+   "courts": [],
+   "languages": [],
+   "bio": "",
+   "isVerified": true,
+   "registrationStage": "awaiting_profile",
+   "accountStatus": "active",
+   "verificationStatus": "pending",
+   "verificationId": null,
+   "verificationDate": null,
+   "rating": 0,
+   "totalReviews": 0,
+   "profileDeactivated": false,
+   "sensitiveActionsLockedUntil": null,
+   "createdAt": "2026-09-03T07:31:24.158Z",
+   "updatedAt": "2026-09-03T07:31:27.127Z"
+  },
+  {
+   "id": "usr_mtl7jmq22tgpqz",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420760652@Nyay Setu.in",
+   "emailHash": "e2ddd13af57f4a0bb2422c9696ee37ea",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$RcIEumXKuboMK0N74NPz2uOfIT.mAOd4LAxPmkepefWeW9HQ/D15W",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:32:40.778Z",
+   "updatedAt": "2026-09-03T07:32:44.634Z"
+  },
+  {
+   "id": "usr_mtl7jmq22tgpqz",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420760652@Nyay Setu.in",
+   "emailHash": "e2ddd13af57f4a0bb2422c9696ee37ea",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$RcIEumXKuboMK0N74NPz2uOfIT.mAOd4LAxPmkepefWeW9HQ/D15W",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:32:40.778Z",
+   "updatedAt": "2026-09-03T07:32:44.634Z"
+  },
+  {
+   "id": "law_mtl7jscrzewf8c",
+   "role": "lawyer",
+   "fullName": "",
+   "professionalName": "",
+   "email": "test.advocate.1788420767991@Nyay Setu.in",
+   "emailHash": "33938c04f6042d7d949fc3df070fedfc",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$LfufUKPtf.REeaDQZQ2ezOUVBkz8x2peOAnfK0VTCtbYN1.4QYi3.",
+   "gender": "",
+   "dob": null,
+   "address": "",
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "barCouncil": "",
+   "barNumberHash": "",
+   "stateBarCouncil": "",
+   "enrollmentDate": null,
+   "enrollmentYear": null,
+   "qualification": "",
+   "university": "",
+   "yearsOfPractice": 0,
+   "practiceType": "",
+   "primarySpecialization": "",
+   "additionalSpecializations": [],
+   "courts": [],
+   "languages": [],
+   "bio": "",
+   "isVerified": true,
+   "registrationStage": "awaiting_profile",
+   "accountStatus": "active",
+   "verificationStatus": "pending",
+   "verificationId": null,
+   "verificationDate": null,
+   "rating": 0,
+   "totalReviews": 0,
+   "profileDeactivated": false,
+   "sensitiveActionsLockedUntil": null,
+   "createdAt": "2026-09-03T07:32:48.075Z",
+   "updatedAt": "2026-09-03T07:32:51.508Z"
+  },
+  {
+   "id": "law_mtl7jscrzewf8c",
+   "role": "lawyer",
+   "fullName": "",
+   "professionalName": "",
+   "email": "test.advocate.1788420767991@Nyay Setu.in",
+   "emailHash": "33938c04f6042d7d949fc3df070fedfc",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$LfufUKPtf.REeaDQZQ2ezOUVBkz8x2peOAnfK0VTCtbYN1.4QYi3.",
+   "gender": "",
+   "dob": null,
+   "address": "",
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "barCouncil": "",
+   "barNumberHash": "",
+   "stateBarCouncil": "",
+   "enrollmentDate": null,
+   "enrollmentYear": null,
+   "qualification": "",
+   "university": "",
+   "yearsOfPractice": 0,
+   "practiceType": "",
+   "primarySpecialization": "",
+   "additionalSpecializations": [],
+   "courts": [],
+   "languages": [],
+   "bio": "",
+   "isVerified": true,
+   "registrationStage": "awaiting_profile",
+   "accountStatus": "active",
+   "verificationStatus": "pending",
+   "verificationId": null,
+   "verificationDate": null,
+   "rating": 0,
+   "totalReviews": 0,
+   "profileDeactivated": false,
+   "sensitiveActionsLockedUntil": null,
+   "createdAt": "2026-09-03T07:32:48.075Z",
+   "updatedAt": "2026-09-03T07:32:51.508Z"
+  },
+  {
+   "id": "usr_mtl7lv3xhrhe9p",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420864823@Nyay Setu.in",
+   "emailHash": "a651b8e3a1390c5e2a3fdde9ce7c97e6",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$CP7ebqeriDX0Qjt7E.d1nOM.ZUSSmzKhUMP.yCP7KXmFVrSv/BXUW",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:34:24.957Z",
+   "updatedAt": "2026-09-03T07:34:28.045Z"
+  },
+  {
+   "id": "usr_mtl7lv3xhrhe9p",
+   "role": "user",
+   "fullName": "Aarav Sharma",
+   "email": "test.citizen.1788420864823@Nyay Setu.in",
+   "emailHash": "a651b8e3a1390c5e2a3fdde9ce7c97e6",
+   "phone": "9876543210",
+   "phoneNormalized": "9876543210",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$CP7ebqeriDX0Qjt7E.d1nOM.ZUSSmzKhUMP.yCP7KXmFVrSv/BXUW",
+   "gender": "",
+   "dob": "1998-05-15",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "profilePhoto": null,
+   "isVerified": true,
+   "registrationStage": "complete",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:34:24.957Z",
+   "updatedAt": "2026-09-03T07:34:28.045Z"
+  },
+  {
+   "id": "law_mtl7m02l751rih",
+   "role": "lawyer",
+   "fullName": "Adv. Rajesh Malhotra",
+   "professionalName": "Adv. Rajesh Malhotra",
+   "email": "test.advocate.1788420871268@Nyay Setu.in",
+   "emailHash": "160de64e7c43e591701ff85bb372624e",
+   "phone": "9870981305",
+   "phoneNormalized": "9870981305",
+   "phoneHash": "f20d4622585b2ecb33f4259d0c7a2c9b",
+   "passwordHash": "$2a$10$U6I9bKkNpng82UNFQBqG9OhIN30qyhfs8..tJ2GuDFTd2oKqGiKUG",
    "gender": "Male",
-   "dob": "1985-03-15",
-   "address": "42, Connaught Place, Central Delhi",
-   "city": "New Delhi",
+   "dob": "1985-04-10",
+   "address": "High Court Chamber No. 42",
+   "city": "Delhi",
    "state": "Delhi",
    "profilePhoto": null,
-   "barCouncil": "DL/1234/2010",
-   "barNumberHash": "04c73c104a2b7aaba7e9cbe03a1dde4e",
+   "barCouncil": "DL/6439/2019",
+   "barNumberHash": "2fcb5f86084b0234228bc3184eb97615",
    "stateBarCouncil": "Bar Council of Delhi",
-   "enrollmentDate": "2010-09-15",
+   "enrollmentDate": "2010-06-15",
    "enrollmentYear": "2010",
-   "qualification": "LLB (Hons), LLM",
-   "university": "Faculty of Law, University of Delhi",
+   "qualification": "LL.B., Campus Law Centre",
+   "university": "Delhi University",
    "yearsOfPractice": 14,
-   "practiceType": "Independent Advocate & Litigation Counsel",
+   "practiceType": "independent",
    "primarySpecialization": "Criminal Law",
    "additionalSpecializations": [
-    "Civil Law",
-    "Cyber Law",
     "Constitutional Law"
    ],
    "courts": [
-    "Supreme Court of India",
-    "High Court of Delhi",
-    "District & Sessions Courts"
+    "Delhi High Court",
+    "Supreme Court of India"
    ],
    "languages": [
     "English",
     "Hindi"
    ],
-   "bio": "A seasoned criminal law practitioner with over 14 years of experience handling complex criminal, civil, and cyber law matters. Successfully represented clients before the Supreme Court and various High Courts across India.",
-   "accountStatus": "active",
-   "verificationStatus": "verified",
-   "verificationId": "LC-VER-2024-0001",
-   "verificationDate": "2024-01-20",
-   "rating": 4.8,
-   "totalReviews": 127,
-   "profileDeactivated": false,
-   "sensitiveActionsLockedUntil": null,
-   "createdAt": "2024-01-10T09:00:00.000Z"
-  },
-  {
-   "id": "adm_001",
-   "role": "admin",
-   "fullName": "Verification Desk",
-   "email": "admin@legalconnect.in",
-   "passwordHash": "$2a$10$eH.cyy2ipwlneomGG.d2gu6PlYWfEHH5JNhBuDY/KYmEO1KrX78/G",
-   "accountStatus": "active",
-   "createdAt": "2026-08-24T19:18:51.703Z"
-  },
-  {
-   "id": "law_mt89vc6bwzzj4f",
-   "role": "lawyer",
-   "fullName": "Real Test Advocate",
-   "professionalName": "Adv. Real Test Advocate",
-   "email": "real.user.1787638605757@example.com",
-   "emailHash": "d6c8f086761aa8affe64d66433a6620e",
-   "phone": "9638605757",
-   "phoneNormalized": "9638605757",
-   "phoneHash": "049f840e31883d7e1a357ba3bc866f51",
-   "passwordHash": "$2a$10$oUfgVmO7QiHF.adZMxU16eLXH22iYnbf7tboeY15ADXQSCGJEiqr2",
-   "gender": "Female",
-   "dob": "1992-02-02",
-   "address": "1 Real Street",
-   "city": "Mumbai",
-   "state": "Maharashtra",
-   "profilePhoto": null,
-   "barCouncil": "MH/5757/2018",
-   "barNumberHash": "3d6781c87e1ec6815c114724755e95b0",
-   "stateBarCouncil": "Bar Council of Maharashtra & Goa",
-   "enrollmentDate": "2018-05-01",
-   "enrollmentYear": "2018",
-   "qualification": "LLB (3 Years)",
-   "university": "Mumbai University",
-   "yearsOfPractice": 6,
-   "practiceType": "Independent Advocate & Litigation Counsel",
-   "primarySpecialization": "Civil Law",
-   "additionalSpecializations": [],
-   "courts": [],
-   "languages": [],
    "bio": "",
+   "isVerified": true,
+   "registrationStage": "complete",
    "accountStatus": "active",
    "verificationStatus": "pending",
    "verificationId": null,
@@ -104,39 +492,50 @@
    "totalReviews": 0,
    "profileDeactivated": false,
    "sensitiveActionsLockedUntil": null,
-   "createdAt": "2026-08-25T06:16:45.923Z"
+   "createdAt": "2026-09-03T07:34:31.389Z",
+   "updatedAt": "2026-09-03T07:34:34.362Z"
   },
   {
-   "id": "law_mt89zf695oh98n",
+   "id": "law_mtl7m02l751rih",
    "role": "lawyer",
-   "fullName": "Flow Check",
-   "professionalName": "Adv. Flow Check",
-   "email": "flow.check.1787638796232@example.com",
-   "emailHash": "803e3917937c2f2168293aa0c1baf89b",
-   "phone": "8638796233",
-   "phoneNormalized": "8638796233",
-   "phoneHash": "8952035168ae14dd4e1a5ed3e3b6d6a3",
-   "passwordHash": "$2a$10$FzlwlHa525TJn1ANUNYcxOsmvs4xsBL59POFDL8JPDyrRXMQmx4yy",
+   "fullName": "Adv. Rajesh Malhotra",
+   "professionalName": "Adv. Rajesh Malhotra",
+   "email": "test.advocate.1788420871268@Nyay Setu.in",
+   "emailHash": "160de64e7c43e591701ff85bb372624e",
+   "phone": "9870981305",
+   "phoneNormalized": "9870981305",
+   "phoneHash": "f20d4622585b2ecb33f4259d0c7a2c9b",
+   "passwordHash": "$2a$10$U6I9bKkNpng82UNFQBqG9OhIN30qyhfs8..tJ2GuDFTd2oKqGiKUG",
    "gender": "Male",
-   "dob": "1991-01-01",
-   "address": "2 Check Ave",
+   "dob": "1985-04-10",
+   "address": "High Court Chamber No. 42",
    "city": "Delhi",
    "state": "Delhi",
    "profilePhoto": null,
-   "barCouncil": "DL/6233/2019",
-   "barNumberHash": "e328b24474a8eaa2dd5b98eda27a03e9",
+   "barCouncil": "DL/6439/2019",
+   "barNumberHash": "2fcb5f86084b0234228bc3184eb97615",
    "stateBarCouncil": "Bar Council of Delhi",
-   "enrollmentDate": "2019-05-01",
-   "enrollmentYear": "2019",
-   "qualification": "LLB",
-   "university": "DU",
-   "yearsOfPractice": 5,
-   "practiceType": "Independent Advocate & Litigation Counsel",
-   "primarySpecialization": "Civil Law",
-   "additionalSpecializations": [],
-   "courts": [],
-   "languages": [],
+   "enrollmentDate": "2010-06-15",
+   "enrollmentYear": "2010",
+   "qualification": "LL.B., Campus Law Centre",
+   "university": "Delhi University",
+   "yearsOfPractice": 14,
+   "practiceType": "independent",
+   "primarySpecialization": "Criminal Law",
+   "additionalSpecializations": [
+    "Constitutional Law"
+   ],
+   "courts": [
+    "Delhi High Court",
+    "Supreme Court of India"
+   ],
+   "languages": [
+    "English",
+    "Hindi"
+   ],
    "bio": "",
+   "isVerified": true,
+   "registrationStage": "complete",
    "accountStatus": "active",
    "verificationStatus": "pending",
    "verificationId": null,
@@ -145,100 +544,873 @@
    "totalReviews": 0,
    "profileDeactivated": false,
    "sensitiveActionsLockedUntil": null,
-   "createdAt": "2026-08-25T06:19:56.434Z"
+   "createdAt": "2026-09-03T07:34:31.389Z",
+   "updatedAt": "2026-09-03T07:34:34.362Z"
+  },
+  {
+   "id": "law_mtl7nnw82huasz",
+   "role": "lawyer",
+   "fullName": "",
+   "professionalName": "",
+   "email": "advocate.test.1@Nyay Setu.in",
+   "emailHash": "7bcdff9f44be26f390a74ab15a7e7703",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$jVqDuhl0MjOP/U.3Gq5yEe5SgGVqVUOv1XdyA4VPESjO10NZhrqf.",
+   "gender": "",
+   "dob": null,
+   "address": "",
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "barCouncil": "",
+   "barNumberHash": "",
+   "stateBarCouncil": "",
+   "enrollmentDate": null,
+   "enrollmentYear": null,
+   "qualification": "",
+   "university": "",
+   "yearsOfPractice": 0,
+   "practiceType": "",
+   "primarySpecialization": "",
+   "additionalSpecializations": [],
+   "courts": [],
+   "languages": [],
+   "bio": "",
+   "isVerified": true,
+   "registrationStage": "awaiting_profile",
+   "accountStatus": "active",
+   "verificationStatus": "pending",
+   "verificationId": null,
+   "verificationDate": null,
+   "rating": 0,
+   "totalReviews": 0,
+   "profileDeactivated": false,
+   "sensitiveActionsLockedUntil": null,
+   "createdAt": "2026-09-03T07:35:48.921Z",
+   "updatedAt": "2026-09-03T07:38:33.082Z"
+  },
+  {
+   "id": "law_mtl7nnw82huasz",
+   "role": "lawyer",
+   "fullName": "",
+   "professionalName": "",
+   "email": "advocate.test.1@Nyay Setu.in",
+   "emailHash": "7bcdff9f44be26f390a74ab15a7e7703",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$jVqDuhl0MjOP/U.3Gq5yEe5SgGVqVUOv1XdyA4VPESjO10NZhrqf.",
+   "gender": "",
+   "dob": null,
+   "address": "",
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "barCouncil": "",
+   "barNumberHash": "",
+   "stateBarCouncil": "",
+   "enrollmentDate": null,
+   "enrollmentYear": null,
+   "qualification": "",
+   "university": "",
+   "yearsOfPractice": 0,
+   "practiceType": "",
+   "primarySpecialization": "",
+   "additionalSpecializations": [],
+   "courts": [],
+   "languages": [],
+   "bio": "",
+   "isVerified": true,
+   "registrationStage": "awaiting_profile",
+   "accountStatus": "active",
+   "verificationStatus": "pending",
+   "verificationId": null,
+   "verificationDate": null,
+   "rating": 0,
+   "totalReviews": 0,
+   "profileDeactivated": false,
+   "sensitiveActionsLockedUntil": null,
+   "createdAt": "2026-09-03T07:35:48.921Z",
+   "updatedAt": "2026-09-03T07:38:33.082Z"
+  },
+  {
+   "id": "usr_mtl807g46etvc7",
+   "role": "user",
+   "fullName": "",
+   "email": "padamkishore90@gmail.com",
+   "emailHash": "f6be8ecf1713b001690863ef1a7b7e4c",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$LKbzJYUr98o7gkdZccxHeuKS4AnfhBewwXbKiIlzmcs4J/aV7tFum",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:45:34.132Z",
+   "updatedAt": "2026-09-03T08:43:47.943Z"
+  },
+  {
+   "id": "usr_mtl807g46etvc7",
+   "role": "user",
+   "fullName": "",
+   "email": "padamkishore90@gmail.com",
+   "emailHash": "f6be8ecf1713b001690863ef1a7b7e4c",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$LKbzJYUr98o7gkdZccxHeuKS4AnfhBewwXbKiIlzmcs4J/aV7tFum",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:45:34.132Z",
+   "updatedAt": "2026-09-03T08:43:47.943Z"
+  },
+  {
+   "id": "usr_mtl807g46etvc7",
+   "role": "user",
+   "fullName": "",
+   "email": "padamkishore90@gmail.com",
+   "emailHash": "f6be8ecf1713b001690863ef1a7b7e4c",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$LKbzJYUr98o7gkdZccxHeuKS4AnfhBewwXbKiIlzmcs4J/aV7tFum",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:45:34.132Z",
+   "updatedAt": "2026-09-03T08:43:47.943Z"
+  },
+  {
+   "id": "usr_mtl807g46etvc7",
+   "role": "user",
+   "fullName": "",
+   "email": "padamkishore90@gmail.com",
+   "emailHash": "f6be8ecf1713b001690863ef1a7b7e4c",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$LKbzJYUr98o7gkdZccxHeuKS4AnfhBewwXbKiIlzmcs4J/aV7tFum",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:45:34.132Z",
+   "updatedAt": "2026-09-03T08:43:47.943Z"
+  },
+  {
+   "id": "usr_mtl9d0qp5uq30p",
+   "role": "user",
+   "fullName": "",
+   "email": "testuser123@gmail.com",
+   "emailHash": "e4e2e90f4a16e6a53ce8a43246da358a",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$Cit/yh4UFFcNGifi8WaouOXBzxrlzTFe0s0A8yCMDS19rBELwAlyG",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T08:23:31.585Z",
+   "updatedAt": "2026-09-03T08:23:31.585Z"
+  },
+  {
+   "id": "usr_mtl9d0qp5uq30p",
+   "role": "user",
+   "fullName": "",
+   "email": "testuser123@gmail.com",
+   "emailHash": "e4e2e90f4a16e6a53ce8a43246da358a",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$Cit/yh4UFFcNGifi8WaouOXBzxrlzTFe0s0A8yCMDS19rBELwAlyG",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T08:23:31.585Z",
+   "updatedAt": "2026-09-03T08:23:31.585Z"
+  },
+  {
+   "id": "usr_mtl9p0mhi3cwpt",
+   "role": "user",
+   "fullName": "",
+   "email": "testuser99@gmail.com",
+   "emailHash": "7ffe7be98bde31dc8388a2557ab6aefc",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$5D4rDeyexJONSDqqxctdnep2AZCmMD53KjwPMKtfxZuvvVYc6wGsG",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T08:32:51.305Z",
+   "updatedAt": "2026-09-03T08:36:23.075Z"
+  },
+  {
+   "id": "usr_mtl9p0mhi3cwpt",
+   "role": "user",
+   "fullName": "",
+   "email": "testuser99@gmail.com",
+   "emailHash": "7ffe7be98bde31dc8388a2557ab6aefc",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$5D4rDeyexJONSDqqxctdnep2AZCmMD53KjwPMKtfxZuvvVYc6wGsG",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T08:32:51.305Z",
+   "updatedAt": "2026-09-03T08:36:23.075Z"
+  },
+  {
+   "id": "usr_mtl9p0mhi3cwpt",
+   "role": "user",
+   "fullName": "",
+   "email": "testuser99@gmail.com",
+   "emailHash": "7ffe7be98bde31dc8388a2557ab6aefc",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$5D4rDeyexJONSDqqxctdnep2AZCmMD53KjwPMKtfxZuvvVYc6wGsG",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T08:32:51.305Z",
+   "updatedAt": "2026-09-03T08:36:23.075Z"
+  },
+  {
+   "id": "usr_mtl807g46etvc7",
+   "role": "user",
+   "fullName": "",
+   "email": "padamkishore90@gmail.com",
+   "emailHash": "f6be8ecf1713b001690863ef1a7b7e4c",
+   "phone": "",
+   "phoneNormalized": "",
+   "phoneHash": "",
+   "passwordHash": "$2a$10$LKbzJYUr98o7gkdZccxHeuKS4AnfhBewwXbKiIlzmcs4J/aV7tFum",
+   "gender": "",
+   "dob": null,
+   "city": "",
+   "state": "",
+   "profilePhoto": null,
+   "isVerified": false,
+   "registrationStage": "awaiting_otp",
+   "accountStatus": "active",
+   "createdAt": "2026-09-03T07:45:34.132Z",
+   "updatedAt": "2026-09-03T08:43:47.943Z"
   }
  ],
  "otpChallenges": [
   {
-   "id": "otp_mt848roq5v8jc1",
-   "userId": "law_demo_001",
-   "codeHash": "490ef6f8f2e9c07ff806af16b4ad8574",
+   "id": "otp_mtl797zxqci3us",
+   "key": "otp:test.citizen.1788420274757@Nyay Setu.in",
+   "userId": "usr_mtl797uikzos4u",
+   "email": "test.citizen.1788420274757@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$ogdixME4YuF92t9dhyyRVOceaK18m/BkB6o/Q.bbtNp3kdV32FnrG",
+   "rawOtp": "642801",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
    "device": {
-    "deviceId": "dev_mt848r3xa6vxnp",
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:29:35.134Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:24:35.134Z",
+   "lastSentAt": "2026-09-03T07:24:35.134Z"
+  },
+  {
+   "id": "otp_mtl7ejz3uly6nn",
+   "key": "otp:test.citizen.1788420523627@Nyay Setu.in",
+   "userId": "usr_mtl7ejulwfcci7",
+   "email": "test.citizen.1788420523627@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$gUfXYR8pkRD9gByAA7KRgO6hDnW6vkBoqh/w3T4PoWryivH7dK8h2",
+   "rawOtp": "328218",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:33:43.935Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:28:43.935Z",
+   "lastSentAt": "2026-09-03T07:28:43.935Z"
+  },
+  {
+   "id": "otp_mtl7en6b51tea7",
+   "key": "otp:test.citizen.1788420523627@Nyay Setu.in",
+   "userId": "usr_mtl7ejulwfcci7",
+   "email": "test.citizen.1788420523627@Nyay Setu.in",
+   "purpose": "login",
+   "hashedOtp": "$2a$10$nelFHf92rU.yFOK5i1zggu6m9HID/3trroyImnZuII/QCA6frNFNG",
+   "rawOtp": "808412",
+   "attemptsCount": 0,
+   "attempts": 0,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:33:48.083Z",
+   "isUsed": false,
+   "createdAt": "2026-09-03T07:28:48.083Z",
+   "lastSentAt": "2026-09-03T07:28:48.083Z"
+  },
+  {
+   "id": "otp_mtl7gpts8qz4fm",
+   "key": "otp:test.citizen.1788420624508@Nyay Setu.in",
+   "userId": "usr_mtl7gpougjh59v",
+   "email": "test.citizen.1788420624508@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$p6PShb5aPxTqjJbk8Gk.6uWUKi98hfTnzts/0N5ewdqJtHvLHALQS",
+   "rawOtp": "533547",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:35:24.833Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:30:24.833Z",
+   "lastSentAt": "2026-09-03T07:30:24.833Z"
+  },
+  {
+   "id": "otp_mtl7gt7q7lttc0",
+   "key": "otp:test.citizen.1788420624508@Nyay Setu.in",
+   "userId": "usr_mtl7gpougjh59v",
+   "email": "test.citizen.1788420624508@Nyay Setu.in",
+   "purpose": "login",
+   "hashedOtp": "$2a$10$ZUhtPd78vn9Ndi7g6/WSPOhyZtJyUVoWQuxXrvscIhLiXXHMDg0j6",
+   "rawOtp": "329500",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:35:29.223Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:30:29.223Z",
+   "lastSentAt": "2026-09-03T07:30:29.223Z"
+  },
+  {
+   "id": "otp_mtl7htlilakgce",
+   "key": "otp:test.citizen.1788420676162@Nyay Setu.in",
+   "userId": "usr_mtl7htj610as2u",
+   "email": "test.citizen.1788420676162@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$8hOtA.0TqdeFcZywNCB4f.nlblYyob51TH575kFb7xHVwbDK0R7yq",
+   "rawOtp": "328991",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:36:16.375Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:31:16.375Z",
+   "lastSentAt": "2026-09-03T07:31:16.375Z"
+  },
+  {
+   "id": "otp_mtl7hx7aejbvym",
+   "key": "otp:test.citizen.1788420676162@Nyay Setu.in",
+   "userId": "usr_mtl7htj610as2u",
+   "email": "test.citizen.1788420676162@Nyay Setu.in",
+   "purpose": "login",
+   "hashedOtp": "$2a$10$wKOi77sM9vPfN.uW/OrdQOgEh6A9g4.2rXlJIY1Xsrx6Uq.q.WBxy",
+   "rawOtp": "218914",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:36:21.046Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:31:21.046Z",
+   "lastSentAt": "2026-09-03T07:31:21.046Z"
+  },
+  {
+   "id": "otp_mtl7hzoagcnd9y",
+   "key": "otp:test.advocate.1788420684068@Nyay Setu.in",
+   "userId": "law_mtl7hzlq9kncpu",
+   "email": "test.advocate.1788420684068@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$Ib9IIYtoKn/nCzqpfChRgu0LJ9jdG10ibdKjjyzIsBGW.3ItVOMQW",
+   "rawOtp": "897820",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:36:24.250Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:31:24.250Z",
+   "lastSentAt": "2026-09-03T07:31:24.250Z"
+  },
+  {
+   "id": "otp_mtl7i215q59oey",
+   "key": "otp:test.advocate.1788420684068@Nyay Setu.in",
+   "userId": "law_mtl7hzlq9kncpu",
+   "email": "test.advocate.1788420684068@Nyay Setu.in",
+   "purpose": "login",
+   "hashedOtp": "$2a$10$h0Q0Q1K6FD/lWJ1eXOG4luSpd5l9aQJ7Av1hKeyUCal1XWgW3B0L6",
+   "rawOtp": "424577",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:36:27.305Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:31:27.305Z",
+   "lastSentAt": "2026-09-03T07:31:27.305Z"
+  },
+  {
+   "id": "otp_mtl7jmsduych60",
+   "key": "otp:test.citizen.1788420760652@Nyay Setu.in",
+   "userId": "usr_mtl7jmq22tgpqz",
+   "email": "test.citizen.1788420760652@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$1YNq5qMcypGZvjr/hygM5eaD5Ca5/y4kQyjIGw15BURE5PPEdjfja",
+   "rawOtp": "339709",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:37:40.861Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:32:40.861Z",
+   "lastSentAt": "2026-09-03T07:32:40.861Z"
+  },
+  {
+   "id": "otp_mtl7jpu2a8sync",
+   "key": "otp:test.citizen.1788420760652@Nyay Setu.in",
+   "userId": "usr_mtl7jmq22tgpqz",
+   "email": "test.citizen.1788420760652@Nyay Setu.in",
+   "purpose": "login",
+   "hashedOtp": "$2a$10$iLF0tDzRne0XMfhlmLm1ou707bQS9JwAjoJRpM8PnnaAQhZDrwpMy",
+   "rawOtp": "841252",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:37:44.811Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:32:44.811Z",
+   "lastSentAt": "2026-09-03T07:32:44.811Z"
+  },
+  {
+   "id": "otp_mtl7jsf7bxv9yj",
+   "key": "otp:test.advocate.1788420767991@Nyay Setu.in",
+   "userId": "law_mtl7jscrzewf8c",
+   "email": "test.advocate.1788420767991@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$QTIPZlmHb6GXDKl85KUwDuQZXLlwh4vWIbSVkNqlJwC3iTXT.VSMa",
+   "rawOtp": "101072",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:37:48.164Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:32:48.164Z",
+   "lastSentAt": "2026-09-03T07:32:48.164Z"
+  },
+  {
+   "id": "otp_mtl7jv549jiiw2",
+   "key": "otp:test.advocate.1788420767991@Nyay Setu.in",
+   "userId": "law_mtl7jscrzewf8c",
+   "email": "test.advocate.1788420767991@Nyay Setu.in",
+   "purpose": "login",
+   "hashedOtp": "$2a$10$OBrOrU.QN3nDzRCAC17KUu0JK6SsAAn4YMPKPadF5KTUj.xRKnW.2",
+   "rawOtp": "392087",
+   "attemptsCount": 0,
+   "attempts": 0,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:37:51.688Z",
+   "isUsed": false,
+   "createdAt": "2026-09-03T07:32:51.688Z",
+   "lastSentAt": "2026-09-03T07:32:51.688Z"
+  },
+  {
+   "id": "otp_mtl7lv685aplfo",
+   "key": "otp:test.citizen.1788420864823@Nyay Setu.in",
+   "userId": "usr_mtl7lv3xhrhe9p",
+   "email": "test.citizen.1788420864823@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$yRUcJZ5nRaAQKkLDcRzoO.M7TdWZwxzztTH9o1RCMQizo0Srb1BlW",
+   "rawOtp": "780907",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:39:25.041Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:34:25.041Z",
+   "lastSentAt": "2026-09-03T07:34:25.041Z"
+  },
+  {
+   "id": "otp_mtl7lxmpaiop7l",
+   "key": "otp:test.citizen.1788420864823@Nyay Setu.in",
+   "userId": "usr_mtl7lv3xhrhe9p",
+   "email": "test.citizen.1788420864823@Nyay Setu.in",
+   "purpose": "login",
+   "hashedOtp": "$2a$10$TPoyxR/c3JhPhps8mT6zGON8T1ez3SrcCoYMa9qxVeiUipE80FRB.",
+   "rawOtp": "304431",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:39:28.225Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:34:28.225Z",
+   "lastSentAt": "2026-09-03T07:34:28.225Z"
+  },
+  {
+   "id": "otp_mtl7m05uuwsn39",
+   "key": "otp:test.advocate.1788420871268@Nyay Setu.in",
+   "userId": "law_mtl7m02l751rih",
+   "email": "test.advocate.1788420871268@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$VWuSQjWqhD0toVhu/NjBbuiuXummAUcOhFuMg8BZWvwCehE8vmqsu",
+   "rawOtp": "825012",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:39:31.507Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:34:31.507Z",
+   "lastSentAt": "2026-09-03T07:34:31.507Z"
+  },
+  {
+   "id": "otp_mtl7m2i6g91uvt",
+   "key": "otp:test.advocate.1788420871268@Nyay Setu.in",
+   "userId": "law_mtl7m02l751rih",
+   "email": "test.advocate.1788420871268@Nyay Setu.in",
+   "purpose": "login",
+   "hashedOtp": "$2a$10$a3aPq5kt.uxLPpIP/8YJt.si8sKDheIiM.TV0.Uv6Tjhzbi/lkbIe",
+   "rawOtp": "248815",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:39:34.543Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:34:34.543Z",
+   "lastSentAt": "2026-09-03T07:34:34.543Z"
+  },
+  {
+   "id": "otp_mtl7nnz3vz0rzw",
+   "key": "otp:advocate.test.1@Nyay Setu.in",
+   "userId": "law_mtl7nnw82huasz",
+   "email": "advocate.test.1@Nyay Setu.in",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$QxYwA0wy0HDDrrih8frC2ejJDLSU99SwDFBHuP4bbv39RYCxGbkLO",
+   "rawOtp": "980743",
+   "attemptsCount": 1,
+   "attempts": 1,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "isNewDevice": true,
+   "expiresAt": "2026-09-03T07:40:49.023Z",
+   "isUsed": true,
+   "createdAt": "2026-09-03T07:35:49.023Z",
+   "lastSentAt": "2026-09-03T07:35:49.023Z"
+  },
+  {
+   "id": "otp_mtl807i53s83kq",
+   "key": "otp:padamkishore90@gmail.com",
+   "userId": "usr_mtl807g46etvc7",
+   "email": "padamkishore90@gmail.com",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$IVfODhMVmGsdQUzu.Nj9PeNNn.//UayeTqNe4rIZLmkBnryQXhG.O",
+   "rawOtp": "286936",
+   "attemptsCount": 0,
+   "attempts": 0,
+   "maxAttempts": 5,
+   "device": {
+    "deviceId": "unknown-device",
     "deviceType": "Desktop",
     "browser": "Chrome",
     "os": "Windows",
     "location": "India (approx.)"
    },
    "isNewDevice": true,
-   "attempts": 0,
-   "expiresAt": "2026-08-25T03:44:14.859Z",
-   "consumed": false,
-   "createdAt": "2026-08-25T03:39:14.859Z"
+   "expiresAt": "2026-09-03T07:51:40.752Z",
+   "isUsed": false,
+   "createdAt": "2026-09-03T07:45:34.205Z",
+   "lastSentAt": "2026-09-03T07:46:40.752Z"
   },
   {
-   "id": "otp_mt867auzrlzdfx",
-   "userId": "law_demo_001",
-   "codeHash": "ffb8ed1da7f8dd3919bef83ce8df6e07",
+   "id": "otp_mtl914c36zfwtl",
+   "key": "otp:padamkishore90@gmail.com",
+   "userId": "usr_mtl807g46etvc7",
+   "email": "padamkishore90@gmail.com",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$eV4CO/12PFqDR41a0qM54uQOIy8Fh1RTqslPkF45Yl.zbQzGMTJUG",
+   "rawOtp": "137293",
+   "attemptsCount": 0,
+   "attempts": 0,
+   "maxAttempts": 5,
    "device": {
     "deviceId": "unknown-device",
     "deviceType": "Desktop",
-    "browser": "Unknown browser",
+    "browser": "Chrome",
     "os": "Windows",
     "location": "India (approx.)"
    },
    "isNewDevice": true,
+   "expiresAt": "2026-09-03T08:19:16.372Z",
+   "isUsed": false,
+   "createdAt": "2026-09-03T08:14:16.372Z",
+   "lastSentAt": "2026-09-03T08:14:16.372Z"
+  },
+  {
+   "id": "otp_mtl9d0tlbc2gli",
+   "key": "otp:testuser123@gmail.com",
+   "userId": "usr_mtl9d0qp5uq30p",
+   "email": "testuser123@gmail.com",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$BPuI1HPZ56MHdq4m3332b.vMS69mMG1HXRT2U0zFPgaVz9yQfv/0u",
+   "rawOtp": "326004",
+   "attemptsCount": 0,
    "attempts": 0,
-   "expiresAt": "2026-08-25T04:39:05.628Z",
-   "consumed": false,
-   "createdAt": "2026-08-25T04:34:05.628Z"
-  },
-  {
-   "id": "otp_mt867mu7d05bl9",
-   "userId": "law_demo_001",
-   "codeHash": "39868d98fc786305fed7c00514fc3752",
+   "maxAttempts": 5,
    "device": {
     "deviceId": "unknown-device",
     "deviceType": "Desktop",
     "browser": "Unknown browser",
-    "os": "Windows",
+    "os": "\"Windows\"",
     "location": "India (approx.)"
    },
    "isNewDevice": true,
+   "expiresAt": "2026-09-03T08:28:31.690Z",
+   "isUsed": false,
+   "createdAt": "2026-09-03T08:23:31.690Z",
+   "lastSentAt": "2026-09-03T08:23:31.690Z"
+  },
+  {
+   "id": "otp_mtl9p0oz0b2z89",
+   "key": "otp:testuser99@gmail.com",
+   "userId": "usr_mtl9p0mhi3cwpt",
+   "email": "testuser99@gmail.com",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$lXgn63RnWgzeGZfHrk0.FOd4vRDXqDpVX6dJPo3diSTXiHoVJVQTu",
+   "rawOtp": "990069",
+   "attemptsCount": 0,
    "attempts": 0,
-   "expiresAt": "2026-08-25T04:39:21.151Z",
-   "consumed": false,
-   "createdAt": "2026-08-25T04:34:21.151Z"
-  },
-  {
-   "id": "otp_mt89vcd6txeccd",
-   "userId": "law_mt89vc6bwzzj4f",
-   "codeHash": "5ccab4ba2beaf504a01b9d5706a2743b",
+   "maxAttempts": 5,
    "device": {
     "deviceId": "unknown-device",
     "deviceType": "Desktop",
     "browser": "Unknown browser",
-    "os": "Unknown OS",
+    "os": "\"Windows\"",
     "location": "India (approx.)"
    },
    "isNewDevice": true,
-   "attempts": 1,
-   "expiresAt": "2026-08-25T06:21:46.170Z",
-   "consumed": true,
-   "createdAt": "2026-08-25T06:16:46.170Z"
+   "expiresAt": "2026-09-03T08:41:23.155Z",
+   "isUsed": false,
+   "createdAt": "2026-09-03T08:32:51.396Z",
+   "lastSentAt": "2026-09-03T08:36:23.155Z"
   },
   {
-   "id": "otp_mt89zfc5np85gh",
-   "userId": "law_mt89zf695oh98n",
-   "codeHash": "f414fa52d35bae5d21e76b9b04b178c8",
+   "id": "otp_mtla33drfve7tk",
+   "key": "otp:padamkishore90@gmail.com",
+   "userId": "usr_mtl807g46etvc7",
+   "email": "padamkishore90@gmail.com",
+   "purpose": "registration",
+   "hashedOtp": "$2a$10$A/NVsqJzSFlBJaC3NUeMP.SVN5ynZoZwx26JoFCGxPTSWl1S06eaK",
+   "rawOtp": "525833",
+   "attemptsCount": 0,
+   "attempts": 0,
+   "maxAttempts": 5,
    "device": {
     "deviceId": "unknown-device",
     "deviceType": "Desktop",
     "browser": "Unknown browser",
-    "os": "Unknown OS",
+    "os": "\"Windows\"",
     "location": "India (approx.)"
    },
    "isNewDevice": true,
-   "attempts": 1,
-   "expiresAt": "2026-08-25T06:24:56.645Z",
-   "consumed": true,
-   "createdAt": "2026-08-25T06:19:56.645Z"
+   "expiresAt": "2026-09-03T08:48:48.065Z",
+   "isUsed": false,
+   "createdAt": "2026-09-03T08:43:48.065Z",
+   "lastSentAt": "2026-09-03T08:43:48.065Z"
+  }
+ ],
+ "otpSends": [
+  {
+   "id": "osend_mtla33dupftrbt",
+   "emailKey": "padamkishore90@gmail.com",
+   "sentAt": "2026-09-03T08:43:48.066Z"
   }
  ],
  "sessions": [
   {
-   "id": "sess_mt89vce1n0yi7w",
-   "userId": "law_mt89vc6bwzzj4f",
+   "id": "sess_mtl79bcp0qujl3",
+   "userId": "usr_mtl797uikzos4u",
    "device": {
     "deviceId": "unknown-device",
     "deviceType": "Desktop",
@@ -246,13 +1418,13 @@
     "os": "Unknown OS",
     "location": "India (approx.)"
    },
-   "createdAt": "2026-08-25T06:16:46.206Z",
-   "lastSeenAt": "2026-08-25T06:16:46.206Z",
+   "createdAt": "2026-09-03T07:24:39.484Z",
+   "lastSeenAt": "2026-09-03T07:24:39.494Z",
    "revoked": false
   },
   {
-   "id": "sess_mt89zfd2hg0h8h",
-   "userId": "law_mt89zf695oh98n",
+   "id": "sess_mtl7emzvnkf639",
+   "userId": "usr_mtl7ejulwfcci7",
    "device": {
     "deviceId": "unknown-device",
     "deviceType": "Desktop",
@@ -260,16 +1432,362 @@
     "os": "Unknown OS",
     "location": "India (approx.)"
    },
-   "createdAt": "2026-08-25T06:19:56.685Z",
-   "lastSeenAt": "2026-08-25T06:19:56.685Z",
+   "createdAt": "2026-09-03T07:28:47.854Z",
+   "lastSeenAt": "2026-09-03T07:28:47.865Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7gt1gely5r8",
+   "userId": "usr_mtl7gpougjh59v",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:30:28.998Z",
+   "lastSeenAt": "2026-09-03T07:30:29.008Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7gvpwc1kf2y",
+   "userId": "usr_mtl7gpougjh59v",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:30:32.468Z",
+   "lastSeenAt": "2026-09-03T07:30:32.468Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7hx28kxjkyn",
+   "userId": "usr_mtl7htj610as2u",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:31:20.864Z",
+   "lastSeenAt": "2026-09-03T07:31:20.871Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7hzjakyiq2n",
+   "userId": "usr_mtl7htj610as2u",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:31:24.070Z",
+   "lastSeenAt": "2026-09-03T07:31:24.070Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7i1wdzbb3pq",
+   "userId": "law_mtl7hzlq9kncpu",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:31:27.134Z",
+   "lastSeenAt": "2026-09-03T07:31:27.137Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7i4fq83yz5l",
+   "userId": "law_mtl7hzlq9kncpu",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:31:30.423Z",
+   "lastSeenAt": "2026-09-03T07:31:30.423Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7jpoypjjp2h",
+   "userId": "usr_mtl7jmq22tgpqz",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:32:44.627Z",
+   "lastSeenAt": "2026-09-03T07:32:44.634Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7jsacewepl1",
+   "userId": "usr_mtl7jmq22tgpqz",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:32:47.988Z",
+   "lastSeenAt": "2026-09-03T07:32:47.988Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7jv0a5mn310",
+   "userId": "law_mtl7jscrzewf8c",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:32:51.514Z",
+   "lastSeenAt": "2026-09-03T07:32:51.517Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7lxhiubvduv",
+   "userId": "usr_mtl7lv3xhrhe9p",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:34:28.038Z",
+   "lastSeenAt": "2026-09-03T07:34:28.045Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7lzzj4qofor",
+   "userId": "usr_mtl7lv3xhrhe9p",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:34:31.279Z",
+   "lastSeenAt": "2026-09-03T07:34:31.279Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7m2d2olamuu",
+   "userId": "law_mtl7m02l751rih",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:34:34.358Z",
+   "lastSeenAt": "2026-09-03T07:34:34.362Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7m4pxj9jesy",
+   "userId": "law_mtl7m02l751rih",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:34:37.413Z",
+   "lastSeenAt": "2026-09-03T07:34:37.413Z",
+   "revoked": false
+  },
+  {
+   "id": "sess_mtl7r6ki6k06x7",
+   "userId": "law_mtl7nnw82huasz",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "createdAt": "2026-09-03T07:38:33.090Z",
+   "lastSeenAt": "2026-09-03T07:38:33.090Z",
    "revoked": false
   }
  ],
  "trustedDevices": [],
  "loginActivity": [
   {
-   "id": "act_mt89zfdmp09w8i",
-   "userId": "law_mt89zf695oh98n",
+   "id": "act_mtla35ramh1vbt",
+   "userId": "usr_mtl807g46etvc7",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T08:43:51.142Z"
+  },
+  {
+   "id": "act_mtl9tmgnyhgrbp",
+   "userId": "usr_mtl9p0mhi3cwpt",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T08:36:26.231Z"
+  },
+  {
+   "id": "act_mtl9p36yk96yqi",
+   "userId": "usr_mtl9p0mhi3cwpt",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T08:32:54.634Z"
+  },
+  {
+   "id": "act_mtl9d38tnjo2ud",
+   "userId": "usr_mtl9d0qp5uq30p",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T08:23:34.829Z"
+  },
+  {
+   "id": "act_mtl916owws3go8",
+   "userId": "usr_mtl807g46etvc7",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T08:14:19.424Z"
+  },
+  {
+   "id": "act_mtl81ost6oqgga",
+   "userId": "usr_mtl807g46etvc7",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:46:43.277Z"
+  },
+  {
+   "id": "act_mtl809m69udtft",
+   "userId": "usr_mtl807g46etvc7",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:45:36.942Z"
+  },
+  {
+   "id": "act_mtl7wrvjgjzbhp",
+   "userId": "law_mtl7jscrzewf8c",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:42:53.983Z"
+  },
+  {
+   "id": "act_mtl7r6kizloova",
+   "userId": "law_mtl7nnw82huasz",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:38:33.090Z"
+  },
+  {
+   "id": "act_mtl7nqkkotnpya",
+   "userId": "law_mtl7nnw82huasz",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:35:52.388Z"
+  },
+  {
+   "id": "act_mtl7m4px4ha1oi",
+   "userId": "law_mtl7m02l751rih",
    "type": "login_new_device",
    "description": "Signed in from a new device (pending confirmation)",
    "result": "success",
@@ -280,28 +1798,644 @@
     "os": "Unknown OS",
     "location": "India (approx.)"
    },
-   "timestamp": "2026-08-25T06:19:56.698Z"
+   "timestamp": "2026-09-03T07:34:37.414Z"
   },
   {
-   "id": "act_mt89vcogxmsxaa",
-   "userId": "law_mt89vc6bwzzj4f",
+   "id": "act_mtl7m4n78d56hv",
+   "userId": "law_mtl7m02l751rih",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:34:37.315Z"
+  },
+  {
+   "id": "act_mtl7m2d2lx8luv",
+   "userId": "law_mtl7m02l751rih",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:34:34.358Z"
+  },
+  {
+   "id": "act_mtl7m2a2ek9zrf",
+   "userId": "law_mtl7m02l751rih",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:34:34.250Z"
+  },
+  {
+   "id": "act_mtl7lzzkc06kam",
+   "userId": "usr_mtl7lv3xhrhe9p",
+   "type": "login_new_device",
+   "description": "Signed in from a new device (pending confirmation)",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:34:31.280Z"
+  },
+  {
+   "id": "act_mtl7lzwzqe4nf1",
+   "userId": "usr_mtl7lv3xhrhe9p",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:34:31.187Z"
+  },
+  {
+   "id": "act_mtl7lxhirat7hr",
+   "userId": "usr_mtl7lv3xhrhe9p",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:34:28.038Z"
+  },
+  {
+   "id": "act_mtl7lxdki8cid3",
+   "userId": "usr_mtl7lv3xhrhe9p",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:34:27.896Z"
+  },
+  {
+   "id": "act_mtl7jv0aqyvfkm",
+   "userId": "law_mtl7jscrzewf8c",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:32:51.514Z"
+  },
+  {
+   "id": "act_mtl7juxfqm2yy7",
+   "userId": "law_mtl7jscrzewf8c",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:32:51.411Z"
+  },
+  {
+   "id": "act_mtl7jsad02qdr5",
+   "userId": "usr_mtl7jmq22tgpqz",
+   "type": "login_new_device",
+   "description": "Signed in from a new device (pending confirmation)",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:32:47.989Z"
+  },
+  {
+   "id": "act_mtl7js7on8s0eq",
+   "userId": "usr_mtl7jmq22tgpqz",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:32:47.892Z"
+  },
+  {
+   "id": "act_mtl7jpoz7ikp4e",
+   "userId": "usr_mtl7jmq22tgpqz",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:32:44.627Z"
+  },
+  {
+   "id": "act_mtl7jplfkjqvkg",
+   "userId": "usr_mtl7jmq22tgpqz",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:32:44.499Z"
+  },
+  {
+   "id": "act_mtl7i4frjlhjks",
+   "userId": "law_mtl7hzlq9kncpu",
+   "type": "login_new_device",
+   "description": "Signed in from a new device (pending confirmation)",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:31:30.423Z"
+  },
+  {
+   "id": "act_mtl7i4de1d31mm",
+   "userId": "law_mtl7hzlq9kncpu",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:31:30.338Z"
+  },
+  {
+   "id": "act_mtl7i1wex9vmzc",
+   "userId": "law_mtl7hzlq9kncpu",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:31:27.134Z"
+  },
+  {
+   "id": "act_mtl7i1tjxqqb2n",
+   "userId": "law_mtl7hzlq9kncpu",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:31:27.031Z"
+  },
+  {
+   "id": "act_mtl7hzjbxw1uiy",
+   "userId": "usr_mtl7htj610as2u",
+   "type": "login_new_device",
+   "description": "Signed in from a new device (pending confirmation)",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:31:24.071Z"
+  },
+  {
+   "id": "act_mtl7hzgxtn2k76",
+   "userId": "usr_mtl7htj610as2u",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:31:23.985Z"
+  },
+  {
+   "id": "act_mtl7hx291fhhcf",
+   "userId": "usr_mtl7htj610as2u",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:31:20.865Z"
+  },
+  {
+   "id": "act_mtl7hwxj1nduxp",
+   "userId": "usr_mtl7htj610as2u",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:31:20.695Z"
+  },
+  {
+   "id": "act_mtl7gvpxntuw4l",
+   "userId": "usr_mtl7gpougjh59v",
+   "type": "login_new_device",
+   "description": "Signed in from a new device (pending confirmation)",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:30:32.469Z"
+  },
+  {
+   "id": "act_mtl7gvng4l0tdg",
+   "userId": "usr_mtl7gpougjh59v",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:30:32.380Z"
+  },
+  {
+   "id": "act_mtl7gt1i1gswxl",
+   "userId": "usr_mtl7gpougjh59v",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:30:28.998Z"
+  },
+  {
+   "id": "act_mtl7gsxch6ut87",
+   "userId": "usr_mtl7gpougjh59v",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:30:28.848Z"
+  },
+  {
+   "id": "act_mtl7epjnzd8fk2",
+   "userId": "usr_mtl7ejulwfcci7",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:28:51.155Z"
+  },
+  {
+   "id": "act_mtl7emzy2gz72i",
+   "userId": "usr_mtl7ejulwfcci7",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:28:47.854Z"
+  },
+  {
+   "id": "act_mtl7emv8qvh1mu",
+   "userId": "usr_mtl7ejulwfcci7",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:28:47.684Z"
+  },
+  {
+   "id": "act_mtl79bgjf5iwum",
+   "userId": "usr_mtl797uikzos4u",
+   "type": "login_blocked",
+   "description": "OTP send blocked (cooldown)",
+   "result": "cooldown",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:24:39.619Z"
+  },
+  {
+   "id": "act_mtl79bctcrf5rn",
+   "userId": "usr_mtl797uikzos4u",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:24:39.485Z"
+  },
+  {
+   "id": "act_mtl79b8ayq833p",
+   "userId": "usr_mtl797uikzos4u",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T07:24:39.323Z"
+  },
+  {
+   "id": "act_mtl1uw0kx7z9vr",
+   "userId": "law_mtk8d9s6apwo53",
    "type": "login_failed",
    "description": "Incorrect password (attempt 1/5)",
    "result": "bad_password",
    "device": {
+    "deviceId": "dev_mt6u7amz_q6cv2i",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:53:28.340Z"
+  },
+  {
+   "id": "act_mtl130sh1yg1o7",
+   "userId": "usr_mtl12xo2ggplfs",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:31:48.161Z"
+  },
+  {
+   "id": "act_mtl0um995il3da",
+   "userId": "usr_mtl0muu6h0wb2l",
+   "type": "login_failed",
+   "description": "Incorrect password (attempt 3/5)",
+   "result": "bad_password",
+   "device": {
+    "deviceId": "dev_mtl0ta9uu21n5p",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:25:16.077Z"
+  },
+  {
+   "id": "act_mtl0tll63nx1x2",
+   "userId": "usr_mtl0muu6h0wb2l",
+   "type": "login_failed",
+   "description": "Incorrect password (attempt 2/5)",
+   "result": "bad_password",
+   "device": {
+    "deviceId": "dev_mtl0ta9uu21n5p",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:24:28.554Z"
+  },
+  {
+   "id": "act_mtl0talrb3lgko",
+   "userId": "usr_mtl0muu6h0wb2l",
+   "type": "login_failed",
+   "description": "Incorrect password (attempt 1/5)",
+   "result": "bad_password",
+   "device": {
+    "deviceId": "dev_mtl0ta9uu21n5p",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:24:14.319Z"
+  },
+  {
+   "id": "act_mtl0mxafhj2cow",
+   "userId": "usr_mtl0muu6h0wb2l",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
     "deviceId": "unknown-device",
     "deviceType": "Desktop",
     "browser": "Unknown browser",
-    "os": "Unknown OS",
+    "os": "\"Windows\"",
     "location": "India (approx.)"
    },
-   "timestamp": "2026-08-25T06:16:46.576Z"
+   "timestamp": "2026-09-03T04:19:17.127Z"
   },
   {
-   "id": "act_mt89vceh19gmjw",
-   "userId": "law_mt89vc6bwzzj4f",
-   "type": "login_new_device",
-   "description": "Signed in from a new device (pending confirmation)",
+   "id": "act_mtl0g3dw6kq84i",
+   "userId": "usr_mtl0g0vm9iac2g",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:13:58.436Z"
+  },
+  {
+   "id": "act_mtl0619hcv6n0i",
+   "userId": "law_mtk8d9s6apwo53",
+   "type": "login_failed",
+   "description": "Incorrect password (attempt 2/5)",
+   "result": "bad_password",
+   "device": {
+    "deviceId": "dev_mt6u7amz_q6cv2i",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:06:09.125Z"
+  },
+  {
+   "id": "act_mtl05rtjps55ak",
+   "userId": "law_mtk8d9s6apwo53",
+   "type": "login_failed",
+   "description": "Incorrect password (attempt 1/5)",
+   "result": "bad_password",
+   "device": {
+    "deviceId": "dev_mt6u7amz_q6cv2i",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:05:56.887Z"
+  },
+  {
+   "id": "act_mtl04tus8rq3zi",
+   "userId": null,
+   "identifierTried": "ahmed0502ahmed@hmail.com",
+   "type": "login_failed",
+   "description": "No account matched supplied credentials",
+   "result": "unknown_account",
+   "device": {
+    "deviceId": "dev_mt6u7amz_q6cv2i",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:05:12.868Z"
+  },
+  {
+   "id": "act_mtl048ayj5d00x",
+   "userId": "usr_mtkzksc4lxftlx",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:04:44.938Z"
+  },
+  {
+   "id": "act_mtl012y5rans7s",
+   "userId": "law_mtl010li2361xi",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
    "result": "success",
    "device": {
     "deviceId": "unknown-device",
@@ -310,13 +2444,180 @@
     "os": "Unknown OS",
     "location": "India (approx.)"
    },
-   "timestamp": "2026-08-25T06:16:46.218Z"
+   "timestamp": "2026-09-03T04:02:18.029Z"
+  },
+  {
+   "id": "act_mtl012v9zygnvd",
+   "userId": "law_mtl010li2361xi",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:02:17.925Z"
+  },
+  {
+   "id": "act_mtl010ivg72q9k",
+   "userId": "usr_mtl00xnfelc5mc",
+   "type": "login",
+   "description": "Credentials accepted; 2FA verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:02:14.887Z"
+  },
+  {
+   "id": "act_mtl010ds8c94e5",
+   "userId": "usr_mtl00xnfelc5mc",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T04:02:14.704Z"
+  },
+  {
+   "id": "act_mtkzn44i1ae55w",
+   "userId": null,
+   "identifierTried": "ahmed0502ahmed@hmail.com",
+   "type": "login_failed",
+   "description": "No account matched supplied credentials",
+   "result": "unknown_account",
+   "device": {
+    "deviceId": "dev_mt6u7amz_q6cv2i",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T03:51:26.370Z"
+  },
+  {
+   "id": "act_mtkzkuv8fsgduk",
+   "userId": "usr_mtkzksc4lxftlx",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Chrome",
+    "os": "Windows",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-03T03:49:41.060Z"
+  },
+  {
+   "id": "act_mtkaor2ji0w1sf",
+   "userId": "law_mtk8d9s6apwo53",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-02T16:12:52.363Z"
+  },
+  {
+   "id": "act_mtk9zqwqsg97se",
+   "userId": "usr_mtk9zifhcdtg6b",
+   "type": "login",
+   "description": "Signed in successfully",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-02T15:53:25.754Z"
+  },
+  {
+   "id": "act_mtk9zihpuzxhdc",
+   "userId": "usr_mtk9zifhcdtg6b",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "Unknown OS",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-02T15:53:14.845Z"
+  },
+  {
+   "id": "act_mtk8hny1vg6g4s",
+   "userId": "law_mtk8d9s6apwo53",
+   "type": "login_failed",
+   "description": "Incorrect password (attempt 1/5)",
+   "result": "bad_password",
+   "device": {
+    "deviceId": "dev_mtk8c12a1knafk",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-02T15:11:22.489Z"
+  },
+  {
+   "id": "act_mtk8d9uqu5p3ab",
+   "userId": "law_mtk8d9s6apwo53",
+   "type": "registration_initiated",
+   "description": "Registration started; verification code emailed",
+   "result": "success",
+   "device": {
+    "deviceId": "unknown-device",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-02T15:07:57.602Z"
+  },
+  {
+   "id": "act_mtk8c1kxyn9vuh",
+   "userId": null,
+   "identifierTried": "padamkishore90@gmail.com",
+   "type": "login_failed",
+   "description": "No account matched supplied credentials",
+   "result": "unknown_account",
+   "device": {
+    "deviceId": "dev_mtk8c12a1knafk",
+    "deviceType": "Desktop",
+    "browser": "Unknown browser",
+    "os": "\"Windows\"",
+    "location": "India (approx.)"
+   },
+   "timestamp": "2026-09-02T15:07:00.226Z"
   }
  ],
  "verificationRecords": [
   {
-   "id": "ver_mt89vc6bar9uvk",
-   "lawyerId": "law_mt89vc6bwzzj4f",
+   "id": "ver_mtl7m2d6583v6a",
+   "lawyerId": "law_mtl7m02l751rih",
    "stages": {
     "barCouncil": {
      "status": "pending",
@@ -332,7 +2633,7 @@
     },
     "duplicate": {
      "status": "clear",
-     "checkedAt": "2026-08-25T06:16:45.923Z",
+     "checkedAt": "2026-09-03T07:34:34.362Z",
      "collisionLawyerId": null
     },
     "manualReview": {
@@ -344,1779 +2645,269 @@
    "overallStatus": "pending",
    "fraudStatus": "low_risk",
    "riskSignals": [],
-   "createdAt": "2026-08-25T06:16:45.923Z"
-  },
-  {
-   "id": "ver_mt89zf6adrgqr5",
-   "lawyerId": "law_mt89zf695oh98n",
-   "stages": {
-    "barCouncil": {
-     "status": "pending",
-     "checkedAt": null
-    },
-    "documents": {
-     "status": "pending",
-     "docsSubmitted": 0
-    },
-    "identity": {
-     "status": "not_started",
-     "livenessAt": null
-    },
-    "duplicate": {
-     "status": "clear",
-     "checkedAt": "2026-08-25T06:19:56.434Z",
-     "collisionLawyerId": null
-    },
-    "manualReview": {
-     "status": "not_required",
-     "reviewerId": null,
-     "decidedAt": null
-    }
-   },
-   "overallStatus": "pending",
-   "fraudStatus": "low_risk",
-   "riskSignals": [],
-   "createdAt": "2026-08-25T06:19:56.434Z"
+   "createdAt": "2026-09-03T07:34:34.362Z"
   }
  ],
  "documents": [],
  "adminActions": [],
  "fraudRiskRecords": [],
  "workspace": {
-  "law_demo_001": {
-   "clients": [
-    {
-     "id": "cli_1",
-     "name": "Rahul Verma",
-     "email": "rahul.verma@example.com",
-     "phone": "9676597010",
-     "avatar": null,
-     "caseCategory": "Defamation",
-     "briefProblem": "False statements are being made against me publicly and I want to file a defamation case.",
-     "preferredDate": "2026-09-01",
-     "preferredTime": "10:00 AM",
-     "consultationType": "Chat",
-     "estimatedFee": 500,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      }
-     ],
-     "status": "pending",
-     "createdAt": "2026-08-12T19:18:51.705Z"
-    },
-    {
-     "id": "cli_2",
-     "name": "Priya Sharma",
-     "email": "priya.sharma@example.com",
-     "phone": "7879261973",
-     "avatar": null,
-     "caseCategory": "Insurance Claim",
-     "briefProblem": "My insurance claim has been wrongfully rejected despite meeting all policy conditions.",
-     "preferredDate": "2026-09-07",
-     "preferredTime": "10:00 AM",
-     "consultationType": "Audio Call",
-     "estimatedFee": 1500,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      }
-     ],
-     "status": "pending",
-     "createdAt": "2026-07-27T19:18:51.705Z"
-    },
-    {
-     "id": "cli_3",
-     "name": "Amit Patel",
-     "email": "amit.patel@example.com",
-     "phone": "9293572271",
-     "avatar": null,
-     "caseCategory": "Employment Dispute",
-     "briefProblem": "I was terminated from my job without proper notice and due process. I need legal advice.",
-     "preferredDate": "2026-09-06",
-     "preferredTime": "5:00 PM",
-     "consultationType": "Chat",
-     "estimatedFee": 2000,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      },
-      {
-       "name": "Evidence_Photos.zip",
-       "type": "Evidence",
-       "size": "8.7 MB"
-      }
-     ],
-     "status": "pending",
-     "createdAt": "2026-07-21T19:18:51.705Z"
-    },
-    {
-     "id": "cli_4",
-     "name": "Neha Gupta",
-     "email": "neha.gupta@example.com",
-     "phone": "9796566720",
-     "avatar": null,
-     "caseCategory": "Cyber Crime",
-     "briefProblem": "I am a victim of online fraud and need legal help to file a case and recover my losses.",
-     "preferredDate": "2026-08-30",
-     "preferredTime": "2:00 PM",
-     "consultationType": "Audio Call",
-     "estimatedFee": 500,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      }
-     ],
-     "status": "accepted",
-     "createdAt": "2026-07-23T19:18:51.705Z"
-    },
-    {
-     "id": "cli_5",
-     "name": "Suresh Kumar",
-     "email": "suresh.kumar@example.com",
-     "phone": "7801222214",
-     "avatar": null,
-     "caseCategory": "Criminal Defense",
-     "briefProblem": "I have been falsely accused in a criminal case and need legal representation for my defense.",
-     "preferredDate": "2026-09-01",
-     "preferredTime": "2:00 PM",
-     "consultationType": "Chat",
-     "estimatedFee": 500,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      }
-     ],
-     "status": "completed",
-     "createdAt": "2026-08-01T19:18:51.705Z"
-    },
-    {
-     "id": "cli_6",
-     "name": "Anita Desai",
-     "email": "anita.desai@example.com",
-     "phone": "7746038106",
-     "avatar": null,
-     "caseCategory": "Consumer Complaint",
-     "briefProblem": "I purchased a defective product and the company is refusing to provide a replacement or refund.",
-     "preferredDate": "2026-09-05",
-     "preferredTime": "5:00 PM",
-     "consultationType": "In-Person",
-     "estimatedFee": 1500,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      },
-      {
-       "name": "Evidence_Photos.zip",
-       "type": "Evidence",
-       "size": "8.7 MB"
-      }
-     ],
-     "status": "rejected",
-     "createdAt": "2026-08-16T19:18:51.705Z"
-    },
-    {
-     "id": "cli_7",
-     "name": "Vikram Singh",
-     "email": "vikram.singh@example.com",
-     "phone": "8134071992",
-     "avatar": null,
-     "caseCategory": "Employment Dispute",
-     "briefProblem": "I was terminated from my job without proper notice and due process. I need legal advice.",
-     "preferredDate": "2026-09-05",
-     "preferredTime": "2:00 PM",
-     "consultationType": "Audio Call",
-     "estimatedFee": 500,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      },
-      {
-       "name": "Evidence_Photos.zip",
-       "type": "Evidence",
-       "size": "8.7 MB"
-      }
-     ],
-     "status": "rejected",
-     "createdAt": "2026-07-30T19:18:51.705Z"
-    },
-    {
-     "id": "cli_8",
-     "name": "Kavita Reddy",
-     "email": "kavita.reddy@example.com",
-     "phone": "9715087410",
-     "avatar": null,
-     "caseCategory": "Criminal Defense",
-     "briefProblem": "I have been falsely accused in a criminal case and need legal representation for my defense.",
-     "preferredDate": "2026-08-25",
-     "preferredTime": "10:00 AM",
-     "consultationType": "Chat",
-     "estimatedFee": 750,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      }
-     ],
-     "status": "completed",
-     "createdAt": "2026-07-28T19:18:51.705Z"
-    },
-    {
-     "id": "cli_9",
-     "name": "Manoj Tiwari",
-     "email": "manoj.tiwari@example.com",
-     "phone": "7962840916",
-     "avatar": null,
-     "caseCategory": "Defamation",
-     "briefProblem": "False statements are being made against me publicly and I want to file a defamation case.",
-     "preferredDate": "2026-09-05",
-     "preferredTime": "2:00 PM",
-     "consultationType": "Audio Call",
-     "estimatedFee": 1000,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      },
-      {
-       "name": "Evidence_Photos.zip",
-       "type": "Evidence",
-       "size": "8.7 MB"
-      }
-     ],
-     "status": "completed",
-     "createdAt": "2026-07-23T19:18:51.705Z"
-    },
-    {
-     "id": "cli_10",
-     "name": "Sunita Rao",
-     "email": "sunita.rao@example.com",
-     "phone": "7870015716",
-     "avatar": null,
-     "caseCategory": "Bail Application",
-     "briefProblem": "My family member has been arrested and I need immediate help with the bail application.",
-     "preferredDate": "2026-09-04",
-     "preferredTime": "4:00 PM",
-     "consultationType": "Chat",
-     "estimatedFee": 2000,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      }
-     ],
-     "status": "pending",
-     "createdAt": "2026-08-05T19:18:51.705Z"
-    },
-    {
-     "id": "cli_11",
-     "name": "Deepak Joshi",
-     "email": "deepak.joshi@example.com",
-     "phone": "8822215387",
-     "avatar": null,
-     "caseCategory": "Property Dispute",
-     "briefProblem": "I have a dispute regarding property ownership. The other party is claiming rights over my ancestral property despite having no legal documents.",
-     "preferredDate": "2026-09-01",
-     "preferredTime": "3:00 PM",
-     "consultationType": "In-Person",
-     "estimatedFee": 1500,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      }
-     ],
-     "status": "completed",
-     "createdAt": "2026-08-19T19:18:51.705Z"
-    },
-    {
-     "id": "cli_12",
-     "name": "Rina Mehta",
-     "email": "rina.mehta@example.com",
-     "phone": "8829007795",
-     "avatar": null,
-     "caseCategory": "Cyber Crime",
-     "briefProblem": "I am a victim of online fraud and need legal help to file a case and recover my losses.",
-     "preferredDate": "2026-08-25",
-     "preferredTime": "2:00 PM",
-     "consultationType": "Audio Call",
-     "estimatedFee": 500,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      },
-      {
-       "name": "Evidence_Photos.zip",
-       "type": "Evidence",
-       "size": "8.7 MB"
-      }
-     ],
-     "status": "pending",
-     "createdAt": "2026-08-20T19:18:51.705Z"
-    },
-    {
-     "id": "cli_13",
-     "name": "Arun Nair",
-     "email": "arun.nair@example.com",
-     "phone": "7237776067",
-     "avatar": null,
-     "caseCategory": "Divorce & Family",
-     "briefProblem": "I am seeking legal help for divorce proceedings and custody matters.",
-     "preferredDate": "2026-08-26",
-     "preferredTime": "4:00 PM",
-     "consultationType": "In-Person",
-     "estimatedFee": 1500,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      }
-     ],
-     "status": "accepted",
-     "createdAt": "2026-07-28T19:18:51.705Z"
-    },
-    {
-     "id": "cli_14",
-     "name": "Pooja Saxena",
-     "email": "pooja.saxena@example.com",
-     "phone": "7228682352",
-     "avatar": null,
-     "caseCategory": "Employment Dispute",
-     "briefProblem": "I was terminated from my job without proper notice and due process. I need legal advice.",
-     "preferredDate": "2026-08-27",
-     "preferredTime": "5:00 PM",
-     "consultationType": "Video Call",
-     "estimatedFee": 750,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      }
-     ],
-     "status": "rejected",
-     "createdAt": "2026-08-12T19:18:51.705Z"
-    },
-    {
-     "id": "cli_15",
-     "name": "Ravi Chopra",
-     "email": "ravi.chopra@example.com",
-     "phone": "9881128689",
-     "avatar": null,
-     "caseCategory": "Bail Application",
-     "briefProblem": "My family member has been arrested and I need immediate help with the bail application.",
-     "preferredDate": "2026-09-02",
-     "preferredTime": "2:00 PM",
-     "consultationType": "Chat",
-     "estimatedFee": 750,
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      }
-     ],
-     "status": "completed",
-     "createdAt": "2026-07-21T19:18:51.705Z"
-    }
-   ],
-   "cases": [
-    {
-     "id": "case_1",
-     "caseNumber": "LC/2026/0001",
-     "clientId": "cli_4",
-     "clientName": "Neha Gupta",
-     "caseType": "Cyber Crime",
-     "legalCategory": "Cyber Crime",
-     "court": "District Court",
-     "filingDate": "2025-11-16T19:18:51.706Z",
-     "status": "Consultation Completed",
-     "nextHearing": "2026-08-28",
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      }
-     ],
-     "notes": [
-      {
-       "id": "note_0_1",
-       "text": "Initial consultation completed. Client has provided basic documents.",
-       "isPrivate": true,
-       "createdAt": "2026-08-11T19:18:51.706Z"
-      },
-      {
-       "id": "note_0_2",
-       "text": "Need to review property documents in detail before the next hearing.",
-       "isPrivate": true,
-       "createdAt": "2026-08-15T19:18:51.706Z"
-      }
-     ],
-     "description": "I am a victim of online fraud and need legal help to file a case and recover my losses.",
-     "createdAt": "2026-07-23T19:18:51.705Z"
-    },
-    {
-     "id": "case_2",
-     "caseNumber": "LC/2026/0002",
-     "clientId": "cli_5",
-     "clientName": "Suresh Kumar",
-     "caseType": "Criminal Defense",
-     "legalCategory": "Criminal Defense",
-     "court": "District Court",
-     "filingDate": "2026-04-12T19:18:51.706Z",
-     "status": "New",
-     "nextHearing": "2026-08-29",
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      }
-     ],
-     "notes": [
-      {
-       "id": "note_1_1",
-       "text": "Initial consultation completed. Client has provided basic documents.",
-       "isPrivate": true,
-       "createdAt": "2026-08-04T19:18:51.706Z"
-      },
-      {
-       "id": "note_1_2",
-       "text": "Need to review property documents in detail before the next hearing.",
-       "isPrivate": true,
-       "createdAt": "2026-08-11T19:18:51.706Z"
-      }
-     ],
-     "description": "I have been falsely accused in a criminal case and need legal representation for my defense.",
-     "createdAt": "2026-08-01T19:18:51.705Z"
-    },
-    {
-     "id": "case_3",
-     "caseNumber": "LC/2026/0003",
-     "clientId": "cli_8",
-     "clientName": "Kavita Reddy",
-     "caseType": "Criminal Defense",
-     "legalCategory": "Criminal Defense",
-     "court": "Sessions Court",
-     "filingDate": "2026-02-16T19:18:51.706Z",
-     "status": "Hearing Scheduled",
-     "nextHearing": "2026-09-17",
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      }
-     ],
-     "notes": [
-      {
-       "id": "note_2_1",
-       "text": "Initial consultation completed. Client has provided basic documents.",
-       "isPrivate": true,
-       "createdAt": "2026-08-10T19:18:51.706Z"
-      },
-      {
-       "id": "note_2_2",
-       "text": "Need to review property documents in detail before the next hearing.",
-       "isPrivate": true,
-       "createdAt": "2026-08-15T19:18:51.706Z"
-      }
-     ],
-     "description": "I have been falsely accused in a criminal case and need legal representation for my defense.",
-     "createdAt": "2026-07-28T19:18:51.705Z"
-    },
-    {
-     "id": "case_4",
-     "caseNumber": "LC/2026/0004",
-     "clientId": "cli_9",
-     "clientName": "Manoj Tiwari",
-     "caseType": "Defamation",
-     "legalCategory": "Defamation",
-     "court": "Supreme Court",
-     "filingDate": "2026-02-13T19:18:51.706Z",
-     "status": "Hearing Scheduled",
-     "nextHearing": "2026-09-18",
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      },
-      {
-       "name": "Evidence_Photos.zip",
-       "type": "Evidence",
-       "size": "8.7 MB"
-      }
-     ],
-     "notes": [
-      {
-       "id": "note_3_1",
-       "text": "Initial consultation completed. Client has provided basic documents.",
-       "isPrivate": true,
-       "createdAt": "2026-08-12T19:18:51.706Z"
-      },
-      {
-       "id": "note_3_2",
-       "text": "Need to review property documents in detail before the next hearing.",
-       "isPrivate": true,
-       "createdAt": "2026-08-13T19:18:51.706Z"
-      }
-     ],
-     "description": "False statements are being made against me publicly and I want to file a defamation case.",
-     "createdAt": "2026-07-23T19:18:51.705Z"
-    },
-    {
-     "id": "case_5",
-     "caseNumber": "LC/2026/0005",
-     "clientId": "cli_11",
-     "clientName": "Deepak Joshi",
-     "caseType": "Property Dispute",
-     "legalCategory": "Property Dispute",
-     "court": "Supreme Court",
-     "filingDate": "2025-12-18T19:18:51.706Z",
-     "status": "New",
-     "nextHearing": "2026-08-28",
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      }
-     ],
-     "notes": [
-      {
-       "id": "note_4_1",
-       "text": "Initial consultation completed. Client has provided basic documents.",
-       "isPrivate": true,
-       "createdAt": "2026-08-10T19:18:51.706Z"
-      },
-      {
-       "id": "note_4_2",
-       "text": "Need to review property documents in detail before the next hearing.",
-       "isPrivate": true,
-       "createdAt": "2026-08-22T19:18:51.706Z"
-      }
-     ],
-     "description": "I have a dispute regarding property ownership. The other party is claiming rights over my ancestral property despite having no legal documents.",
-     "createdAt": "2026-08-19T19:18:51.705Z"
-    },
-    {
-     "id": "case_6",
-     "caseNumber": "LC/2026/0006",
-     "clientId": "cli_13",
-     "clientName": "Arun Nair",
-     "caseType": "Divorce & Family",
-     "legalCategory": "Divorce & Family",
-     "court": "Family Court",
-     "filingDate": "2026-04-28T19:18:51.706Z",
-     "status": "Consultation Completed",
-     "nextHearing": "2026-08-28",
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      },
-      {
-       "name": "Agreement_Copy.pdf",
-       "type": "Agreement",
-       "size": "2.1 MB"
-      }
-     ],
-     "notes": [
-      {
-       "id": "note_5_1",
-       "text": "Initial consultation completed. Client has provided basic documents.",
-       "isPrivate": true,
-       "createdAt": "2026-08-03T19:18:51.706Z"
-      },
-      {
-       "id": "note_5_2",
-       "text": "Need to review property documents in detail before the next hearing.",
-       "isPrivate": true,
-       "createdAt": "2026-08-16T19:18:51.706Z"
-      }
-     ],
-     "description": "I am seeking legal help for divorce proceedings and custody matters.",
-     "createdAt": "2026-07-28T19:18:51.705Z"
-    },
-    {
-     "id": "case_7",
-     "caseNumber": "LC/2026/0007",
-     "clientId": "cli_15",
-     "clientName": "Ravi Chopra",
-     "caseType": "Bail Application",
-     "legalCategory": "Bail Application",
-     "court": "Family Court",
-     "filingDate": "2026-04-18T19:18:51.706Z",
-     "status": "New",
-     "nextHearing": "2026-09-22",
-     "documents": [
-      {
-       "name": "ID_Proof.pdf",
-       "type": "ID Proof",
-       "size": "1.2 MB"
-      },
-      {
-       "name": "Property_Document.pdf",
-       "type": "Property Document",
-       "size": "3.5 MB"
-      }
-     ],
-     "notes": [
-      {
-       "id": "note_6_1",
-       "text": "Initial consultation completed. Client has provided basic documents.",
-       "isPrivate": true,
-       "createdAt": "2026-08-10T19:18:51.706Z"
-      },
-      {
-       "id": "note_6_2",
-       "text": "Need to review property documents in detail before the next hearing.",
-       "isPrivate": true,
-       "createdAt": "2026-08-19T19:18:51.706Z"
-      }
-     ],
-     "description": "My family member has been arrested and I need immediate help with the bail application.",
-     "createdAt": "2026-07-21T19:18:51.705Z"
-    }
-   ],
-   "appointments": [
-    {
-     "id": "appt_1",
-     "clientId": "cli_1",
-     "clientName": "Rahul Verma",
-     "caseType": "Defamation",
-     "date": "2026-08-25T10:00:00.000Z",
-     "duration": 45,
-     "type": "Chat",
-     "status": "confirmed",
-     "fee": 1500,
-     "reminders": {
-      "h24Sent": false,
-      "m30Sent": false
-     }
-    },
-    {
-     "id": "appt_2",
-     "clientId": "cli_2",
-     "clientName": "Priya Sharma",
-     "caseType": "Insurance Claim",
-     "date": "2026-08-26T06:30:00.000Z",
-     "duration": 45,
-     "type": "Chat",
-     "status": "confirmed",
-     "fee": 750,
-     "reminders": {
-      "h24Sent": false,
-      "m30Sent": false
-     }
-    },
-    {
-     "id": "appt_3",
-     "clientId": "cli_3",
-     "clientName": "Amit Patel",
-     "caseType": "Employment Dispute",
-     "date": "2026-08-27T08:30:00.000Z",
-     "duration": 30,
-     "type": "Video Call",
-     "status": "completed",
-     "fee": 1000,
-     "reminders": {
-      "h24Sent": false,
-      "m30Sent": false
-     }
-    },
-    {
-     "id": "appt_4",
-     "clientId": "cli_4",
-     "clientName": "Neha Gupta",
-     "caseType": "Cyber Crime",
-     "date": "2026-08-28T07:00:00.000Z",
-     "duration": 30,
-     "type": "Video Call",
-     "status": "confirmed",
-     "fee": 1000,
-     "reminders": {
-      "h24Sent": false,
-      "m30Sent": false
-     }
-    },
-    {
-     "id": "appt_5",
-     "clientId": "cli_5",
-     "clientName": "Suresh Kumar",
-     "caseType": "Criminal Defense",
-     "date": "2026-08-29T03:30:00.000Z",
-     "duration": 60,
-     "type": "Chat",
-     "status": "upcoming",
-     "fee": 1500,
-     "reminders": {
-      "h24Sent": false,
-      "m30Sent": false
-     }
-    }
-   ],
-   "transactions": [
-    {
-     "id": "txn_1",
-     "clientName": "Pooja Saxena",
-     "service": "Court Appearance",
-     "date": "2026-08-20T19:18:51.706Z",
-     "amount": 3000,
-     "platformFee": 300,
-     "netEarnings": 2700,
-     "paymentStatus": "completed",
-     "paymentMethod": "Net Banking"
-    },
-    {
-     "id": "txn_5",
-     "clientName": "Rina Mehta",
-     "service": "Document Review",
-     "date": "2026-08-16T19:18:51.707Z",
-     "amount": 3000,
-     "platformFee": 300,
-     "netEarnings": 2700,
-     "paymentStatus": "completed",
-     "paymentMethod": "Net Banking"
-    },
-    {
-     "id": "txn_6",
-     "clientName": "Rina Mehta",
-     "service": "Document Review",
-     "date": "2026-08-11T19:18:51.707Z",
-     "amount": 750,
-     "platformFee": 75,
-     "netEarnings": 675,
-     "paymentStatus": "pending",
-     "paymentMethod": "Card"
-    },
-    {
-     "id": "txn_13",
-     "clientName": "Suresh Kumar",
-     "service": "Initial Consultation",
-     "date": "2026-08-07T19:18:51.707Z",
-     "amount": 3000,
-     "platformFee": 300,
-     "netEarnings": 2700,
-     "paymentStatus": "completed",
-     "paymentMethod": "Net Banking"
-    },
-    {
-     "id": "txn_3",
-     "clientName": "Pooja Saxena",
-     "service": "Case Filing",
-     "date": "2026-08-03T19:18:51.707Z",
-     "amount": 1500,
-     "platformFee": 150,
-     "netEarnings": 1350,
-     "paymentStatus": "completed",
-     "paymentMethod": "Card"
-    },
-    {
-     "id": "txn_10",
-     "clientName": "Rina Mehta",
-     "service": "Initial Consultation",
-     "date": "2026-08-03T19:18:51.707Z",
-     "amount": 2000,
-     "platformFee": 200,
-     "netEarnings": 1800,
-     "paymentStatus": "pending",
-     "paymentMethod": "UPI"
-    },
-    {
-     "id": "txn_16",
-     "clientName": "Deepak Joshi",
-     "service": "Initial Consultation",
-     "date": "2026-08-03T19:18:51.707Z",
-     "amount": 2000,
-     "platformFee": 200,
-     "netEarnings": 1800,
-     "paymentStatus": "processing",
-     "paymentMethod": "UPI"
-    },
-    {
-     "id": "txn_18",
-     "clientName": "Manoj Tiwari",
-     "service": "Detailed Consultation",
-     "date": "2026-07-30T19:18:51.707Z",
-     "amount": 1000,
-     "platformFee": 100,
-     "netEarnings": 900,
-     "paymentStatus": "completed",
-     "paymentMethod": "UPI"
-    },
-    {
-     "id": "txn_2",
-     "clientName": "Arun Nair",
-     "service": "Initial Consultation",
-     "date": "2026-07-30T19:18:51.706Z",
-     "amount": 5000,
-     "platformFee": 500,
-     "netEarnings": 4500,
-     "paymentStatus": "processing",
-     "paymentMethod": "Card"
-    },
-    {
-     "id": "txn_4",
-     "clientName": "Manoj Tiwari",
-     "service": "Document Review",
-     "date": "2026-07-29T19:18:51.707Z",
-     "amount": 1000,
-     "platformFee": 100,
-     "netEarnings": 900,
-     "paymentStatus": "pending",
-     "paymentMethod": "UPI"
-    },
-    {
-     "id": "txn_7",
-     "clientName": "Rahul Verma",
-     "service": "Case Filing",
-     "date": "2026-07-29T19:18:51.707Z",
-     "amount": 750,
-     "platformFee": 75,
-     "netEarnings": 675,
-     "paymentStatus": "completed",
-     "paymentMethod": "Net Banking"
-    },
-    {
-     "id": "txn_12",
-     "clientName": "Kavita Reddy",
-     "service": "Initial Consultation",
-     "date": "2026-07-27T19:18:51.707Z",
-     "amount": 5000,
-     "platformFee": 500,
-     "netEarnings": 4500,
-     "paymentStatus": "processing",
-     "paymentMethod": "Net Banking"
-    },
-    {
-     "id": "txn_20",
-     "clientName": "Priya Sharma",
-     "service": "Detailed Consultation",
-     "date": "2026-07-22T19:18:51.707Z",
-     "amount": 750,
-     "platformFee": 75,
-     "netEarnings": 675,
-     "paymentStatus": "completed",
-     "paymentMethod": "UPI"
-    },
-    {
-     "id": "txn_19",
-     "clientName": "Amit Patel",
-     "service": "Court Appearance",
-     "date": "2026-07-21T19:18:51.707Z",
-     "amount": 500,
-     "platformFee": 50,
-     "netEarnings": 450,
-     "paymentStatus": "completed",
-     "paymentMethod": "Card"
-    },
-    {
-     "id": "txn_14",
-     "clientName": "Neha Gupta",
-     "service": "Court Appearance",
-     "date": "2026-07-17T19:18:51.707Z",
-     "amount": 5000,
-     "platformFee": 500,
-     "netEarnings": 4500,
-     "paymentStatus": "completed",
-     "paymentMethod": "Net Banking"
-    },
-    {
-     "id": "txn_15",
-     "clientName": "Rina Mehta",
-     "service": "Case Filing",
-     "date": "2026-07-17T19:18:51.707Z",
-     "amount": 1000,
-     "platformFee": 100,
-     "netEarnings": 900,
-     "paymentStatus": "processing",
-     "paymentMethod": "UPI"
-    },
-    {
-     "id": "txn_11",
-     "clientName": "Priya Sharma",
-     "service": "Detailed Consultation",
-     "date": "2026-07-16T19:18:51.707Z",
-     "amount": 3000,
-     "platformFee": 300,
-     "netEarnings": 2700,
-     "paymentStatus": "completed",
-     "paymentMethod": "Net Banking"
-    },
-    {
-     "id": "txn_17",
-     "clientName": "Neha Gupta",
-     "service": "Initial Consultation",
-     "date": "2026-07-15T19:18:51.707Z",
-     "amount": 5000,
-     "platformFee": 500,
-     "netEarnings": 4500,
-     "paymentStatus": "processing",
-     "paymentMethod": "Net Banking"
-    },
-    {
-     "id": "txn_9",
-     "clientName": "Pooja Saxena",
-     "service": "Document Review",
-     "date": "2026-07-12T19:18:51.707Z",
-     "amount": 5000,
-     "platformFee": 500,
-     "netEarnings": 4500,
-     "paymentStatus": "completed",
-     "paymentMethod": "Card"
-    },
-    {
-     "id": "txn_8",
-     "clientName": "Neha Gupta",
-     "service": "Document Review",
-     "date": "2026-06-30T19:18:51.707Z",
-     "amount": 750,
-     "platformFee": 75,
-     "netEarnings": 675,
-     "paymentStatus": "completed",
-     "paymentMethod": "Net Banking"
-    }
-   ],
-   "reviews": [
-    {
-     "id": "rev_11",
-     "clientName": "Rina Mehta",
-     "rating": 4,
-     "review": "Exceptional lawyer with deep understanding of civil matters.",
-     "wouldRecommend": true,
-     "date": "2026-08-19T19:18:51.707Z"
-    },
-    {
-     "id": "rev_6",
-     "clientName": "Neha Gupta",
-     "rating": 5,
-     "review": "Great experience. The lawyer understood my case immediately and provided practical solutions.",
-     "wouldRecommend": true,
-     "date": "2026-08-16T19:18:51.707Z"
-    },
-    {
-     "id": "rev_12",
-     "clientName": "Priya Sharma",
-     "rating": 4,
-     "review": "Prompt responses and thorough case preparation. Very satisfied.",
-     "wouldRecommend": false,
-     "date": "2026-08-06T19:18:51.707Z"
-    },
-    {
-     "id": "rev_10",
-     "clientName": "Deepak Joshi",
-     "rating": 5,
-     "review": "Good consultation experience. Would definitely recommend to others.",
-     "wouldRecommend": false,
-     "date": "2026-08-04T19:18:51.707Z"
-    },
-    {
-     "id": "rev_4",
-     "clientName": "Anita Desai",
-     "rating": 5,
-     "review": "Outstanding legal advice. Resolved my case efficiently.",
-     "wouldRecommend": true,
-     "date": "2026-06-21T19:18:51.707Z"
-    },
-    {
-     "id": "rev_7",
-     "clientName": "Priya Sharma",
-     "rating": 5,
-     "review": "Very competent and well-versed in criminal law. Won my case successfully.",
-     "wouldRecommend": false,
-     "date": "2026-06-15T19:18:51.707Z"
-    },
-    {
-     "id": "rev_9",
-     "clientName": "Pooja Saxena",
-     "rating": 4,
-     "review": "Knowledgeable and supportive. Made a complex legal process seem simple.",
-     "wouldRecommend": true,
-     "date": "2026-06-05T19:18:51.707Z"
-    },
-    {
-     "id": "rev_8",
-     "clientName": "Pooja Saxena",
-     "rating": 5,
-     "review": "Highly professional. Worth every rupee spent on consultation.",
-     "wouldRecommend": true,
-     "date": "2026-05-17T19:18:51.707Z"
-    },
-    {
-     "id": "rev_1",
-     "clientName": "Pooja Saxena",
-     "rating": 5,
-     "review": "Excellent lawyer! Very knowledgeable and professional. Explained everything clearly.",
-     "wouldRecommend": true,
-     "date": "2026-04-06T19:18:51.707Z"
-    },
-    {
-     "id": "rev_3",
-     "clientName": "Suresh Kumar",
-     "rating": 4,
-     "review": "Provided great guidance on my property dispute case. Very patient and thorough.",
-     "wouldRecommend": true,
-     "date": "2026-02-18T19:18:51.707Z"
-    },
-    {
-     "id": "rev_2",
-     "clientName": "Priya Sharma",
-     "rating": 5,
-     "review": "Very helpful in understanding my legal rights. Highly recommended.",
-     "wouldRecommend": true,
-     "date": "2026-02-12T19:18:51.707Z"
-    },
-    {
-     "id": "rev_5",
-     "clientName": "Sunita Rao",
-     "rating": 3,
-     "review": "Professional and responsive. Kept me informed throughout the process.",
-     "wouldRecommend": true,
-     "date": "2026-02-08T19:18:51.707Z"
-    }
-   ],
+  "usr_mtk9zifhcdtg6b": {
    "notifications": [
     {
-     "id": "notif_1",
-     "type": "client",
-     "title": "New Consultation Request",
-     "message": "Rahul Verma has requested a consultation for Defamation.",
-     "read": false,
-     "time": "2026-08-24T18:48:51.707Z",
-     "link": "/clients"
-    },
-    {
-     "id": "notif_2",
-     "type": "appointment",
-     "title": "Upcoming Appointment",
-     "message": "Your consultation with Rahul Verma starts soon.",
-     "read": false,
-     "time": "2026-08-24T18:18:51.707Z",
-     "link": "/consultation"
-    },
-    {
-     "id": "notif_3",
-     "type": "payment",
-     "title": "Payment Received",
-     "message": "₹1,000 received for consultation with Amit Patel.",
-     "read": true,
-     "time": "2026-08-24T17:18:51.707Z",
-     "link": "/payments"
-    },
-    {
-     "id": "notif_4",
-     "type": "verification",
-     "title": "Certificate Verified",
-     "message": "Your LLB certificate has been successfully verified.",
-     "read": true,
-     "time": "2026-08-23T19:18:51.707Z",
-     "link": "/settings/tab/notifications"
-    },
-    {
-     "id": "notif_5",
+     "id": "notif_mtk9zqwnbs5p96",
      "type": "security",
-     "title": "New Device Login",
-     "message": "A new device logged into your account. Review it in Security settings.",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
      "read": false,
-     "time": "2026-08-22T19:18:51.707Z",
-     "link": "/settings/tab/security"
-    },
-    {
-     "id": "notif_6",
-     "type": "case",
-     "title": "Hearing Reminder",
-     "message": "Case LC/2026/0001 has a hearing scheduled for 2026-08-27.",
-     "read": false,
-     "time": "2026-08-21T19:18:51.707Z",
-     "link": "/cases"
-    }
-   ],
-   "conversations": [
-    {
-     "id": "conv_1",
-     "clientId": "cli_1",
-     "clientName": "Rahul Verma",
-     "lastMessage": "When is the next hearing?",
-     "lastMessageTime": "2026-08-22T10:18:51.708Z",
-     "unreadCount": 2,
-     "category": "Defamation",
-     "messages": [
-      {
-       "id": "m0_1",
-       "sender": "client",
-       "text": "Hello, I need help with my case.",
-       "time": "2026-08-21T19:18:51.708Z"
-      },
-      {
-       "id": "m0_2",
-       "sender": "lawyer",
-       "text": "Hello Rahul, I have reviewed your case details. Let me explain what I found.",
-       "time": "2026-08-21T20:18:51.708Z"
-      },
-      {
-       "id": "m0_3",
-       "sender": "lawyer",
-       "text": "Based on the documents you shared, there is a strong case. We should proceed with filing.",
-       "time": "2026-08-22T19:18:51.708Z"
-      },
-      {
-       "id": "m0_4",
-       "sender": "client",
-       "text": "Thank you. What documents do I need to submit next?",
-       "time": "2026-08-22T19:48:51.708Z"
-      },
-      {
-       "id": "m0_5",
-       "sender": "lawyer",
-       "text": "Please upload the original agreement copy and any correspondence you have with the other party.",
-       "time": "2026-08-23T19:18:51.708Z"
-      },
-      {
-       "id": "m0_6",
-       "sender": "client",
-       "text": "I have uploaded the documents. Please review them.",
-       "time": "2026-08-24T07:18:51.708Z"
-      }
-     ]
-    },
-    {
-     "id": "conv_2",
-     "clientId": "cli_2",
-     "clientName": "Priya Sharma",
-     "lastMessage": "Please review the attached agreement.",
-     "lastMessageTime": "2026-08-23T06:18:51.708Z",
-     "unreadCount": 1,
-     "category": "Insurance Claim",
-     "messages": [
-      {
-       "id": "m1_1",
-       "sender": "client",
-       "text": "Hello, I need help with my case.",
-       "time": "2026-08-21T19:18:51.708Z"
-      },
-      {
-       "id": "m1_2",
-       "sender": "lawyer",
-       "text": "Hello Priya, I have reviewed your case details. Let me explain what I found.",
-       "time": "2026-08-21T20:18:51.708Z"
-      },
-      {
-       "id": "m1_3",
-       "sender": "lawyer",
-       "text": "Based on the documents you shared, there is a strong case. We should proceed with filing.",
-       "time": "2026-08-22T19:18:51.708Z"
-      },
-      {
-       "id": "m1_4",
-       "sender": "client",
-       "text": "Thank you. What documents do I need to submit next?",
-       "time": "2026-08-22T19:48:51.708Z"
-      },
-      {
-       "id": "m1_5",
-       "sender": "lawyer",
-       "text": "Please upload the original agreement copy and any correspondence you have with the other party.",
-       "time": "2026-08-23T19:18:51.708Z"
-      },
-      {
-       "id": "m1_6",
-       "sender": "client",
-       "text": "I have uploaded the documents. Please review them.",
-       "time": "2026-08-24T07:18:51.708Z"
-      }
-     ]
-    },
-    {
-     "id": "conv_3",
-     "clientId": "cli_3",
-     "clientName": "Amit Patel",
-     "lastMessage": "Thank you for the consultation.",
-     "lastMessageTime": "2026-08-23T06:18:51.708Z",
-     "unreadCount": 0,
-     "category": "Employment Dispute",
-     "messages": [
-      {
-       "id": "m2_1",
-       "sender": "client",
-       "text": "Hello, I need help with my case.",
-       "time": "2026-08-21T19:18:51.708Z"
-      },
-      {
-       "id": "m2_2",
-       "sender": "lawyer",
-       "text": "Hello Amit, I have reviewed your case details. Let me explain what I found.",
-       "time": "2026-08-21T20:18:51.708Z"
-      },
-      {
-       "id": "m2_3",
-       "sender": "lawyer",
-       "text": "Based on the documents you shared, there is a strong case. We should proceed with filing.",
-       "time": "2026-08-22T19:18:51.708Z"
-      },
-      {
-       "id": "m2_4",
-       "sender": "client",
-       "text": "Thank you. What documents do I need to submit next?",
-       "time": "2026-08-22T19:48:51.708Z"
-      },
-      {
-       "id": "m2_5",
-       "sender": "lawyer",
-       "text": "Please upload the original agreement copy and any correspondence you have with the other party.",
-       "time": "2026-08-23T19:18:51.708Z"
-      },
-      {
-       "id": "m2_6",
-       "sender": "client",
-       "text": "I have uploaded the documents. Please review them.",
-       "time": "2026-08-24T07:18:51.708Z"
-      }
-     ]
-    },
-    {
-     "id": "conv_4",
-     "clientId": "cli_4",
-     "clientName": "Neha Gupta",
-     "lastMessage": "Thank you for the consultation.",
-     "lastMessageTime": "2026-08-23T21:18:51.708Z",
-     "unreadCount": 0,
-     "category": "Cyber Crime",
-     "messages": [
-      {
-       "id": "m3_1",
-       "sender": "client",
-       "text": "Hello, I need help with my case.",
-       "time": "2026-08-21T19:18:51.708Z"
-      },
-      {
-       "id": "m3_2",
-       "sender": "lawyer",
-       "text": "Hello Neha, I have reviewed your case details. Let me explain what I found.",
-       "time": "2026-08-21T20:18:51.708Z"
-      },
-      {
-       "id": "m3_3",
-       "sender": "lawyer",
-       "text": "Based on the documents you shared, there is a strong case. We should proceed with filing.",
-       "time": "2026-08-22T19:18:51.708Z"
-      },
-      {
-       "id": "m3_4",
-       "sender": "client",
-       "text": "Thank you. What documents do I need to submit next?",
-       "time": "2026-08-22T19:48:51.708Z"
-      },
-      {
-       "id": "m3_5",
-       "sender": "lawyer",
-       "text": "Please upload the original agreement copy and any correspondence you have with the other party.",
-       "time": "2026-08-23T19:18:51.708Z"
-      },
-      {
-       "id": "m3_6",
-       "sender": "client",
-       "text": "I have uploaded the documents. Please review them.",
-       "time": "2026-08-24T07:18:51.708Z"
-      }
-     ]
-    },
-    {
-     "id": "conv_5",
-     "clientId": "cli_5",
-     "clientName": "Suresh Kumar",
-     "lastMessage": "I have uploaded the required documents.",
-     "lastMessageTime": "2026-08-22T20:18:51.708Z",
-     "unreadCount": 0,
-     "category": "Criminal Defense",
-     "messages": [
-      {
-       "id": "m4_1",
-       "sender": "client",
-       "text": "Hello, I need help with my case.",
-       "time": "2026-08-21T19:18:51.708Z"
-      },
-      {
-       "id": "m4_2",
-       "sender": "lawyer",
-       "text": "Hello Suresh, I have reviewed your case details. Let me explain what I found.",
-       "time": "2026-08-21T20:18:51.708Z"
-      },
-      {
-       "id": "m4_3",
-       "sender": "lawyer",
-       "text": "Based on the documents you shared, there is a strong case. We should proceed with filing.",
-       "time": "2026-08-22T19:18:51.708Z"
-      },
-      {
-       "id": "m4_4",
-       "sender": "client",
-       "text": "Thank you. What documents do I need to submit next?",
-       "time": "2026-08-22T19:48:51.708Z"
-      },
-      {
-       "id": "m4_5",
-       "sender": "lawyer",
-       "text": "Please upload the original agreement copy and any correspondence you have with the other party.",
-       "time": "2026-08-23T19:18:51.708Z"
-      },
-      {
-       "id": "m4_6",
-       "sender": "client",
-       "text": "I have uploaded the documents. Please review them.",
-       "time": "2026-08-24T07:18:51.708Z"
-      }
-     ]
-    }
-   ],
-   "experience": [
-    {
-     "id": "exp_1",
-     "organization": "Sharma & Associates Law Firm",
-     "position": "Senior Associate",
-     "startYear": 2019,
-     "endYear": 2024,
-     "role": "Lead Counsel",
-     "area": "Criminal & Civil Litigation"
-    },
-    {
-     "id": "exp_2",
-     "organization": "Kumar Legal Services",
-     "position": "Associate",
-     "startYear": 2015,
-     "endYear": 2019,
-     "role": "Counsel",
-     "area": "Criminal Law"
-    },
-    {
-     "id": "exp_3",
-     "organization": "District Court Practice",
-     "position": "Independent Advocate",
-     "startYear": 2010,
-     "endYear": 2015,
-     "role": "Advocate",
-     "area": "General Practice"
-    }
-   ],
-   "caseExperience": [
-    {
-     "id": "cexp_1",
-     "type": "Property Dispute",
-     "area": "Civil Law",
-     "court": "High Court",
-     "year": 2023,
-     "role": "Lead Counsel",
-     "status": "Completed",
-     "outcome": "Successfully Resolved",
-     "description": "Complex property dispute involving multiple parties. Obtained a favourable verdict for the client."
-    },
-    {
-     "id": "cexp_2",
-     "type": "Criminal Defense",
-     "area": "Criminal Law",
-     "court": "Sessions Court",
-     "year": 2022,
-     "role": "Defense Counsel",
-     "status": "Completed",
-     "outcome": "Acquitted",
-     "description": "Defended client against serious criminal charges. Secured acquittal based on insufficient evidence."
-    },
-    {
-     "id": "cexp_3",
-     "type": "Cyber Crime",
-     "area": "Cyber Law",
-     "court": "District Court",
-     "year": 2024,
-     "role": "Counsel",
-     "status": "Ongoing",
-     "outcome": "In Progress",
-     "description": "Representing a victim of online fraud and identity theft."
-    },
-    {
-     "id": "cexp_4",
-     "type": "Bail Application",
-     "area": "Criminal Law",
-     "court": "High Court",
-     "year": 2023,
-     "role": "Defense Counsel",
-     "status": "Completed",
-     "outcome": "Bail Granted",
-     "description": "Successfully argued a bail application in an economic offence case."
-    }
-   ],
-   "certificates": [
-    {
-     "id": "cert_1",
-     "name": "Bar Council Enrollment Certificate",
-     "type": "required",
-     "status": "verified",
-     "verifiedDate": "2024-01-15",
-     "fileId": null,
-     "fileLabel": "bar_council_cert.pdf"
-    },
-    {
-     "id": "cert_2",
-     "name": "LLB Degree Certificate",
-     "type": "required",
-     "status": "verified",
-     "verifiedDate": "2024-01-15",
-     "fileId": null,
-     "fileLabel": "llb_degree.pdf"
-    },
-    {
-     "id": "cert_3",
-     "name": "Government Identity Proof",
-     "type": "required",
-     "status": "verified",
-     "verifiedDate": "2024-01-15",
-     "fileId": null,
-     "fileLabel": "aadhaar.pdf"
-    },
-    {
-     "id": "cert_4",
-     "name": "LLM Certificate",
-     "type": "optional",
-     "status": "verified",
-     "verifiedDate": "2024-02-20",
-     "fileId": null,
-     "fileLabel": "llm_cert.pdf"
-    },
-    {
-     "id": "cert_5",
-     "name": "Cyber Law Certification",
-     "type": "optional",
-     "status": "verified",
-     "verifiedDate": "2024-03-10",
-     "fileId": null,
-     "fileLabel": "cyber_law_cert.pdf"
-    },
-    {
-     "id": "cert_6",
-     "name": "Mediation Certification",
-     "type": "optional",
-     "status": "pending",
-     "verifiedDate": null,
-     "fileId": null,
-     "fileLabel": "mediation_cert.pdf"
-    }
-   ],
-   "pricing": [
-    {
-     "id": "price_1",
-     "service": "Initial Consultation",
-     "fee": 500,
-     "duration": "30 min",
-     "type": "fixed"
-    },
-    {
-     "id": "price_2",
-     "service": "Detailed Consultation",
-     "fee": 1000,
-     "duration": "60 min",
-     "type": "fixed"
-    },
-    {
-     "id": "price_3",
-     "service": "Document Review",
-     "fee": 750,
-     "duration": "Per Document",
-     "type": "fixed"
-    },
-    {
-     "id": "price_4",
-     "service": "Case Representation",
-     "fee": 5000,
-     "duration": "Per Case",
-     "type": "starting"
-    },
-    {
-     "id": "price_5",
-     "service": "Court Appearance",
-     "fee": 3000,
-     "duration": "Per Hearing",
-     "type": "starting"
-    },
-    {
-     "id": "price_6",
-     "service": "Legal Notice Drafting",
-     "fee": 2000,
-     "duration": "Per Notice",
-     "type": "negotiable"
-    }
-   ],
-   "availability": {
-    "monday": [
-     {
-      "start": "10:00",
-      "end": "13:00"
-     },
-     {
-      "start": "16:00",
-      "end": "19:00"
-     }
-    ],
-    "tuesday": [
-     {
-      "start": "10:00",
-      "end": "14:00"
-     }
-    ],
-    "wednesday": [],
-    "thursday": [
-     {
-      "start": "10:00",
-      "end": "13:00"
-     },
-     {
-      "start": "15:00",
-      "end": "18:00"
-     }
-    ],
-    "friday": [
-     {
-      "start": "10:00",
-      "end": "14:00"
-     },
-     {
-      "start": "16:00",
-      "end": "19:00"
-     }
-    ],
-    "saturday": [
-     {
-      "start": "10:00",
-      "end": "13:00"
-     }
-    ],
-    "sunday": []
-   },
-   "settings": {
-    "notifications": {
-     "clientRequests": true,
-     "payments": true,
-     "appointments": true,
-     "securityAlerts": true,
-     "caseUpdates": true,
-     "marketing": false
-    },
-    "privacy": {
-     "profileVisibility": "public",
-     "showEmail": false,
-     "showPhone": false,
-     "allowReviews": true,
-     "shareDocuments": "with_permission"
-    },
-    "security": {
-     "twoFactorEnabled": true,
-     "loginAlerts": true,
-     "sessionTimeout": 24
-    }
-   },
-   "verification": {
-    "identity": {
-     "status": "verified",
-     "date": "2024-01-15",
-     "method": "Government ID + Selfie match"
-    },
-    "barCouncil": {
-     "status": "verified",
-     "date": "2024-01-15",
-     "registrationNumber": "DL/1234/2010"
-    },
-    "education": {
-     "status": "verified",
-     "date": "2024-01-15",
-     "institution": "Delhi University"
-    },
-    "practiceCertificate": {
-     "status": "verified",
-     "date": "2024-01-20",
-     "validUntil": "2026-12-31"
-    },
-    "professionalProfile": {
-     "status": "verified",
-     "date": "2024-01-20"
-    },
-    "verificationId": "LC-VER-2024-0001",
-    "overallStatus": "verified",
-    "riskLevel": "low",
-    "lastUpdated": "2024-01-20"
-   }
-  },
-  "law_mt89vc6bwzzj4f": {
-   "notifications": [
-    {
-     "id": "notif_mt89vcezzpq28w",
-     "type": "security",
-     "title": "New Device Sign-In",
-     "message": "A sign-in from Unknown browser on Unknown OS (Desktop) is awaiting your confirmation. If this wasn't you, secure your account immediately.",
-     "link": "/settings/tab/security",
-     "read": false,
-     "time": "2026-08-25T06:16:46.235Z"
+     "time": "2026-09-02T15:53:25.751Z"
     }
    ]
   },
-  "law_mt89zf695oh98n": {
+  "usr_mtl797uikzos4u": {
    "notifications": [
     {
-     "id": "notif_mt89zfeihlfemy",
+     "id": "notif_mtl79bcpa3dbfx",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:24:39.481Z"
+    }
+   ]
+  },
+  "usr_mtl7ejulwfcci7": {
+   "notifications": [
+    {
+     "id": "notif_mtl7emzuqkwey4",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:28:47.850Z"
+    }
+   ]
+  },
+  "usr_mtl7gpougjh59v": {
+   "notifications": [
+    {
+     "id": "notif_mtl7gvpxpo919f",
      "type": "security",
      "title": "New Device Sign-In",
      "message": "A sign-in from Unknown browser on Unknown OS (Desktop) is awaiting your confirmation. If this wasn't you, secure your account immediately.",
      "link": "/settings/tab/security",
      "read": false,
-     "time": "2026-08-25T06:19:56.730Z"
+     "time": "2026-09-03T07:30:32.469Z"
+    },
+    {
+     "id": "notif_mtl7gt1cto3e2u",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:30:28.992Z"
+    }
+   ]
+  },
+  "usr_mtl7htj610as2u": {
+   "notifications": [
+    {
+     "id": "notif_mtl7hzjb3f7wt8",
+     "type": "security",
+     "title": "New Device Sign-In",
+     "message": "A sign-in from Unknown browser on Unknown OS (Desktop) is awaiting your confirmation. If this wasn't you, secure your account immediately.",
+     "link": "/settings/tab/security",
+     "read": false,
+     "time": "2026-09-03T07:31:24.071Z"
+    },
+    {
+     "id": "notif_mtl7hx27xyb8y9",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:31:20.863Z"
+    }
+   ]
+  },
+  "law_mtl7hzlq9kncpu": {
+   "notifications": [
+    {
+     "id": "notif_mtl7i4froz5xjc",
+     "type": "security",
+     "title": "New Device Sign-In",
+     "message": "A sign-in from Unknown browser on Unknown OS (Desktop) is awaiting your confirmation. If this wasn't you, secure your account immediately.",
+     "link": "/settings/tab/security",
+     "read": false,
+     "time": "2026-09-03T07:31:30.423Z"
+    },
+    {
+     "id": "notif_mtl7i1wc455esw",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:31:27.132Z"
+    }
+   ]
+  },
+  "usr_mtl7jmq22tgpqz": {
+   "notifications": [
+    {
+     "id": "notif_mtl7jsadn9jg0k",
+     "type": "security",
+     "title": "New Device Sign-In",
+     "message": "A sign-in from Unknown browser on Unknown OS (Desktop) is awaiting your confirmation. If this wasn't you, secure your account immediately.",
+     "link": "/settings/tab/security",
+     "read": false,
+     "time": "2026-09-03T07:32:47.989Z"
+    },
+    {
+     "id": "notif_mtl7jpoxkrdbre",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:32:44.625Z"
+    }
+   ]
+  },
+  "law_mtl7jscrzewf8c": {
+   "notifications": [
+    {
+     "id": "notif_mtl7jv09jzzrgu",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:32:51.513Z"
+    }
+   ]
+  },
+  "usr_mtl7lv3xhrhe9p": {
+   "notifications": [
+    {
+     "id": "notif_mtl7lzzkip7gfl",
+     "type": "security",
+     "title": "New Device Sign-In",
+     "message": "A sign-in from Unknown browser on Unknown OS (Desktop) is awaiting your confirmation. If this wasn't you, secure your account immediately.",
+     "link": "/settings/tab/security",
+     "read": false,
+     "time": "2026-09-03T07:34:31.280Z"
+    },
+    {
+     "id": "notif_mtl7lxhgedhfox",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:34:28.036Z"
+    }
+   ]
+  },
+  "law_mtl7m02l751rih": {
+   "notifications": [
+    {
+     "id": "notif_mtl7m4pyeeg1m5",
+     "type": "security",
+     "title": "New Device Sign-In",
+     "message": "A sign-in from Unknown browser on Unknown OS (Desktop) is awaiting your confirmation. If this wasn't you, secure your account immediately.",
+     "link": "/settings/tab/security",
+     "read": false,
+     "time": "2026-09-03T07:34:37.414Z"
+    },
+    {
+     "id": "notif_mtl7m2d65ykicx",
+     "type": "verification",
+     "title": "Profile Received",
+     "message": "Your advocate profile was received and entered the credential verification queue.",
+     "link": "/verification",
+     "read": false,
+     "time": "2026-09-03T07:34:34.362Z"
+    },
+    {
+     "id": "notif_mtl7m2d16u7f6l",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:34:34.357Z"
+    }
+   ]
+  },
+  "law_mtl7nnw82huasz": {
+   "notifications": [
+    {
+     "id": "notif_mtl7r6kh5bi9fj",
+     "type": "security",
+     "title": "Email Verified",
+     "message": "Your email address is confirmed. Welcome to Nyay Setu!",
+     "link": null,
+     "read": false,
+     "time": "2026-09-03T07:38:33.089Z"
     }
    ]
   }
- }
+ },
+ "securityEvents": [],
+ "userProfiles": [
+  {
+   "userId": "usr_mtl797uikzos4u",
+   "fullName": "Aarav Sharma",
+   "phone": "9876543210",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "dob": "1998-05-15"
+  },
+  {
+   "userId": "usr_mtl7ejulwfcci7",
+   "fullName": "Aarav Sharma",
+   "phone": "9876543210",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "dob": "1998-05-15"
+  },
+  {
+   "userId": "usr_mtl7gpougjh59v",
+   "fullName": "Aarav Sharma",
+   "phone": "9876543210",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "dob": "1998-05-15"
+  },
+  {
+   "userId": "usr_mtl7htj610as2u",
+   "fullName": "Aarav Sharma",
+   "phone": "9876543210",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "dob": "1998-05-15"
+  },
+  {
+   "userId": "usr_mtl7jmq22tgpqz",
+   "fullName": "Aarav Sharma",
+   "phone": "9876543210",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "dob": "1998-05-15"
+  },
+  {
+   "userId": "usr_mtl7lv3xhrhe9p",
+   "fullName": "Aarav Sharma",
+   "phone": "9876543210",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "dob": "1998-05-15"
+  }
+ ]
 }

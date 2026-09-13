@@ -1,5 +1,12 @@
 {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "liveServer.settings.ignoreFiles": [
+        "**/backend/**",
+        "**/data/**",
+        "**/*.json",
+        "**/*.log",
+        "**/*.tmp"
+    ]
 }

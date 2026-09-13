@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — VERIFICATION SERVICE
+   Nyay Setu — VERIFICATION SERVICE
    verificationService.js — Bar registry lookup (simulated),
    credential document intake, identity/liveness status model,
    manual admin review actions.
@@ -57,7 +57,7 @@ function lookupBarCouncil(lawyer, barNumber, stateCouncil) {
 
   if (collision) {
     result.outcome = 'information_mismatch';
-    result.reason = 'This registration number is already associated with another advocate profile on LegalConnect. Routed for investigation.';
+    result.reason = 'This registration number is already associated with another advocate profile on Nyay Setu. Routed for investigation.';
     applyStageResult(data, lawyer, 'barCouncil', 'information_mismatch', result);
     return result;
   }
@@ -67,7 +67,7 @@ function lookupBarCouncil(lawyer, barNumber, stateCouncil) {
   result.outcome = 'manual_verification_required';
   result.checks.stateMatch = true;
   result.checks.activeStanding = null;
-  result.reason = 'Well-formed registration. Awaiting confirmation by the LegalConnect verification desk (official Bar Council feed not yet connected).';
+  result.reason = 'Well-formed registration. Awaiting confirmation by the Nyay Setu verification desk (official Bar Council feed not yet connected).';
 
   applyStageResult(data, lawyer, 'barCouncil', 'manual_verification_required', result);
 

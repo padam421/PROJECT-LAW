@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — LAWYER DASHBOARD
+   Nyay Setu — LAWYER DASHBOARD
    dashboard.js — Live workspace overview: stats, today's
    schedule, pending requests, AI-assisted case insights.
    ============================================================ */
@@ -39,6 +39,69 @@ const DashboardPage = {
           </button>
           <button class="btn btn-primary" onclick="Router.navigate('/consultation')">
             <span class="material-symbols-rounded">video_call</span> Consultation Room
+          </button>
+        </div>
+      </div>
+
+      <!-- Advocate Virtual Court & AI Assistant Showcase (Task 3) -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(360px, 1fr));gap:20px;margin-bottom:24px">
+        <!-- 1. Virtual Courtroom Simulator Card -->
+        <div class="card" style="background:linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);border:1px solid rgba(245,158,11,0.35);box-shadow:var(--shadow-sm);position:relative;overflow:hidden">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#b45309);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 14px rgba(245,158,11,0.35)">
+                <span class="material-symbols-rounded" style="font-size:26px">gavel</span>
+              </div>
+              <div>
+                <div style="font-size:0.75rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:0.5px">Interactive 3D Practice</div>
+                <h3 style="font-size:1.2rem;font-weight:800;color:var(--color-primary);margin:0">Virtual Courtroom Simulator</h3>
+              </div>
+            </div>
+            <span class="badge badge-accent" style="background:rgba(245,158,11,0.15);color:#d97706;border:1px solid rgba(245,158,11,0.3)">Advocate Mode</span>
+          </div>
+          <p style="font-size:0.88rem;color:var(--color-gray-600);line-height:1.5;margin-bottom:18px">
+            Step into the virtual bench. Rehearse petitioner submissions, practice judicial bench etiquette, and prepare cross-examination before real courtroom appearances.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="Router.navigate('/court')">
+              <span class="material-symbols-rounded">sports_esports</span> Enter Court Simulator
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="AdvocateCourtPage ? AdvocateCourtPage.showProtocols() : Router.navigate('/court')">
+              <span class="material-symbols-rounded">menu_book</span> Bench Protocols
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. AI Legal Assistant & Query Card -->
+        <div class="card" style="background:linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);border:1px solid rgba(13,148,136,0.3);box-shadow:var(--shadow-sm);position:relative;overflow:hidden">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0d9488,#0f766e);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 14px rgba(13,148,136,0.35)">
+                <span class="material-symbols-rounded" style="font-size:26px">auto_awesome</span>
+              </div>
+              <div>
+                <div style="font-size:0.75rem;font-weight:700;color:var(--color-accent);text-transform:uppercase;letter-spacing:0.5px">Instant Legal Intelligence</div>
+                <h3 style="font-size:1.2rem;font-weight:800;color:var(--color-primary);margin:0">Ask Nyay Setu AI Assistant</h3>
+              </div>
+            </div>
+            <span class="badge badge-accent">BNS / IPC / Precedents</span>
+          </div>
+          <p style="font-size:0.88rem;color:var(--color-gray-600);line-height:1.5;margin-bottom:14px">
+            Search case law precedents, draft legal arguments for injunctions, translate IPC sections to BNS 2023, or summarize complex case briefs.
+          </p>
+          <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto">
+            <span class="badge badge-neutral" style="cursor:pointer;padding:4px 10px;font-size:0.75rem" onclick="Router.navigate('/ai-assistant')">
+              📖 IPC to BNS Converter
+            </span>
+            <span class="badge badge-neutral" style="cursor:pointer;padding:4px 10px;font-size:0.75rem" onclick="Router.navigate('/ai-assistant')">
+              ⚖️ Bail Precedents
+            </span>
+            <span class="badge badge-neutral" style="cursor:pointer;padding:4px 10px;font-size:0.75rem" onclick="Router.navigate('/ai-assistant')">
+              📝 Petition Drafting
+            </span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="Router.navigate('/ai-assistant')">
+            <span class="material-symbols-rounded">chat</span> Open AI Legal Assistant
           </button>
         </div>
       </div>
@@ -251,8 +314,106 @@ const DashboardPage = {
       `).join('')}
       <div class="ai-disclaimer mt-2">
         <span class="material-symbols-rounded icon-sm">info</span>
-        <span>Preliminary, rule-based observations generated inside LegalConnect. They support — never replace — your professional judgment.</span>
+        <span>Preliminary, rule-based observations generated inside Nyay Setu. They support — never replace — your professional judgment.</span>
       </div>
     `;
+  },
+
+  /* ---------------- Real-time Live Sync ---------------- */
+  async syncWithBackend() {
+    try {
+      if (typeof ApiClient === 'undefined') return;
+      let hasChanges = false;
+
+      // 1. Sync live consultations from MySQL
+      const liveConsults = await ApiClient.fetchLiveConsultations();
+      if (Array.isArray(liveConsults) && liveConsults.length) {
+        const curClients = Store.getState('clients') || [];
+        liveConsults.forEach(c => {
+          const clientObj = {
+            id: c.id,
+            clientId: c.user_id,
+            name: c.client_name || 'Padam Kishore',
+            email: c.client_email || 'padamkishore90@gmail.com',
+            phone: c.client_phone || '9876543210',
+            city: c.client_city || 'Jaipur',
+            state: c.client_state || 'Rajasthan',
+            caseCategory: c.case_category || c.case_title || 'Legal Consultation',
+            briefProblem: c.notes || 'Consultation requested via portal.',
+            preferredDate: c.consult_date ? new Date(c.consult_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            preferredTime: c.consult_time || '10:00 AM',
+            consultationType: (c.consult_mode || 'video').toUpperCase() === 'VIDEO' ? 'Video' : 'Phone',
+            estimatedFee: parseFloat(c.fee || c.total_amount || 1000),
+            status: c.status || 'pending',
+            createdAt: c.created_at || new Date().toISOString(),
+            isLiveVerified: true
+          };
+
+          const idx = curClients.findIndex(x => x.id === c.id || (x.clientId === c.user_id && x.status === c.status));
+          if (idx >= 0) {
+            if (curClients[idx].status !== clientObj.status) {
+              curClients[idx] = { ...curClients[idx], ...clientObj };
+              hasChanges = true;
+            }
+          } else {
+            curClients.unshift(clientObj);
+            hasChanges = true;
+          }
+        });
+        if (hasChanges) {
+          Store.setState('clients', curClients);
+        }
+      }
+
+      // 2. Sync live notifications from MySQL
+      const liveNotifs = await ApiClient.fetchLiveNotifications();
+      if (Array.isArray(liveNotifs) && liveNotifs.length) {
+        const curNotifs = Store.getState('notifications') || [];
+        let notifChanges = false;
+        liveNotifs.forEach(n => {
+          const exists = curNotifs.some(x => x.id === n.id);
+          if (!exists) {
+            curNotifs.unshift({
+              id: n.id,
+              type: n.type || 'client',
+              title: n.title,
+              message: n.message,
+              read: Boolean(n.read || n.is_read),
+              link: '/clients',
+              time: n.time || n.createdAt || new Date().toISOString()
+            });
+            notifChanges = true;
+          }
+        });
+        if (notifChanges) {
+          Store.setState('notifications', curNotifs);
+          hasChanges = true;
+        }
+      }
+
+      // 3. If new data arrived, re-render dashboard view smoothly
+      if (hasChanges && window.location.hash.includes('/dashboard')) {
+        Router.transitionPage('/dashboard');
+      }
+    } catch (err) {
+      console.warn('[DashboardPage] sync error:', err);
+    }
+  },
+
+  onEnter() {
+    this.syncWithBackend();
+    if (this._pollTimer) clearInterval(this._pollTimer);
+    this._pollTimer = setInterval(() => {
+      if (window.location.hash.includes('/dashboard')) {
+        this.syncWithBackend();
+      }
+    }, 12000);
+  },
+
+  onLeave() {
+    if (this._pollTimer) {
+      clearInterval(this._pollTimer);
+      this._pollTimer = null;
+    }
   }
 };

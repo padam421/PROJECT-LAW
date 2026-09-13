@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — VERIFICATION & DOCUMENT CONTROLLER
+   Nyay Setu — VERIFICATION & DOCUMENT CONTROLLER
    ============================================================ */
 
 const fs = require('fs');
@@ -91,7 +91,13 @@ exports.summary = (req, res) => {
 exports.adminQueue = (req, res) => {
   const data = db.get();
   const queue = data.users
-    .filter(u => u.role === 'lawyer' && u.verificationStatus !== 'verified')
+    // Only fully registered advocates enter the review queue — accounts
+    // still mid-signup (email verified, profile not yet submitted) are
+    // excluded. Restricted/investigation accounts remain visible with
+    // their accountStatus flag so the desk can act on them.
+    .filter(u => u.role === 'lawyer' &&
+                 u.verificationStatus !== 'verified' &&
+                 u.registrationStage === 'complete')
     .map(u => {
       const record = data.verificationRecords.find(v => v.lawyerId === u.id);
       return {

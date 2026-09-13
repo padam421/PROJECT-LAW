@@ -1,0 +1,477 @@
+/* ============================================================
+   Nyay Setu USER — AUTHENTICATION SCREENS
+   auth.css — Login, Register, OTP, Security Setup, Privacy
+   Clean, Realistic Light Theme Forms (Matching Lawyer Portal)
+   ============================================================ */
+
+/* --- Language Selection Grid --- */
+.u-lang-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--u-space-3);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.u-lang-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--u-space-2);
+  padding: var(--u-space-5) var(--u-space-3);
+  background: #ffffff;
+  border: 1.5px solid var(--u-border);
+  border-radius: var(--u-radius-lg);
+  cursor: pointer;
+  transition: all var(--u-duration-base) var(--u-ease-out);
+  text-align: center;
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-lang-card:hover {
+  background: var(--u-bg-secondary);
+  border-color: var(--u-border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--u-shadow-md);
+}
+
+.u-lang-card.selected {
+  border-color: var(--u-accent);
+  background: var(--u-accent-subtle);
+  box-shadow: 0 0 0 3px var(--u-accent-subtle);
+}
+
+.u-lang-native {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--u-primary);
+}
+
+.u-lang-name {
+  font-size: 0.75rem;
+  color: var(--u-text-secondary);
+  font-weight: 500;
+}
+
+.u-lang-check {
+  display: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--u-accent);
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--u-space-1);
+}
+
+.u-lang-card.selected .u-lang-check {
+  display: flex;
+}
+
+.u-lang-check .material-symbols-rounded {
+  font-size: 14px;
+  color: #fff;
+}
+
+/* --- Welcome Screen Cards --- */
+.u-welcome-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-4);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.u-welcome-card {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-5);
+  padding: var(--u-space-6);
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-xl);
+  cursor: pointer;
+  transition: all var(--u-duration-base) var(--u-ease-out);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-welcome-card:hover {
+  border-color: var(--u-border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--u-shadow-md);
+}
+
+.u-welcome-card:active {
+  transform: translateY(0);
+}
+
+.u-welcome-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--u-radius-md);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.u-welcome-card:nth-child(1) .u-welcome-card-icon { background: rgba(26, 39, 68, 0.08); color: var(--u-primary); }
+.u-welcome-card:nth-child(2) .u-welcome-card-icon { background: var(--u-emerald-subtle); color: var(--u-emerald); }
+.u-welcome-card:nth-child(3) .u-welcome-card-icon { background: var(--u-amber-subtle); color: var(--u-amber); }
+
+.u-welcome-card-icon .material-symbols-rounded { font-size: 28px; }
+
+.u-welcome-card-info {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.u-welcome-card-title {
+  font-family: var(--u-font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--u-primary);
+  margin-bottom: 4px;
+}
+
+.u-welcome-card-desc {
+  font-size: 0.82rem;
+  color: var(--u-text-secondary);
+  line-height: 1.5;
+}
+
+.u-welcome-card-arrow {
+  color: var(--u-text-tertiary);
+  transition: all var(--u-duration-fast);
+  z-index: 1;
+}
+
+.u-welcome-card:hover .u-welcome-card-arrow {
+  color: var(--u-primary);
+  transform: translateX(4px);
+}
+
+/* --- Auth Form Styling --- */
+.u-auth-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--u-radius-md);
+  background: var(--u-accent-gradient);
+  display: grid;
+  place-items: center;
+  margin: 0 auto var(--u-space-5);
+  box-shadow: 0 4px 14px rgba(26, 39, 68, 0.2);
+}
+
+.u-auth-logo .material-symbols-rounded {
+  font-size: 28px;
+  color: #fff;
+}
+
+.u-auth-title {
+  font-family: var(--u-font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--u-primary);
+  margin-bottom: var(--u-space-2);
+  letter-spacing: -0.015em;
+}
+
+.u-auth-subtitle {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--u-text-secondary);
+  margin-bottom: var(--u-space-6);
+  line-height: 1.5;
+}
+
+.u-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-3);
+  margin: var(--u-space-5) 0;
+}
+
+.u-auth-divider::before,
+.u-auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--u-border);
+}
+
+.u-auth-divider span {
+  font-size: 0.78rem;
+  color: var(--u-text-tertiary);
+  font-weight: 500;
+}
+
+.u-auth-link {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--u-text-secondary);
+  margin-top: var(--u-space-5);
+}
+
+.u-auth-link a {
+  color: var(--u-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.u-auth-link a:hover {
+  text-decoration: underline;
+}
+
+/* --- OTP Input Group --- */
+.u-otp-group {
+  display: flex;
+  justify-content: center;
+  gap: var(--u-space-3);
+  margin: var(--u-space-6) 0;
+}
+
+.u-otp-input {
+  width: 48px;
+  height: 56px;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-family: var(--u-font-display);
+  background: #ffffff;
+  border: 2px solid var(--u-border-strong);
+  border-radius: var(--u-radius-sm);
+  color: var(--u-text-primary);
+  transition: all var(--u-duration-fast);
+  outline: none;
+  caret-color: var(--u-accent);
+}
+
+.u-otp-input:focus {
+  border-color: var(--u-accent);
+  box-shadow: 0 0 0 3px var(--u-accent-subtle);
+  background: #ffffff;
+}
+
+.u-otp-input.filled {
+  border-color: var(--u-accent);
+  background: var(--u-accent-subtle);
+}
+
+.u-otp-timer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--u-text-secondary);
+}
+
+.u-otp-timer strong {
+  color: var(--u-accent);
+  font-weight: 600;
+}
+
+/* --- Security Setup --- */
+.u-security-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-3);
+}
+
+.u-security-option {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-4);
+  padding: var(--u-space-4);
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-md);
+  cursor: pointer;
+  transition: all var(--u-duration-fast);
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-security-option:hover {
+  background: var(--u-bg-secondary);
+  border-color: var(--u-border-strong);
+}
+
+.u-security-option.active {
+  border-color: var(--u-accent);
+  background: var(--u-accent-subtle);
+}
+
+.u-security-option-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--u-radius-sm);
+  background: var(--u-accent-subtle);
+  display: grid;
+  place-items: center;
+  color: var(--u-accent);
+  flex-shrink: 0;
+}
+
+.u-security-option-info {
+  flex: 1;
+}
+
+.u-security-option-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--u-primary);
+  margin-bottom: 2px;
+}
+
+.u-security-option-desc {
+  font-size: 0.78rem;
+  color: var(--u-text-secondary);
+}
+
+/* --- Privacy Consent --- */
+.u-privacy-card {
+  padding: var(--u-space-5);
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-md);
+  margin-bottom: var(--u-space-4);
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-privacy-card h4 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--u-primary);
+  margin-bottom: var(--u-space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-2);
+}
+
+.u-privacy-card p {
+  font-size: 0.82rem;
+  color: var(--u-text-secondary);
+  line-height: 1.6;
+}
+
+.u-privacy-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--u-space-2);
+  margin-top: var(--u-space-4);
+}
+
+.u-privacy-link {
+  padding: 6px 14px;
+  background: var(--u-bg-secondary);
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--u-text-secondary);
+  cursor: pointer;
+  transition: all var(--u-duration-fast);
+}
+
+.u-privacy-link:hover {
+  background: #ffffff;
+  border-color: var(--u-accent);
+  color: var(--u-accent);
+}
+
+/* --- Success State --- */
+.u-success-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--u-emerald-subtle);
+  display: grid;
+  place-items: center;
+  margin: 0 auto var(--u-space-5);
+  animation: successPop 0.5s var(--u-ease-spring) forwards;
+}
+
+.u-success-icon .material-symbols-rounded {
+  font-size: 36px;
+  color: var(--u-emerald);
+}
+
+@keyframes successPop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- Register Form 2-Column --- */
+.u-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--u-space-4);
+}
+
+@media (max-width: 480px) {
+  .u-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .u-otp-input {
+    width: 42px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+
+  .u-lang-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* --- Password Strength --- */
+.u-pwd-strength {
+  display: flex;
+  gap: 4px;
+  margin-top: var(--u-space-2);
+}
+
+.u-pwd-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--u-border);
+  transition: background var(--u-duration-fast);
+}
+
+.u-pwd-bar.weak { background: var(--u-rose); }
+.u-pwd-bar.medium { background: var(--u-amber); }
+.u-pwd-bar.strong { background: var(--u-emerald); }
+
+.u-pwd-text {
+  font-size: 0.72rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.u-pwd-text.weak { color: var(--u-rose); }
+.u-pwd-text.medium { color: var(--u-amber); }
+.u-pwd-text.strong { color: var(--u-emerald); }
+
+/* --- Remember Me & Forgot Password Row --- */
+.u-auth-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--u-space-5);
+}
+
+.u-forgot-link {
+  font-size: 0.8rem;
+  color: var(--u-accent);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.u-forgot-link:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,343 @@
+/* ============================================================
+   Nyay Setu USER — HOME DASHBOARD
+   home.css — User home with hero greeting, quick actions,
+   active case cards, notification feed (Realistic Light Theme)
+   ============================================================ */
+
+/* --- Hero Greeting --- */
+.u-hero {
+  padding: var(--u-space-8) var(--u-space-6);
+  border-radius: var(--u-radius-2xl);
+  background: linear-gradient(135deg, rgba(26, 39, 68, 0.04) 0%, rgba(13, 148, 136, 0.06) 100%);
+  border: 1px solid var(--u-border);
+  margin-bottom: var(--u-space-6);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--u-shadow-sm);
+}
+
+.u-hero::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.08), transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.u-hero-greeting {
+  font-family: var(--u-font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  color: var(--u-primary);
+  margin-bottom: var(--u-space-2);
+  letter-spacing: -0.015em;
+}
+
+.u-hero-greeting .wave {
+  display: inline-block;
+  animation: wave 2.5s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
+.u-hero-subtitle {
+  font-size: 0.92rem;
+  color: var(--u-text-secondary);
+  line-height: 1.5;
+}
+
+@keyframes wave {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+}
+
+/* --- Quick Action Cards --- */
+.u-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--u-space-4);
+  margin-bottom: var(--u-space-8);
+}
+
+.u-quick-action {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--u-space-4);
+  padding: var(--u-space-5);
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-lg);
+  cursor: pointer;
+  transition: all var(--u-duration-base) var(--u-ease-out);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-quick-action::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0.8;
+  transition: opacity var(--u-duration-base);
+}
+
+.u-quick-action:nth-child(1)::after { background: var(--u-primary); }
+.u-quick-action:nth-child(2)::after { background: var(--u-accent); }
+.u-quick-action:nth-child(3)::after { background: var(--u-amber); }
+.u-quick-action:nth-child(4)::after { background: #3b82f6; }
+.u-quick-action:nth-child(5)::after { background: var(--u-emerald); }
+
+.u-quick-action:hover {
+  border-color: var(--u-border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--u-shadow-md);
+}
+
+.u-quick-action:hover::after {
+  opacity: 1;
+}
+
+.u-quick-action-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--u-radius-sm);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.u-quick-action:nth-child(1) .u-quick-action-icon { background: rgba(26, 39, 68, 0.08); color: var(--u-primary); }
+.u-quick-action:nth-child(2) .u-quick-action-icon { background: var(--u-accent-subtle); color: var(--u-accent); }
+.u-quick-action:nth-child(3) .u-quick-action-icon { background: var(--u-amber-subtle); color: var(--u-amber); }
+.u-quick-action:nth-child(4) .u-quick-action-icon { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+.u-quick-action:nth-child(5) .u-quick-action-icon { background: var(--u-emerald-subtle); color: var(--u-emerald); }
+
+.u-quick-action-icon .material-symbols-rounded { font-size: 24px; }
+
+.u-quick-action-info { flex: 1; }
+
+.u-quick-action-title {
+  font-family: var(--u-font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--u-text-primary);
+  margin-bottom: 3px;
+}
+
+.u-quick-action-desc {
+  font-size: 0.78rem;
+  color: var(--u-text-tertiary);
+  line-height: 1.4;
+}
+
+/* --- Active Case Card --- */
+.u-case-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-4);
+  padding: var(--u-space-5);
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-lg);
+  cursor: pointer;
+  transition: all var(--u-duration-base);
+  margin-bottom: var(--u-space-3);
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-case-strip:hover {
+  background: #ffffff;
+  border-color: var(--u-border-strong);
+  transform: translateX(4px);
+  box-shadow: var(--u-shadow-md);
+}
+
+.u-case-strip-type {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--u-radius-sm);
+  background: var(--u-accent-subtle);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--u-accent);
+}
+
+.u-case-strip-info { flex: 1; min-width: 0; }
+
+.u-case-strip-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--u-text-primary);
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.u-case-strip-meta {
+  font-size: 0.75rem;
+  color: var(--u-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-3);
+}
+
+.u-case-strip-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--u-radius-full);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.u-case-strip-status.ongoing { background: var(--u-amber-subtle); color: var(--u-amber-light); border: 1px solid rgba(245, 158, 11, 0.2); }
+.u-case-strip-status.resolved { background: var(--u-emerald-subtle); color: var(--u-emerald-light); border: 1px solid rgba(16, 185, 129, 0.2); }
+.u-case-strip-status.new { background: var(--u-accent-subtle); color: var(--u-accent); border: 1px solid rgba(13, 148, 136, 0.2); }
+
+/* --- Upcoming Hearing Card --- */
+.u-hearing-card {
+  padding: var(--u-space-5);
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--u-radius-lg);
+  margin-bottom: var(--u-space-4);
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-hearing-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--u-space-3);
+}
+
+.u-hearing-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--u-amber-light);
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-2);
+}
+
+.u-hearing-card-date {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--u-amber-light);
+  background: var(--u-amber-subtle);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  padding: 4px 12px;
+  border-radius: var(--u-radius-full);
+}
+
+.u-hearing-card-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--u-space-3);
+}
+
+.u-hearing-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.u-hearing-detail-label {
+  font-size: 0.7rem;
+  color: var(--u-text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.u-hearing-detail-value {
+  font-size: 0.85rem;
+  color: var(--u-text-primary);
+  font-weight: 500;
+}
+
+.u-hearing-card-actions {
+  display: flex;
+  gap: var(--u-space-2);
+  margin-top: var(--u-space-4);
+  padding-top: var(--u-space-4);
+  border-top: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+/* --- Notification Feed --- */
+.u-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--u-space-3);
+  padding: var(--u-space-3) 0;
+  border-bottom: 1px solid var(--u-divider);
+}
+
+.u-notif-item:last-child { border-bottom: none; }
+
+.u-notif-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--u-radius-sm);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.u-notif-icon.lawyer { background: var(--u-accent-subtle); color: var(--u-accent); }
+.u-notif-icon.hearing { background: var(--u-amber-subtle); color: var(--u-amber); }
+.u-notif-icon.document { background: var(--u-emerald-subtle); color: var(--u-emerald); }
+.u-notif-icon.security { background: var(--u-rose-subtle); color: var(--u-rose); }
+.u-notif-icon.payment { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+
+.u-notif-content { flex: 1; min-width: 0; }
+
+.u-notif-text {
+  font-size: 0.85rem;
+  color: var(--u-text-secondary);
+  line-height: 1.45;
+}
+
+.u-notif-text strong {
+  color: var(--u-text-primary);
+  font-weight: 600;
+}
+
+.u-notif-time {
+  font-size: 0.72rem;
+  color: var(--u-text-tertiary);
+  margin-top: 2px;
+}
+
+.u-notif-unread .u-notif-text {
+  color: var(--u-text-primary);
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .u-quick-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .u-hearing-card-details {
+    grid-template-columns: 1fr;
+  }
+}

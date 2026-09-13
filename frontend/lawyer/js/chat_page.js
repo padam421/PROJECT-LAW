@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — SECURE CLIENT CHAT
+   Nyay Setu — SECURE CLIENT CHAT
    chat_page.js — Threads, messaging, document sharing,
    counsel-only notes, case document drawer.
    ============================================================ */

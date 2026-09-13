@@ -1,4 +1,4 @@
-# LegalConnect
+# Nyay Setu
 
 AI-Powered Advocate Portal & Virtual Court Platform — a legal-tech
 platform where verified advocates manage clients, cases,
@@ -24,37 +24,53 @@ npm install
 npm start          # http://localhost:3000 → advocate portal
 ```
 
-1. Open the portal and choose **Lawyer / Advocate**.
-2. Click **Start Advocate Registration** and complete the two-step form.
-3. Sign in with your registered email/mobile + password.
-4. Complete two-factor verification — a 6-digit code is required after your password.
+1. Open the portal and choose **Lawyer / Advocate → Start Advocate Registration**.
+2. **Step 1:** email + password → a 6-digit verification code is emailed instantly.
+3. **Step 2:** enter the code on the OTP screen (six boxes with paste support,
+   live 5-minute countdown, resend unlocks after 60 s).
+4. Email verified ✓ — complete your professional profile, then you're in.
+5. Every later sign-in: password → fresh emailed OTP (2FA), session held in an
+   HttpOnly secure cookie.
+
+Full configuration walkthrough: **[docs/AUTH_SETUP.md](docs/AUTH_SETUP.md)**.
 
 ### Enabling real email delivery
 
-Sign-in codes and password-reset emails are delivered over SMTP as soon as
-you configure it in `.env`:
+Any ONE transactional channel is enough — priority order:
+**Resend API → Brevo API → SendGrid API → SMTP** (`nodemailer`).
 
 ```ini
+# e.g. Resend (resend.com):
+RESEND_API_KEY=re_xxxxxxxxxxxx
+MAIL_FROM=Nyay Setu <no-reply@yourdomain.com>   # domain verified in provider
+
+# or Gmail SMTP:
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_SECURE=true
 SMTP_USER=you@gmail.com
-SMTP_PASS=<Google App Password>   # account → security → 2-step verification → app passwords
-MAIL_FROM=LegalConnect <you@gmail.com>
+SMTP_PASS=<Google App Password>
+MAIL_FROM=Nyay Setu <you@gmail.com>
 APP_BASE_URL=http://localhost:3000
 ```
 
-Until SMTP is configured, the server runs in development mode: OTP codes are
-printed to the server console (and returned as `devOtp` outside production) so
-you can still sign in locally. Password-reset email returns an explicit
-"service not configured" error instead of pretending to send.
+Until a channel is configured, dev mode prints codes to the **server console
+only** — they are never returned by the API.
+
+### Security guarantees (enforced server-side)
+
+- CSPRNG codes via `crypto.randomInt(100000, 999999)`; stored only as bcrypt hashes
+- 5-minute expiry, single-use, lockout after 5 wrong entries
+- Max 3 OTP emails / address / rolling 15 min + 60-second resend cooldown
+- JWT sessions in HttpOnly + Secure cookies (no tokens in JS storage or URLs)
+- Login lockout (5 fails → 15 min), enumeration-safe password reset
 
 ### Verification desk (admin)
 
 The review console lives at `/admin`. Bootstrap credentials come from
-`ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env` — override them before any real
-deployment. Demo/sample data is **disabled by default**; set
-`SEED_DEMO_DATA=true` on an empty database only if you want sample content.
+`ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env` — production refuses to boot
+without an explicit password. Demo/sample data is **disabled by default**;
+set `SEED_DEMO_DATA=true` on an empty database only if you want sample content.
 
 ## Data layer
 
@@ -63,8 +79,8 @@ Development uses an atomic file-backed JSON store
 For production PostgreSQL:
 
 ```bash
-psql -d legalconnect -f database/migrations/001_initial_schema.sql
-psql -d legalconnect -f database/seeders/demo_data.sql
+psql -d Nyay Setu -f database/migrations/001_initial_schema.sql
+psql -d Nyay Setu -f database/seeders/demo_data.sql
 ```
 
 ## Environment

@@ -1,11 +1,14 @@
 /* ============================================================
-   LEGALCONNECT — MAIN APPLICATION ENTRY POINT
+   Nyay Setu — MAIN APPLICATION ENTRY POINT
    app.js — SPA route table, guards & boot sequence
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', async () => {
   // 1. Initialize state store (hydrates cache instantly, then server)
   Store.init();
+
+  // 2. Seed demo data for presentation (remove for production)
+  if (typeof LawyerDemoData !== 'undefined') LawyerDemoData.seed();
 
   /* ---------------- Splash & Role selection ---------------- */
   Router.register('/splash', () => SplashPage.render(), {
@@ -22,13 +25,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   Router.register('/forgot-password', () => AuthPage.renderForgotPassword(), { title: 'Password Recovery' });
   Router.register('/reset-password', () => AuthPage.renderResetPassword(), { title: 'Set New Password' });
   Router.register('/otp', () => OTPPage.render(), {
-    title: 'Two-Factor Verification',
-    onEnter: () => OTPPage.onEnter()
+    title: 'Email Verification',
+    onEnter: () => OTPPage.onEnter(),
+    onLeave: () => OTPPage.onLeave()
   });
   Router.register('/device-check', () => OTPPage.renderDeviceCheck(), { title: 'New Device Confirmation' });
 
   /* ---------------- Registration & verification ---------------- */
-  Router.register('/register', () => RegisterPage.render(), { title: 'Advocate Registration' });
+  Router.register('/register', () => RegisterPage.render(), {
+    title: 'Advocate Registration',
+    onEnter: () => RegisterPage.onEnter()
+  });
   Router.register('/verification', () => VerificationPage.render(), {
     title: 'Credential Verification',
     onEnter: () => VerificationPage.onEnter()
@@ -37,6 +44,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   /* ---------------- Portal pages (auth-protected) ---------------- */
   Router.register('/dashboard', () => DashboardPage.render(), {
     title: 'Advocate Dashboard',
+    requiresAuth: true,
+    onEnter: () => DashboardPage.onEnter && DashboardPage.onEnter(),
+    onLeave: () => DashboardPage.onLeave && DashboardPage.onLeave()
+  });
+
+  Router.register('/court', () => AdvocateCourtPage.render(), {
+    title: 'Virtual Courtroom Simulator',
+    requiresAuth: true
+  });
+
+  Router.register('/ai-assistant', () => AdvocateChatBot.render(), {
+    title: 'AI Legal Research Assistant',
     requiresAuth: true
   });
 
@@ -117,8 +136,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   /* ---------------- Boot ---------------- */
-  await Store.refreshFromServer().catch(() => {}); // hydrate workspace before first paint when possible
   Router.init();
+  Store.refreshFromServer().catch(() => {});
 
   // Start appointment reminder engine once signed in
   if (AuthManager.isLoggedIn()) {

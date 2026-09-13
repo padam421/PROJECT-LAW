@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — AUTHENTICATION PAGES
+   Nyay Setu — AUTHENTICATION PAGES
    auth_page.js — Role Selection, Login, and Forgot Password
    ============================================================ */
 
@@ -15,20 +15,20 @@ const AuthPage = {
             <div class="login-logo-icon">
               <span class="material-symbols-rounded">balance</span>
             </div>
-            <div class="login-logo-text" style="color:var(--color-white)">LegalConnect</div>
+            <div class="login-logo-text" style="color:var(--color-white)">Nyay Setu</div>
           </div>
-          <h2 class="role-question">How would you like to use LegalConnect?</h2>
+          <h2 class="role-question">How would you like to use Nyay Setu?</h2>
           <p class="role-hint">Select your role to access customized legal tools, workflows and simulated courtrooms</p>
 
           <div class="role-cards">
             <!-- User / Client Role -->
-            <div class="role-card" onclick="Utils.showToast('Client Portal is under preparation. Please select Lawyer / Advocate to explore the portal.', 'info')">
+            <div class="role-card" onclick="window.location.href='../user/index.html#/language'">
               <div class="role-card-icon">
                 <span class="material-symbols-rounded">person</span>
               </div>
               <h3 class="role-card-title">User / Client</h3>
               <p class="role-card-desc">Find top verified advocates, get AI legal assistance & book virtual consultations</p>
-              <button class="btn btn-secondary btn-sm mt-4 w-full">I am a Client</button>
+              <button class="btn btn-secondary btn-sm mt-4 w-full" onclick="event.stopPropagation();window.location.href='../user/index.html#/language'">I am a Client</button>
             </div>
 
             <!-- Lawyer / Advocate Role -->
@@ -43,7 +43,7 @@ const AuthPage = {
           </div>
 
           <div class="mt-8 text-center" style="color:rgba(255,255,255,0.7);font-size:var(--text-body-sm)">
-            New Advocate to LegalConnect? 
+            New Advocate to Nyay Setu? 
             <a onclick="Router.navigate('/register')" style="color:var(--color-accent-lighter);font-weight:600;cursor:pointer;text-decoration:underline">
               Start Advocate Registration →
             </a>
@@ -64,7 +64,7 @@ const AuthPage = {
             <div class="login-logo-icon">
               <span class="material-symbols-rounded">gavel</span>
             </div>
-            <div class="login-logo-text">LegalConnect</div>
+            <div class="login-logo-text">Nyay Setu</div>
           </div>
 
           <h2 class="login-title">Advocate Practice Portal</h2>
@@ -74,7 +74,7 @@ const AuthPage = {
             <div class="form-group">
               <label class="form-label">Registered Email or Mobile Number</label>
               <div class="input-icon-wrapper">
-                <input type="text" id="login-identifier" class="form-input" placeholder="you@example.com or 9876543210" autocomplete="username" required>
+                <input type="text" id="login-identifier" name="email" class="form-input" placeholder="you@example.com or 9876543210" autocomplete="username" required>
                 <span class="material-symbols-rounded input-icon">mail</span>
               </div>
             </div>
@@ -82,7 +82,7 @@ const AuthPage = {
             <div class="form-group">
               <label class="form-label">Password</label>
               <div class="input-icon-wrapper">
-                <input type="password" id="login-password" class="form-input" placeholder="Enter your password" autocomplete="current-password" required>
+                <input type="password" id="login-password" name="password" class="form-input" placeholder="Enter your password" autocomplete="current-password" required>
                 <span class="material-symbols-rounded input-icon">lock</span>
               </div>
             </div>
@@ -101,7 +101,7 @@ const AuthPage = {
           </form>
 
           <div class="login-divider">
-            <span>New to LegalConnect?</span>
+            <span>New to Nyay Setu?</span>
           </div>
 
           <a class="btn btn-accent btn-block btn-lg" href="#/register" style="text-align:center">
@@ -130,7 +130,18 @@ const AuthPage = {
     const result = await AuthManager.login(identifier, password, remember);
 
     if (result.success) {
-      Utils.showToast('Credentials authenticated. Completing 2FA OTP verification...', 'info');
+      if (result.directLogin) {
+        Utils.showToast('Welcome back, Advocate! Signed in successfully.', 'success');
+        ApiClient.startReminderEngine();
+        Router.navigate('/dashboard');
+        return;
+      }
+      Utils.showToast(
+        result.emailNotVerified
+          ? 'Credentials verified. Finish activating your account with the 6-digit code sent to your email.'
+          : 'Credentials authenticated. A 6-digit verification code was sent to your email.',
+        'info'
+      );
       Router.navigate('/otp');
     } else {
       Utils.showToast(result.error || 'Authentication failed', 'error');

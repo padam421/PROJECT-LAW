@@ -1,12 +1,14 @@
 /* ============================================================
-   LEGALCONNECT — SPLASH SCREEN LOGIC
+   Nyay Setu — SPLASH SCREEN LOGIC
    splash.js — Splash animation and session routing
    ============================================================ */
 
 const SplashPage = {
+  _timer: null,
+
   render() {
     return `
-      <div class="splash-screen">
+      <div class="splash-screen" onclick="SplashPage.skip()" style="cursor:pointer">
         <div class="splash-particles">
           <div class="splash-particle"></div>
           <div class="splash-particle"></div>
@@ -29,24 +31,30 @@ const SplashPage = {
           <div class="splash-loader">
             <div class="splash-loader-bar" id="splash-progress"></div>
           </div>
+          <div style="margin-top:16px;font-size:12px;color:rgba(255,255,255,0.4)">Click anywhere to continue</div>
         </div>
       </div>
     `;
   },
 
+  skip() {
+    if (this._timer) clearTimeout(this._timer);
+    if (AuthManager.isLoggedIn()) {
+      Router.navigate('/dashboard');
+    } else {
+      Router.navigate('/role-select');
+    }
+  },
+
   onEnter() {
     const bar = document.getElementById('splash-progress');
     if (bar) {
-      setTimeout(() => bar.classList.add('loading'), 100);
+      setTimeout(() => bar.classList.add('loading'), 50);
     }
 
-    // Check auth after 2.5s and route
-    setTimeout(() => {
-      if (AuthManager.isLoggedIn()) {
-        Router.navigate('/dashboard');
-      } else {
-        Router.navigate('/role-select');
-      }
-    }, 2600);
+    // Auto-advance after 1.8 seconds
+    this._timer = setTimeout(() => {
+      this.skip();
+    }, 1800);
   }
 };

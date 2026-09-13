@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — SETTINGS & SECURITY CENTER
+   Nyay Setu — SETTINGS & SECURITY CENTER
    settings_page.js — Verification record, security (2FA,
    devices, sessions, incidents), notifications, privacy,
    account, support, deactivation.
@@ -80,7 +80,7 @@ const SettingsPage = {
       <div class="settings-pane active">
         <div class="settings-pane-header">
           <h3 class="settings-pane-title">Verification Record</h3>
-          <p class="settings-pane-desc">Your permanent accreditation status on LegalConnect</p>
+          <p class="settings-pane-desc">Your permanent accreditation status on Nyay Setu</p>
         </div>
 
         ${isVerified ? `
@@ -351,6 +351,7 @@ const SettingsPage = {
     if (!n.read) {
       n.read = true;
       Store.setState('notifications', notifs);
+      fetch(`/api/notifications/${id}/read`, { method: 'PATCH', credentials: 'include' }).catch(() => {});
       Router.transitionPage('/settings', { tab: 'notifications' });
     }
     if (n.link) Router.navigate(n.link);
@@ -359,6 +360,7 @@ const SettingsPage = {
   markAllRead() {
     const notifs = (Store.getState('notifications') || []).map(n => ({ ...n, read: true }));
     Store.setState('notifications', notifs);
+    fetch('/api/notifications/read-all', { method: 'PATCH', credentials: 'include' }).catch(() => {});
     Utils.showToast('All notifications marked as read.', 'info');
     Router.transitionPage('/settings', { tab: 'notifications' });
   },
@@ -455,7 +457,7 @@ const SettingsPage = {
         </div>
 
         <button class="btn btn-primary mt-4" onclick="SettingsPage.saveAccount()">Save Contact Details</button>
-        <p class="text-body-sm text-muted mt-3">Legal name and Bar registration are locked to protect integrity. To correct them, contact support@legalconnect.in with official proof.</p>
+        <p class="text-body-sm text-muted mt-3">Legal name and Bar registration are locked to protect integrity. To correct them, contact support@nyaysetu.in with official proof.</p>
       </div>
     `;
   },
@@ -529,8 +531,8 @@ const SettingsPage = {
           </div>
           <div class="card card-glass">
             <h4 class="card-title mb-2">Contact Support</h4>
-            <p class="text-body-md text-muted mb-2">Email: <strong>support@legalconnect.in</strong></p>
-            <p class="text-body-md text-muted mb-4">Verification desk: <strong>verification@legalconnect.in</strong></p>
+            <p class="text-body-md text-muted mb-2">Email: <strong>support@nyaysetu.in</strong></p>
+            <p class="text-body-md text-muted mb-4">Verification desk: <strong>verification@nyaysetu.in</strong></p>
             <button class="btn btn-secondary btn-sm" onclick="SettingsPage.openReportProblem()">Report a Problem</button>
           </div>
         </div>

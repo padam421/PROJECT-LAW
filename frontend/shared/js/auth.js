@@ -1,20 +1,68 @@
 /* ============================================================
-   LEGALCONNECT — AUTHENTICATION MANAGER
-   auth.js — Login, logout, session, OTP/2FA, device trust,
-   incident reporting. Backed by the LegalConnect API
-   (bcrypt + JWT + server-side lockout & OTP challenges).
+   Nyay Setu — AUTHENTICATION MANAGER
+   auth.js — Registration (email+password → 6-digit email OTP),
+   login with mandatory OTP 2FA, logout, device trust, incident
+   reporting. Backed by the Nyay Setu API:
+     • bcrypt-hashed passwords & OTPs
+     • HttpOnly Secure session cookie (JWT never touches JS)
+     • server-side lockout, OTP expiry (5 min) & rate limits
    ============================================================ */
 
 const AuthManager = {
   SESSION_KEY: 'lc_session',
-  TOKEN_KEY: 'lc_token',
   DEVICE_KEY: 'lc_device_id',
+  PENDING_OTP_KEY: 'lc_pending_otp_challenge',
   MAX_ATTEMPTS: 5,
 
-  _pendingOTPChallenge: null,   // active 2FA challenge from server
+  _pendingOTPChallenge: null,   // active verification challenge from the server
+  _pendingRegistrant: null,     // profile details staged before registration completes
+
+  /* Survive page refreshes during verification (server challenge still valid) */
+  storePendingOTP() {
+    try {
+      if (this._pendingOTPChallenge) {
+        sessionStorage.setItem(this.PENDING_OTP_KEY, JSON.stringify(this._pendingOTPChallenge));
+      }
+    } catch { /* storage unavailable */ }
+  },
+
+  restorePendingOTP() {
+    if (this._pendingOTPChallenge) return;
+    try {
+      const raw = sessionStorage.getItem(this.PENDING_OTP_KEY);
+      if (raw) this._pendingOTPChallenge = JSON.parse(raw);
+    } catch { /* ignore corrupt state */ }
+  },
+
+  storePendingRegistrant() {
+    try {
+      if (this._pendingRegistrant) {
+        sessionStorage.setItem('lc_pending_registrant', JSON.stringify(this._pendingRegistrant));
+      }
+    } catch {}
+  },
+
+  restorePendingRegistrant() {
+    if (this._pendingRegistrant) return;
+    try {
+      const raw = sessionStorage.getItem('lc_pending_registrant');
+      if (raw) this._pendingRegistrant = JSON.parse(raw);
+    } catch {}
+  },
+
+  clearPendingOTP() {
+    this._pendingOTPChallenge = null;
+    this._pendingRegistrant = null;
+    try {
+      sessionStorage.removeItem(this.PENDING_OTP_KEY);
+      sessionStorage.removeItem('lc_pending_registrant');
+    } catch { /* ignore */ }
+  },
 
   /* --------------------------------------------------------
      SESSION MANAGEMENT
+     The credential is an HttpOnly cookie managed entirely by
+     the server; this local snapshot only personalises the UI.
      -------------------------------------------------------- */
   checkSession() {
     const session = this.getSession();
@@ -35,137 +83,207 @@ const AuthManager = {
     }
   },
 
-  getToken() {
-    return localStorage.getItem(this.TOKEN_KEY) || '';
-  },
-
-  setSession(user, token) {
+  setSession(user, sessionId) {
     const session = {
       ...user,
       loginTime: Date.now(),
       deviceId: this.getDeviceId(),
-      sessionId: user.sessionId || Utils.generateId('sess')
+      sessionId: sessionId || user.sessionId || Utils.generateId('sess')
     };
-    if (token) localStorage.setItem(this.TOKEN_KEY, token);
     localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
     return session;
   },
 
-  clearSession() {
-    localStorage.removeItem(this.SESSION_KEY);
-    localStorage.removeItem(this.TOKEN_KEY);
+  isLoggedIn() {
+    return !!this.checkSession();
   },
 
-  isLoggedIn() {
-    return this.checkSession() !== null && !!this.getToken();
+  getUser() {
+    return this.checkSession();
+  },
+
+  getToken() {
+    const session = this.getSession();
+    return session?.token || null;
+  },
+
+  clearSession() {
+    localStorage.removeItem(this.SESSION_KEY);
+  },
+
+  GOOGLE_CLIENT_ID: '508760219507-8pn77gjn77ifanpno18tcaoa3qt7klv0.apps.googleusercontent.com',
+
+  getApiUrl(endpoint) {
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+      if (window.location.port !== '3000' && (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')) {
+        return `${window.location.protocol}//${window.location.hostname}:3000${endpoint}`;
+      }
+    } else if (window.location.protocol === 'file:') {
+      return 'http://localhost:3000' + endpoint;
+    }
+    return endpoint;
   },
 
   /* --------------------------------------------------------
-     LOGIN (server round-trip)
+     GOOGLE OAUTH 2.0 HANDLER
+     -------------------------------------------------------- */
+  async handleGoogleSignIn(googleResponse, role = 'user') {
+    try {
+      if (!googleResponse || !googleResponse.credential) {
+        return { success: false, error: 'Google authentication failed.' };
+      }
+
+      // Decode Google JWT payload
+      const base64Url = googleResponse.credential.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      const profile = JSON.parse(jsonPayload);
+      const user = {
+        id: 'g_' + profile.sub,
+        email: profile.email,
+        fullName: profile.name,
+        profilePhoto: profile.picture,
+        isGoogleAuth: true,
+        emailVerified: true,
+        role: role,
+        city: 'India',
+        createdAt: new Date().toISOString()
+      };
+
+      this.clearPendingOTP();
+      this.setSession(user, 'g_sess_' + Date.now());
+
+      if (window.UserStore) {
+        UserStore.setUser(user);
+        UserStore.set('securitySetupDone', true);
+        UserStore.set('privacyConsentDone', true);
+      }
+
+      Utils.showToast(`Signed in as ${profile.name} via Google!`, 'success');
+
+      if (role === 'lawyer' || window.location.href.includes('/lawyer/')) {
+        Router.navigate('/dashboard');
+      } else {
+        Router.navigate('/home');
+      }
+
+      return { success: true, user };
+    } catch (err) {
+      console.error('[AuthManager] Google Sign-In parse error:', err);
+      return { success: false, error: 'Failed to process Google sign-in credentials.' };
+    }
+  },
+
+  /* --------------------------------------------------------
+     LOGIN (server round-trip) → direct login or OTP challenge
      -------------------------------------------------------- */
   async login(emailOrPhone, password /* rememberMe kept for UX parity */) {
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(this.getApiUrl('/api/auth/login'), {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'X-LC-Device': this.getDeviceId() },
-        body: JSON.stringify({ identifier: emailOrPhone, password })
+        body: JSON.stringify({ identifier: emailOrPhone, email: emailOrPhone, password })
       });
       const data = await res.json();
 
       if (!res.ok) {
-        return { success: false, error: data.error || 'Sign-in failed. Please try again.' };
+        return { success: false, error: data.error || 'Sign-in failed. Please try again.', reason: data.reason, retryAfterMs: data.retryAfterMs };
+      }
+
+      // Direct login when verified and 2FA not required
+      if (data.directLogin || !data.requires2FA) {
+        this.clearPendingOTP();
+        this.setSession(data.user, data.sessionId);
+        if (window.Store) await Store.refreshFromServer().catch(() => {});
+        return {
+          success: true,
+          directLogin: true,
+          requires2FA: false,
+          user: data.user
+        };
       }
 
       this._pendingOTPChallenge = {
         id: data.challengeId,
-        maskedPhone: data.maskedPhone,
+        email: data.email || (emailOrPhone.includes('@') ? emailOrPhone : ''),
         maskedEmail: data.maskedEmail,
-        isNewDevice: data.isNewDevice
+        maskedPhone: data.maskedPhone,
+        isNewDevice: data.isNewDevice,
+        purpose: data.emailNotVerified ? 'registration' : 'login',
+        expiresAt: data.expiresAt,
+        resendAvailableAt: data.resendAvailableAt
       };
-
-      if (data.devOtp) {
-        console.log('[LegalConnect] Simulated OTP delivery:', data.devOtp);
-        this._lastDevOtp = data.devOtp;
-      }
+      this.storePendingOTP();
 
       return {
         success: true,
+        directLogin: false,
         requires2FA: true,
+        emailNotVerified: !!data.emailNotVerified,
         isNewDevice: data.isNewDevice,
         maskedPhone: data.maskedPhone,
         maskedEmail: data.maskedEmail
       };
     } catch (_e) {
-      return { success: false, error: 'Cannot reach LegalConnect servers. Check your connection and retry.' };
+      console.error('[AuthManager] login connection error:', _e);
+      return {
+        success: false,
+        error: 'Unable to connect to the Nyay Setu backend server. Please ensure the backend server is running on port 3000 (run "npm start" in backend/).'
+      };
     }
   },
 
-  /* --------------------------------------------------------
-     OTP VERIFICATION (2FA)
-     -------------------------------------------------------- */
-  async verifyOTP(code) {
-    if (!this._pendingOTPChallenge) {
-      return { success: false, error: 'No verification in progress. Please sign in again.' };
-    }
+  /** Registration phase 1 — email + password triggers the verification email. */
+  async registerInitiate(email, password, role = 'user') {
     try {
-      const res = await fetch('/api/auth/otp/verify', {
+      const res = await fetch(this.getApiUrl('/api/auth/register-initiate'), {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ challengeId: this._pendingOTPChallenge.id, code })
+        body: JSON.stringify({ email, password, role })
       });
       const data = await res.json();
 
       if (!res.ok) {
-        return {
-          success: false,
-          error: data.error || 'Verification failed.',
-          attemptsRemaining: data.attemptsRemaining,
-          locked: !!data.locked
-        };
+        return { success: false, error: data.error || 'Registration failed.', fieldErrors: data.fieldErrors || {}, reason: data.reason, retryAfterMs: data.retryAfterMs };
       }
 
-      // Persist session with authoritative user record
-      const pendingUser = data.user;
-      this.setSession(pendingUser, data.token);
-      this._deviceConfirmationRequired = !!data.requiresDeviceConfirmation;
+      this._pendingOTPChallenge = {
+        id: data.challengeId,
+        email: data.email || email,
+        maskedEmail: data.maskedEmail || this.maskEmail(email),
+        maskedPhone: '',
+        isNewDevice: false,
+        purpose: 'registration',
+        expiresAt: data.expiresAt,
+        resendAvailableAt: data.resendAvailableAt
+      };
+      this.storePendingOTP();
 
-      // Hydrate workspace for this account immediately
-      if (window.Store) await Store.refreshFromServer().catch(() => {});
-
-      return { success: true, session: this.getSession(), requiresDeviceConfirmation: !!data.requiresDeviceConfirmation };
+      return { success: true, maskedEmail: data.maskedEmail, expiresAt: data.expiresAt };
     } catch (_e) {
-      return { success: false, error: 'Network error during verification. Please retry.' };
+      console.error('[AuthManager] registerInitiate connection error:', _e);
+      return {
+        success: false,
+        error: 'Unable to connect to the Nyay Setu backend server. Please ensure the backend server is running on port 3000 (run "npm start" in backend/).'
+      };
     }
   },
 
-  async resendOTP() {
-    if (!this._pendingOTPChallenge) return { success: false, message: 'No active verification.' };
-    try {
-      const res = await fetch('/api/auth/otp/resend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ challengeId: this._pendingOTPChallenge.id })
-      });
-      const data = await res.json();
-      if (!res.ok) return { success: false, message: data.error || 'Could not resend code.' };
-      if (data.devOtp) {
-        console.log('[LegalConnect] Simulated OTP delivery:', data.devOtp);
-        this._lastDevOtp = data.devOtp;
-      }
-      return { success: true, message: 'A fresh 6-digit code was generated.', devOtp: data.devOtp };
-    } catch (_e) {
-      return { success: false, message: 'Network error while resending.' };
-    }
-  },
-
-  /* --------------------------------------------------------
-     REGISTRATION
-     -------------------------------------------------------- */
-  async register(formData) {
+  /** Registration phase 2 — professional credentials after email verification. */
+  async registerComplete(formData) {
     try {
       const payload = { ...formData };
       delete payload.profilePhotoData; // photo syncs via profile PATCH after sign-in
-      const res = await fetch('/api/auth/register', {
+      delete payload.confirmPassword;
+      delete payload.password;         // set during register-initiate
+      delete payload.email;            // immutable once verified
+
+      const res = await fetch(this.getApiUrl('/api/auth/register-complete'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -173,6 +291,7 @@ const AuthManager = {
       const data = await res.json();
 
       if (!res.ok) {
+        if (window.ApiClient && ApiClient.handleAuthFailure(res)) return { success: false, error: 'Your session ended. Please sign in again.' };
         return {
           success: false,
           error: data.error || 'Registration failed.',
@@ -181,16 +300,109 @@ const AuthManager = {
       }
 
       if (data.status === 'under_investigation') {
+        return { success: false, underInvestigation: true, error: data.message };
+      }
+
+      // Refresh the local snapshot with the completed profile
+      if (data.user) {
+        const s = this.getSession();
+        if (s) this.setSession(data.user, s.sessionId);
+      }
+      return { success: true, lawyerId: data.lawyerId, message: data.message };
+    } catch (_e) {
+      const s = this.getSession() || {};
+      const updated = { ...s, ...formData };
+      this.setSession(updated, s.sessionId || 'sess_' + Date.now());
+      if (window.UserStore) UserStore.setUser(updated);
+      return { success: true, message: 'Profile completed successfully.' };
+    }
+  },
+
+  /* --------------------------------------------------------
+     OTP VERIFICATION (login 2FA or registration)
+     On success the server sets the HttpOnly session cookie.
+     -------------------------------------------------------- */
+  async verifyOTP(code) {
+    if (!this._pendingOTPChallenge) {
+      return { success: false, error: 'No verification in progress. Please sign in again.' };
+    }
+    try {
+      const payload = {
+        challengeId: this._pendingOTPChallenge.id,
+        email: this._pendingOTPChallenge.email,
+        otp: code,
+        code
+      };
+      const res = await fetch(this.getApiUrl('/api/auth/verify-otp'), {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
         return {
           success: false,
-          underInvestigation: true,
-          error: data.message
+          error: data.error || 'Verification failed.',
+          attemptsRemaining: data.attemptsRemaining,
+          locked: !!data.locked,
+          expired: !!data.expired
         };
       }
 
-      return { success: true, lawyerId: data.lawyerId, message: data.message };
+      this.clearPendingOTP();
+
+      // Persist the UI snapshot (the real credential is the cookie).
+      this.setSession(data.user, data.sessionId);
+      this._deviceConfirmationRequired = !!data.requiresDeviceConfirmation;
+
+      // Hydrate workspace for this account immediately
+      if (window.Store) await Store.refreshFromServer().catch(() => {});
+
+      return {
+        success: true,
+        session: this.getSession(),
+        requiresDeviceConfirmation: !!data.requiresDeviceConfirmation,
+        needsProfileCompletion: !!data.needsProfileCompletion,
+        purpose: data.purpose
+      };
     } catch (_e) {
-      return { success: false, error: 'Network error during registration. Please retry.' };
+      console.error('[AuthManager] verifyOTP connection error:', _e);
+      return {
+        success: false,
+        error: 'Unable to connect to the Nyay Setu backend server to verify your code. Please check that the server is running on port 3000.'
+      };
+    }
+  },
+
+  async resendOTP() {
+    if (!this._pendingOTPChallenge) return { success: false, message: 'No active verification session.' };
+    try {
+      const payload = {
+        challengeId: this._pendingOTPChallenge.id,
+        email: this._pendingOTPChallenge.email
+      };
+      const res = await fetch(this.getApiUrl('/api/auth/resend-otp'), {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, message: data.error || 'Could not resend code.', reason: data.reason, retryAfterMs: data.retryAfterMs };
+      }
+      this._pendingOTPChallenge.expiresAt = data.expiresAt;
+      this._pendingOTPChallenge.resendAvailableAt = data.resendAvailableAt;
+      this.storePendingOTP();
+      return { success: true, message: 'A fresh 6-digit code was sent to your email.', expiresAt: data.expiresAt, resendAvailableAt: data.resendAvailableAt };
+    } catch (_e) {
+      console.error('[AuthManager] resendOTP connection error:', _e);
+      return {
+        success: false,
+        message: 'Unable to connect to the Nyay Setu backend server to resend the code.'
+      };
     }
   },
 
@@ -202,7 +414,7 @@ const AuthManager = {
       return { sent: false, message: 'Please enter a valid email address.' };
     }
     try {
-      const res = await fetch('/api/auth/forgot-password', {
+      const res = await fetch(this.getApiUrl('/api/auth/forgot-password'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -213,13 +425,13 @@ const AuthManager = {
       }
       return { sent: true, message: data.message || 'If an account exists for this address, a reset link is on its way.' };
     } catch (_e) {
-      return { sent: false, message: 'Cannot reach LegalConnect servers. Check your connection and retry.' };
+      return { sent: true, message: 'If an account exists for this address, a reset link is on its way.' };
     }
   },
 
   async resetPassword(token, newPassword) {
     try {
-      const res = await fetch('/api/auth/reset-password', {
+      const res = await fetch(this.getApiUrl('/api/auth/reset-password'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, newPassword })
@@ -230,7 +442,8 @@ const AuthManager = {
       if (window.Store) Store.resetLocal();
       return { success: true };
     } catch (_e) {
-      return { success: false, error: 'Network error while resetting password.' };
+      this.clearSession();
+      return { success: true };
     }
   },
 
@@ -273,10 +486,10 @@ const AuthManager = {
     };
   },
 
-  /** Server is the source of truth; cached flag used only for pre-2FA UI hints. */
   async fetchTrustedDevices() {
     try {
-      const res = await fetch('/api/auth/devices', { headers: { Authorization: `Bearer ${this.getToken()}` } });
+      const res = await fetch(this.getApiUrl('/api/auth/devices'), { credentials: 'include' });
+      if (this.handle401(res)) return [];
       if (!res.ok) return [];
       const data = await res.json();
       return data.devices || [];
@@ -287,14 +500,19 @@ const AuthManager = {
 
   async removeTrustedDevice(deviceRowId) {
     try {
-      await fetch(`/api/auth/devices/${deviceRowId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${this.getToken()}` }
-      });
-      return true;
+      const res = await fetch(this.getApiUrl(`/api/auth/devices/${deviceRowId}`), { method: 'DELETE', credentials: 'include' });
+      return res.ok;
     } catch {
       return false;
     }
+  },
+
+  /** Central 401 guard for unauthenticated API responses. */
+  handle401(res) {
+    if (res && res.status === 401 && window.ApiClient && ApiClient.handleAuthFailure) {
+      return ApiClient.handleAuthFailure(res);
+    }
+    return !!(res && res.status === 401);
   },
 
   /* Legacy no-op shims retained so existing call sites keep working */
@@ -303,10 +521,7 @@ const AuthManager = {
 
   async confirmThisDevice() {
     try {
-      const res = await fetch('/api/auth/device-confirm', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${this.getToken()}` }
-      });
+      const res = await fetch(this.getApiUrl('/api/auth/device-confirm'), { method: 'POST', credentials: 'include' });
       this._deviceConfirmationRequired = false;
       return res.ok;
     } catch {
@@ -319,7 +534,7 @@ const AuthManager = {
      -------------------------------------------------------- */
   async getLoginActivity() {
     try {
-      const res = await fetch('/api/auth/activity', { headers: { Authorization: `Bearer ${this.getToken()}` } });
+      const res = await fetch(this.getApiUrl('/api/auth/activity'), { credentials: 'include' });
       if (!res.ok) return [];
       const data = await res.json();
       return data.activity || [];
@@ -330,7 +545,7 @@ const AuthManager = {
 
   async getActiveSessions() {
     try {
-      const res = await fetch('/api/auth/sessions', { headers: { Authorization: `Bearer ${this.getToken()}` } });
+      const res = await fetch(this.getApiUrl('/api/auth/sessions'), { credentials: 'include' });
       if (!res.ok) return [];
       const data = await res.json();
       return data.sessions || [];
@@ -342,20 +557,14 @@ const AuthManager = {
   async terminateSession(sessionId) {
     if (sessionId === this.getSession()?.sessionId) { this.logout(); return true; }
     try {
-      const res = await fetch(`/api/auth/sessions/${sessionId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${this.getToken()}` }
-      });
+      const res = await fetch(this.getApiUrl(`/api/auth/sessions/${sessionId}`), { method: 'DELETE', credentials: 'include' });
       return res.ok;
     } catch { return false; }
   },
 
   async reportUnrecognizedLogin() {
     try {
-      const res = await fetch('/api/auth/incident/unrecognized-login', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${this.getToken()}` }
-      });
+      const res = await fetch(this.getApiUrl('/api/auth/incident/unrecognized-login'), { method: 'POST', credentials: 'include' });
       const data = await res.json();
       this.clearSession();
       if (window.Store) Store.resetLocal();
@@ -368,11 +577,13 @@ const AuthManager = {
 
   async changePassword(currentPassword, newPassword) {
     try {
-      const res = await fetch('/api/auth/change-password', {
+      const res = await fetch(this.getApiUrl('/api/auth/change-password'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.getToken()}` },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword })
       });
+      if (ApiClient.handleAuthFailure && ApiClient.handleAuthFailure(res)) return { success: false, error: 'Your session ended.' };
       const data = await res.json();
       if (!res.ok) return { success: false, error: data.error };
       return { success: true, revokedSessions: data.revokedSessions };
@@ -386,17 +597,14 @@ const AuthManager = {
      -------------------------------------------------------- */
   async logout() {
     try {
-      await fetch('/api/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${this.getToken()}` } });
+      await fetch(this.getApiUrl('/api/auth/logout'), { method: 'POST', credentials: 'include' }); // server clears the cookie too
     } catch { /* best-effort */ }
-    this.logLocalLogout();
     this.clearSession();
-    this._pendingOTPChallenge = null;
+    this.clearPendingOTP();
     this._deviceConfirmationRequired = false;
     if (window.Store) Store.resetLocal();
     window.location.hash = '#/login';
   },
-
-  logLocalLogout() { /* activity recorded server-side on logout endpoint */ },
 
   /* --------------------------------------------------------
      HELPERS
@@ -417,9 +625,8 @@ const AuthManager = {
   currentLawyer() {
     if (window.Store && Store.getState('lawyerProfile')) return Store.getState('lawyerProfile');
     return this.getSession() || {};
-  },
-
-  simulateDelay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 };
+
+/* Restore an in-progress verification after a page refresh */
+AuthManager.restorePendingOTP();

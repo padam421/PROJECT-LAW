@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — CLIENT REVIEWS
+   Nyay Setu — CLIENT REVIEWS
    reviews_page.js — Read-only verified feedback with a real
    rating distribution computed from data.
    ============================================================ */

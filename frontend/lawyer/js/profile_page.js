@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — ADVOCATE PORTFOLIO & PRACTICE SETTINGS
+   Nyay Setu — ADVOCATE PORTFOLIO & PRACTICE SETTINGS
    profile_page.js — Public profile, experience, case record,
    certificates, service pricing & weekly availability.
    ============================================================ */

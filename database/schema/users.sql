@@ -26,6 +26,11 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash         TEXT NOT NULL,                          -- bcrypt, cost from env BCRYPT_ROUNDS
   password_change_required BOOLEAN NOT NULL DEFAULT FALSE,
 
+  -- Email verification (6-digit OTP) & signup lifecycle
+  is_verified           BOOLEAN NOT NULL DEFAULT FALSE,
+  registration_stage    TEXT NOT NULL DEFAULT 'complete'
+                        CHECK (registration_stage IN ('awaiting_otp','awaiting_profile','complete')),
+
   -- Lifecycle / access control
   account_status        TEXT NOT NULL DEFAULT 'active'
                         CHECK (account_status IN ('active','suspended','restricted_pending_investigation')),
@@ -131,21 +136,44 @@ CREATE TABLE IF NOT EXISTS auth_sessions (
 CREATE INDEX IF NOT EXISTS idx_sessions_user_active ON auth_sessions (user_id) WHERE revoked = FALSE;
 
 -- ------------------------------------------------------------
--- otp_challenges — hashed 2FA codes; raw codes are never stored
+-- otp_challenges — bcrypt-hashed 6-digit codes; raw codes are
+-- never stored, logged, or returned by the API.
+-- Mirrors a Redis key `otp:${email}:${purpose}` semantics with a
+-- 5-minute TTL, max-attempt lockout and single-use consumption.
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS otp_challenges (
   id          TEXT PRIMARY KEY,                                 -- 'otp_*'
+  key         VARCHAR(120) UNIQUE,                              -- 'otp:${email}:${purpose}'
   user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  code_hash   CHAR(32) NOT NULL,                                -- sha256(code + userId)[:32]
+  email       TEXT NOT NULL,
+  purpose     TEXT NOT NULL DEFAULT 'login'
+              CHECK (purpose IN ('login','registration')),
+  hashed_otp  TEXT NOT NULL,                                    -- bcrypt(6-digit code)
   device      JSONB NOT NULL DEFAULT '{}',
   is_new_device BOOLEAN NOT NULL DEFAULT FALSE,
   attempts    SMALLINT NOT NULL DEFAULT 0,
-  expires_at  TIMESTAMPTZ NOT NULL,
-  consumed    BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  max_attempts SMALLINT NOT NULL DEFAULT 5,                      -- wrong entries before the code locks
+  expires_at  TIMESTAMPTZ NOT NULL,                             -- created_at + 5 minutes
+  is_used     BOOLEAN NOT NULL DEFAULT FALSE,                   -- consumed or locked
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW()                -- powers the 60s resend cooldown
 );
 
-CREATE INDEX IF NOT EXISTS idx_otp_open ON otp_challenges (id) WHERE consumed = FALSE;
+CREATE INDEX IF NOT EXISTS idx_otp_open ON otp_challenges (user_id, purpose) WHERE is_used = FALSE;
+CREATE INDEX IF NOT EXISTS idx_otp_email_recent ON otp_challenges (email, last_sent_at DESC);
+
+-- ------------------------------------------------------------
+-- otp_sends — rolling-window flood control log per address
+-- (max 3 sends / email / 15 minutes). Rows outside the window
+-- are pruned by the application after use.
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS otp_sends (
+  id        TEXT PRIMARY KEY,                                   -- 'osend_*'
+  email_key TEXT NOT NULL,                                      -- lowercased recipient address
+  sent_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_otp_sends_window ON otp_sends (email_key, sent_at DESC);
 
 -- ------------------------------------------------------------
 -- login_activity — audit trail powering lockout & Security Center
@@ -156,7 +184,8 @@ CREATE TABLE IF NOT EXISTS login_activity (
   identifier_tried VARCHAR(64),                                 -- only when no account matched
   type             TEXT NOT NULL CHECK (type IN
                    ('login','login_failed','login_blocked','login_new_device','logout',
-                    'device_trusted','device_revoked','otp_locked','document_uploaded')),
+                    'device_trusted','device_revoked','otp_locked','document_uploaded',
+                    'registration_initiated')),
   description      TEXT NOT NULL,
   result           TEXT NOT NULL DEFAULT 'success',
   device           JSONB NOT NULL DEFAULT '{}',

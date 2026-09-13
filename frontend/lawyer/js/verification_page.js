@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — CREDENTIAL VERIFICATION PIPELINE
+   Nyay Setu — CREDENTIAL VERIFICATION PIPELINE
    verification_page.js — Registry check → Document intake →
    Identity confirmation → Risk screening → Outcome.
    ------------------------------------------------------------
@@ -97,7 +97,7 @@ const VerificationPage = {
       <div class="barcouncil-verify">
         <h3 class="card-title">State Bar Council Registration Check</h3>
         <p class="text-body-sm text-muted mb-4">
-          We validate your enrollment number format and cross-check it against duplicate profiles on LegalConnect.
+          We validate your enrollment number format and cross-check it against duplicate profiles on Nyay Setu.
           Confirmation of active standing is completed by our verification desk; an official Bar Council data feed is not yet connected to this platform.
         </p>
 
@@ -348,9 +348,9 @@ const VerificationPage = {
         <div class="verification-result">
           <div class="result-icon error"><span class="material-symbols-rounded">report</span></div>
           <h2 class="result-title" style="color:var(--color-error)">Verification Not Approved</h2>
-          <p class="text-body-md text-muted mb-4">
-            Your application could not be approved in its current form. Upload corrected documents,
-            or contact support@legalconnect.in for assistance.
+          <p class="text-body-sm text-muted mb-4">
+            For major discrepancies, please wait for manual review
+            or contact support@nyaysetu.in for assistance.
           </p>
           <div class="d-flex justify-center gap-4 mt-6 flex-wrap">
             <button class="btn btn-secondary btn-lg" onclick="VerificationPage.reset(); VerificationPage.loadDocs().then(()=>Router.transitionPage('/verification'));">Upload Corrected Documents</button>

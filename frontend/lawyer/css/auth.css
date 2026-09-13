@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — AUTHENTICATION PAGES
+   Nyay Setu — AUTHENTICATION PAGES
    auth.css — Login, role selection, forgot password
    ============================================================ */
 
@@ -243,21 +243,7 @@
   color: var(--color-accent-dark);
 }
 
-/* Demo credentials hint */
-.demo-hint {
-  background: var(--color-info-light);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--text-body-sm);
-  color: var(--color-info);
-  text-align: center;
-  margin-top: var(--space-4);
-}
 
-.demo-hint strong {
-  font-weight: var(--weight-semibold);
-}
 
 /* ============================================================
    3. FORGOT PASSWORD

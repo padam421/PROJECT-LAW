@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — EARNINGS & PAYMENTS
+   Nyay Setu — EARNINGS & PAYMENTS
    payments_page.js — Fee split transparency, earnings summary,
    settlement ledger with real CSV export.
    ============================================================ */

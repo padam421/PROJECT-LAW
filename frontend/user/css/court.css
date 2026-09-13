@@ -1,0 +1,393 @@
+/* ============================================================
+   Nyay Setu USER — COURT PREPARATION & SIMULATOR
+   court.css — Hearing prep, checklists, virtual court simulator,
+   hearing day screen, post-hearing (Realistic Light Theme)
+   ============================================================ */
+
+/* --- Hearing Preparation --- */
+.u-prep-header {
+  text-align: center;
+  padding: var(--u-space-6) 0;
+  margin-bottom: var(--u-space-6);
+}
+
+.u-prep-header-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--u-radius-lg);
+  background: var(--u-amber-subtle);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  display: grid;
+  place-items: center;
+  margin: 0 auto var(--u-space-4);
+  color: var(--u-amber-light);
+}
+
+.u-prep-header-icon .material-symbols-rounded { font-size: 32px; }
+
+.u-prep-header h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--u-primary);
+  margin-bottom: var(--u-space-2);
+}
+
+.u-prep-header p {
+  font-size: 0.9rem;
+  color: var(--u-text-secondary);
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* --- Checklist --- */
+.u-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-2);
+}
+
+.u-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-3);
+  padding: var(--u-space-3) var(--u-space-4);
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-md);
+  cursor: pointer;
+  transition: all var(--u-duration-fast);
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-checklist-item:hover {
+  background: var(--u-bg-secondary);
+  border-color: var(--u-border-strong);
+}
+
+.u-checklist-item.checked {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.u-checklist-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--u-border-strong);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: all var(--u-duration-fast);
+}
+
+.u-checklist-item.checked .u-checklist-check {
+  background: var(--u-emerald);
+  border-color: var(--u-emerald);
+}
+
+.u-checklist-check .material-symbols-rounded {
+  font-size: 16px;
+  color: #fff;
+  opacity: 0;
+  transition: opacity var(--u-duration-fast);
+}
+
+.u-checklist-item.checked .u-checklist-check .material-symbols-rounded {
+  opacity: 1;
+}
+
+.u-checklist-text {
+  font-size: 0.88rem;
+  color: var(--u-text-primary);
+  flex: 1;
+}
+
+.u-checklist-item.checked .u-checklist-text {
+  text-decoration: line-through;
+  color: var(--u-text-disabled);
+}
+
+/* --- Case Explainer (Step-by-step) --- */
+.u-explainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-4);
+}
+
+.u-explainer-step {
+  display: flex;
+  gap: var(--u-space-4);
+  padding: var(--u-space-4);
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-md);
+  position: relative;
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-explainer-step::before {
+  content: '';
+  position: absolute;
+  left: 28px;
+  bottom: -16px;
+  width: 2px;
+  height: 16px;
+  background: var(--u-border);
+}
+
+.u-explainer-step:last-child::before { display: none; }
+
+.u-explainer-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--u-accent-subtle);
+  color: var(--u-accent);
+  display: grid;
+  place-items: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.u-explainer-content { flex: 1; }
+
+.u-explainer-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--u-primary);
+  margin-bottom: 4px;
+}
+
+.u-explainer-text {
+  font-size: 0.85rem;
+  color: var(--u-text-secondary);
+  line-height: 1.5;
+}
+
+/* --- Virtual Court Simulator --- */
+.u-court-sim {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.u-courtroom {
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-2xl);
+  padding: var(--u-space-8);
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-courtroom::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.05), transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Judge */
+.u-court-judge {
+  text-align: center;
+  margin-bottom: var(--u-space-8);
+  position: relative;
+  z-index: 1;
+}
+
+.u-court-judge-bench {
+  width: 100%;
+  max-width: 320px;
+  padding: var(--u-space-4) var(--u-space-6);
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--u-radius-lg);
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+}
+
+.u-court-judge-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  display: grid;
+  place-items: center;
+  margin: 0 auto var(--u-space-2);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.u-court-judge-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--u-amber-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Court Areas */
+.u-court-areas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--u-space-5);
+}
+
+.u-court-area {
+  padding: var(--u-space-5);
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-lg);
+  text-align: center;
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-court-area-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto var(--u-space-2);
+}
+
+.u-court-area-icon.lawyer { background: var(--u-accent-subtle); color: var(--u-accent); }
+.u-court-area-icon.you { background: rgba(26, 39, 68, 0.08); color: var(--u-primary); }
+
+.u-court-area-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--u-primary);
+  margin-bottom: 2px;
+}
+
+.u-court-area-desc {
+  font-size: 0.78rem;
+  color: var(--u-text-secondary);
+}
+
+/* --- Court Tips --- */
+.u-court-tips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--u-space-3);
+  margin-top: var(--u-space-6);
+}
+
+.u-court-tip {
+  padding: var(--u-space-4);
+  background: #ffffff;
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-md);
+  display: flex;
+  gap: var(--u-space-3);
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-court-tip-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--u-radius-xs);
+  background: var(--u-accent-subtle);
+  display: grid;
+  place-items: center;
+  color: var(--u-accent);
+  flex-shrink: 0;
+}
+
+.u-court-tip-icon .material-symbols-rounded { font-size: 18px; }
+
+.u-court-tip-text {
+  font-size: 0.82rem;
+  color: var(--u-text-secondary);
+  line-height: 1.5;
+}
+
+/* --- Hearing Day Screen --- */
+.u-hearing-day {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.u-hearing-day-hero {
+  text-align: center;
+  padding: var(--u-space-8) var(--u-space-5);
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--u-radius-2xl);
+  margin-bottom: var(--u-space-6);
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-hearing-day-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--u-space-2);
+  padding: var(--u-space-2) var(--u-space-4);
+  background: var(--u-amber-subtle);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--u-radius-full);
+  color: var(--u-amber-light);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: var(--u-space-4);
+}
+
+.u-hearing-day-case {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--u-primary);
+  margin-bottom: var(--u-space-4);
+}
+
+.u-hearing-day-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--u-space-4);
+}
+
+.u-hearing-day-detail {
+  text-align: center;
+}
+
+.u-hearing-day-detail-label {
+  font-size: 0.68rem;
+  color: var(--u-text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.u-hearing-day-detail-value {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--u-text-primary);
+  margin-top: 2px;
+}
+
+.u-hearing-day-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--u-space-3);
+}
+
+/* --- Post Hearing --- */
+.u-post-hearing {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .u-court-areas { grid-template-columns: 1fr; }
+  .u-hearing-day-details { grid-template-columns: 1fr; gap: var(--u-space-2); }
+  .u-hearing-day-actions { grid-template-columns: 1fr; }
+}

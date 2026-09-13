@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — CASE FILE MANAGEMENT
+   Nyay Setu — CASE FILE MANAGEMENT
    cases_page.js — Case list, litigation pipeline, confidential
    notes, exhibits (real upload/download), case creation.
    ============================================================ */

@@ -1,9 +1,9 @@
 /* ============================================================
-   LEGALCONNECT — CENTRAL STATE STORE
+   Nyay Setu — CENTRAL STATE STORE
    store.js — Server-hydrated state, optimistic local writes,
    debounced persistence, computed selectors
    ------------------------------------------------------------
-   Data lives on the LegalConnect API (per-lawyer workspace).
+   Data lives on the Nyay Setu API (per-lawyer workspace).
    This store keeps an in-memory mirror for instant rendering,
    persists a cache to localStorage for fast boot, and syncs
    every mutation back to the server automatically.
@@ -76,14 +76,14 @@ const Store = {
     clearTimeout(this._pendingSync[collection]);
     this._pendingSync[collection] = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/state/${collection}`, {
+        const url = window.AuthManager ? AuthManager.getApiUrl(`/api/state/${collection}`) : `/api/state/${collection}`;
+        const res = await fetch(url, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('lc_token') || ''}`
-          },
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ value: this._state[collection] })
         });
+        if (res.status === 401) AuthManager.clearSession();
         this._online = res.ok;
       } catch (_e) {
         this._online = false; // offline — will retry on next mutation
@@ -135,9 +135,8 @@ const Store = {
 
   /** Pull the authoritative workspace after sign-in or major actions. */
   async refreshFromServer() {
-    const res = await fetch('/api/state', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('lc_token') || ''}` }
-    });
+    const url = window.AuthManager ? AuthManager.getApiUrl('/api/state') : '/api/state';
+    const res = await fetch(url, { credentials: 'include' });
     if (!res.ok) throw new Error(`State fetch failed (${res.status})`);
     const data = await res.json();
     this._online = true;

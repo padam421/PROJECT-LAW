@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — DATABASE SEEDER
+   Nyay Setu — DATABASE SEEDER
    seed.js — Demo advocate (rich workspace), admin reviewer,
    and empty-workspace defaults for fresh registrations.
    ============================================================ */
@@ -279,10 +279,10 @@ async function seedDemoAdvocate(data) {
     role: 'lawyer',
     fullName: 'Adv. Rajesh Kumar Sharma',
     professionalName: 'Adv. R.K. Sharma',
-    email: 'demo@legalconnect.in',
+    email: 'demo@Nyay Setu.in',
     phone: '9876543210',
     phoneNormalized: '9876543210',
-    emailHash: sha256Short('demo@legalconnect.in'),
+    emailHash: sha256Short('demo@Nyay Setu.in'),
     phoneHash: sha256Short('9876543210'),
     passwordHash: demoPasswordHash,
     gender: 'Male',
@@ -305,6 +305,8 @@ async function seedDemoAdvocate(data) {
     courts: ['Supreme Court of India', 'High Court of Delhi', 'District & Sessions Courts'],
     languages: ['English', 'Hindi'],
     bio: 'A seasoned criminal law practitioner with over 14 years of experience handling complex criminal, civil, and cyber law matters. Successfully represented clients before the Supreme Court and various High Courts across India.',
+    isVerified: true,
+    registrationStage: 'complete',
     accountStatus: 'active',
     verificationStatus: 'verified',
     verificationId: 'LC-VER-2024-0001',
@@ -317,7 +319,7 @@ async function seedDemoAdvocate(data) {
   });
 
   data.workspace['law_demo_001'] = buildDemoWorkspace();
-  console.log('[seed] Demo advocate seeded (SEED_DEMO_DATA=true): demo@legalconnect.in');
+  console.log('[seed] Demo advocate seeded (SEED_DEMO_DATA=true): demo@Nyay Setu.in');
 }
 
 /**
@@ -332,18 +334,28 @@ async function seedIfEmpty() {
   let changed = false;
 
   if (!data.users.some(u => u.role === 'admin')) {
-    const adminEmail = String(process.env.ADMIN_EMAIL || 'admin@legalconnect.in').toLowerCase();
+    const adminEmail = String(process.env.ADMIN_EMAIL || 'admin@Nyay Setu.in').toLowerCase();
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    // Production requires an explicit ADMIN_PASSWORD (envConfig fail-fast
+    // blocks boot otherwise). Development falls back to a known default so
+    // the review console is usable out of the box.
+    const plainAdminPassword = adminPassword || 'Admin@1234';
     data.users.push({
       id: db.uid('adm'),
       role: 'admin',
       fullName: 'Verification Desk',
       email: adminEmail,
-      passwordHash: await hashPassword(process.env.ADMIN_PASSWORD || 'Admin@1234'),
+      passwordHash: await hashPassword(plainAdminPassword),
+      isVerified: true,
+      registrationStage: 'complete',
       accountStatus: 'active',
       createdAt: new Date().toISOString()
     });
     changed = true;
     console.log(`[seed] Verification-desk admin ready: ${adminEmail}`);
+    if (!adminPassword) {
+      console.warn('[seed] WARNING: ADMIN_PASSWORD not set — using development default. Set it in .env before deploying.');
+    }
   }
 
   const demoWanted = String(process.env.SEED_DEMO_DATA || '').toLowerCase() === 'true';

@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — VALIDATION & SHARED HELPERS
+   Nyay Setu — VALIDATION & SHARED HELPERS
    ============================================================ */
 
 const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

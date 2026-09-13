@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — AI CASE ANALYSIS ENGINE
+   Nyay Setu — AI CASE ANALYSIS ENGINE
    case_analysis.js — Dynamic AI legal analysis simulator
    ============================================================ */
 

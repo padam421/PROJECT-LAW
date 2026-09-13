@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — UI COMPONENTS BUILDER
+   Nyay Setu — UI COMPONENTS BUILDER
    components.js — Reusable HTML builders (Sidebar, TopBar,
    AppLayout, StatCard, EmptyState) + shared handlers
    ============================================================ */
@@ -22,22 +22,87 @@ const Components = {
   Sidebar(activeItem = 'dashboard') {
     const unreadCount = Store.getUnreadNotifications().length;
     const pendingReqs = Store.getPendingRequests().length;
-    const lawyer = Store.getState('lawyerProfile') || AuthManager.currentLawyer();
+    const lawyer =
+      Store.getState('lawyerProfile') || AuthManager.currentLawyer();
     const deactivated = !!lawyer.profileDeactivated;
 
     const navItems = [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-      { id: 'clients', label: 'Client Requests', icon: 'person_search', route: '/clients', badge: pendingReqs || null },
-      { id: 'consultation', label: 'Consultation', icon: 'video_camera_front', route: '/consultation' },
-      { id: 'chat', label: 'Client Chat', icon: 'chat', route: '/chat', badge: this.totalUnreadChats() || null },
-      { id: 'cases', label: 'Case Management', icon: 'folder_open', route: '/cases' },
-      { id: 'payments', label: 'Earnings & Payments', icon: 'payments', route: '/payments' },
-      { id: 'reviews', label: 'Client Reviews', icon: 'star', route: '/reviews' },
-      { id: 'profile', label: 'Portfolio & Profile', icon: 'badge', route: '/profile' },
-      { id: 'settings', label: 'Settings & Security', icon: 'settings', route: '/settings', badge: unreadCount || null }
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        icon: 'dashboard',
+        route: '/dashboard',
+      },
+      {
+        id: 'clients',
+        label: 'Client Requests',
+        icon: 'person_search',
+        route: '/clients',
+        badge: pendingReqs || null,
+      },
+      {
+        id: 'court',
+        label: 'Virtual Courtroom',
+        icon: 'gavel',
+        route: '/court',
+      },
+      {
+        id: 'ai-assistant',
+        label: 'AI Legal Assistant',
+        icon: 'auto_awesome',
+        route: '/ai-assistant',
+      },
+      {
+        id: 'consultation',
+        label: 'Consultation',
+        icon: 'video_camera_front',
+        route: '/consultation',
+      },
+      {
+        id: 'chat',
+        label: 'Client Chat',
+        icon: 'chat',
+        route: '/chat',
+        badge: this.totalUnreadChats() || null,
+      },
+      {
+        id: 'cases',
+        label: 'Case Management',
+        icon: 'folder_open',
+        route: '/cases',
+      },
+      {
+        id: 'payments',
+        label: 'Earnings & Payments',
+        icon: 'payments',
+        route: '/payments',
+      },
+      {
+        id: 'reviews',
+        label: 'Client Reviews',
+        icon: 'star',
+        route: '/reviews',
+      },
+      {
+        id: 'profile',
+        label: 'Portfolio & Profile',
+        icon: 'badge',
+        route: '/profile',
+      },
+      {
+        id: 'settings',
+        label: 'Settings & Security',
+        icon: 'settings',
+        route: '/settings',
+        badge: unreadCount || null,
+      },
     ];
 
-    const initials = (lawyer.fullName || 'Advocate').split(' ').map(n => n[0]).slice(0, 2).join('');
+    const initials = (lawyer.fullName || 'Advocate')
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('');
     const photo = lawyer.profilePhoto;
 
     return `
@@ -47,7 +112,7 @@ const Components = {
             <span class="material-symbols-rounded icon-filled">gavel</span>
           </div>
           <div class="sidebar-brand">
-            <span class="sidebar-brand-name">LegalConnect</span>
+            <span class="sidebar-brand-name">Nyay Setu</span>
             <span class="sidebar-brand-tagline">Advocate Portal</span>
           </div>
         </div>
@@ -55,18 +120,28 @@ const Components = {
         <nav class="sidebar-nav" aria-label="Primary">
           <div class="sidebar-section">
             <div class="sidebar-section-title">Practice</div>
-            ${navItems.slice(0, 7).map(item => this.sidebarItem(item, activeItem)).join('')}
+            ${navItems
+              .slice(0, 7)
+              .map((item) => this.sidebarItem(item, activeItem))
+              .join('')}
           </div>
           <div class="sidebar-section">
             <div class="sidebar-section-title">Account</div>
-            ${navItems.slice(7).map(item => this.sidebarItem(item, activeItem)).join('')}
+            ${navItems
+              .slice(7)
+              .map((item) => this.sidebarItem(item, activeItem))
+              .join('')}
           </div>
         </nav>
 
-        ${deactivated ? `
+        ${
+          deactivated
+            ? `
           <div class="sidebar-status-chip" title="Not receiving new bookings">
             <span class="material-symbols-rounded icon-sm">pause_circle</span> Paused
-          </div>` : ''}
+          </div>`
+            : ''
+        }
 
         <div class="sidebar-footer">
           <div class="sidebar-profile" onclick="Router.navigate('/profile')" role="button" tabindex="0" aria-label="Open profile">
@@ -99,14 +174,18 @@ const Components = {
   },
 
   totalUnreadChats() {
-    return (Store.getState('conversations') || []).reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+    return (Store.getState('conversations') || []).reduce(
+      (sum, c) => sum + (c.unreadCount || 0),
+      0
+    );
   },
 
   toggleSidebar(open) {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.querySelector('.sidebar-overlay');
     if (!sidebar) return;
-    const shouldOpen = open === undefined ? !sidebar.classList.contains('open') : open;
+    const shouldOpen =
+      open === undefined ? !sidebar.classList.contains('open') : open;
     sidebar.classList.toggle('open', shouldOpen);
     if (overlay) overlay.classList.toggle('active', shouldOpen);
   },
@@ -125,12 +204,16 @@ const Components = {
           </button>
           <div>
             <h1 class="topbar-title">${Utils.escapeHtml(title)}</h1>
-            ${breadcrumbs.length > 0 ? `
+            ${
+              breadcrumbs.length > 0
+                ? `
               <div class="topbar-breadcrumb">
                 <a href="#/dashboard">Home</a>
-                ${breadcrumbs.map(b => `<span>/</span><span>${Utils.escapeHtml(b)}</span>`).join('')}
+                ${breadcrumbs.map((b) => `<span>/</span><span>${Utils.escapeHtml(b)}</span>`).join('')}
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
         </div>
 
@@ -159,7 +242,12 @@ const Components = {
   /* --------------------------------------------------------
      APP LAYOUT WRAPPER
      -------------------------------------------------------- */
-  AppLayout(contentHtml, activeNav = 'dashboard', pageTitle = 'Dashboard', breadcrumbs = []) {
+  AppLayout(
+    contentHtml,
+    activeNav = 'dashboard',
+    pageTitle = 'Dashboard',
+    breadcrumbs = []
+  ) {
     return `
       <div class="app-layout">
         ${this.Sidebar(activeNav)}
@@ -184,12 +272,16 @@ const Components = {
         </div>
         <div class="stat-card-value">${value}</div>
         <div class="stat-card-label">${label}</div>
-        ${trend ? `
+        ${
+          trend
+            ? `
           <div class="stat-card-trend ${trend.type || 'up'}">
             <span class="material-symbols-rounded icon-sm">${trend.type === 'down' ? 'trending_down' : 'trending_up'}</span>
             ${Utils.escapeHtml(trend.text)}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     `;
   },
@@ -212,7 +304,9 @@ const Components = {
      SKELETON LOADER BLOCK
      -------------------------------------------------------- */
   skeletonRows(rows = 3) {
-    return `<div class="skeleton-stack">${Array.from({ length: rows }).map(() => '<div class="skeleton-row"></div>').join('')}</div>`;
+    return `<div class="skeleton-stack">${Array.from({ length: rows })
+      .map(() => '<div class="skeleton-row"></div>')
+      .join('')}</div>`;
   },
 
   /* --------------------------------------------------------
@@ -229,14 +323,18 @@ const Components = {
   },
 
   async handleLogout() {
-    const confirmed = await Utils.showConfirm('Confirm Sign Out', 'Your session will be securely terminated on this device.', {
-      confirmText: 'Sign Out',
-      type: 'danger'
-    });
+    const confirmed = await Utils.showConfirm(
+      'Confirm Sign Out',
+      'Your session will be securely terminated on this device.',
+      {
+        confirmText: 'Sign Out',
+        type: 'danger',
+      }
+    );
     if (confirmed) {
       ApiClient.stopReminderEngine();
       await AuthManager.logout();
       Utils.showToast('Session securely ended.', 'info');
     }
-  }
+  },
 };

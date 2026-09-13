@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — OTP & DEVICE CHECK
+   Nyay Setu — OTP & DEVICE CHECK
    otp.css — OTP verification, 2FA, new device confirmation
    ============================================================ */
 
@@ -128,6 +128,51 @@
 .otp-resend-btn:disabled {
   color: var(--color-gray-300);
   cursor: not-allowed;
+}
+
+/* Inline alert banner for expiry / wrong-code / rate-limit feedback */
+.otp-alert {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  font-size: var(--text-body-sm);
+  line-height: 1.45;
+  border-radius: var(--radius-md, 10px);
+  padding: 10px 14px;
+  margin-bottom: var(--space-5);
+  animation: fadeIn 0.25s ease;
+}
+
+.otp-alert .material-symbols-rounded {
+  font-size: 18px;
+  margin-top: 1px;
+}
+
+.otp-alert-error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.otp-alert-warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.otp-alert-info {
+  background: rgba(20, 184, 166, 0.12);
+  color: var(--color-accent-lighter, #5eead4);
+  border: 1px solid rgba(20, 184, 166, 0.35);
+}
+
+.otp-alert-success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.35);
 }
 
 .otp-error {
@@ -264,23 +309,4 @@
   font-weight: var(--weight-medium);
 }
 
-/* ============================================================
-   3. OTP HINT (for demo)
-   ============================================================ */
-.otp-hint {
-  background: var(--color-gold-50);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--text-body-sm);
-  color: var(--color-gold-dark);
-  margin-top: var(--space-4);
-}
 
-.otp-hint code {
-  font-family: var(--font-mono);
-  font-weight: var(--weight-bold);
-  background: rgba(245, 158, 11, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
-}

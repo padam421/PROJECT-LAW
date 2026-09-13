@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — DATA LAYER (file-backed JSON database)
+   Nyay Setu — DATA LAYER (file-backed JSON database)
    dbConfig.js — Atomic read/write, per-lawyer workspaces, indexes
    ------------------------------------------------------------
    Production note: this driver mirrors a relational model 1:1.
@@ -26,6 +26,7 @@ function emptyDb() {
     meta: { version: 2, createdAt: new Date().toISOString() },
     users: [],              // lawyers + admins (auth identity)
     otpChallenges: [],
+    otpSends: [],           // per-email send log powering rate limits (auto-pruned)
     sessions: [],           // active JWT session records
     trustedDevices: [],
     loginActivity: [],

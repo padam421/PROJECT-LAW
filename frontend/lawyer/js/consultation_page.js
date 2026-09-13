@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — VIRTUAL CONSULTATION ROOM
+   Nyay Setu — VIRTUAL CONSULTATION ROOM
    consultation_page.js — Session room with controls, in-call
    chat & exhibits panel, honest media status.
    ------------------------------------------------------------

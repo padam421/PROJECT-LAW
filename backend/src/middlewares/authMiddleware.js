@@ -1,16 +1,23 @@
 /* ============================================================
-   LEGALCONNECT — AUTH MIDDLEWARE
+   Nyay Setu — AUTH MIDDLEWARE
    authMiddleware.js — JWT verification, role guards,
    sensitive-action lock enforcement
    ============================================================ */
 
 const jwt = require('jsonwebtoken');
 const config = require('../config/envConfig');
+const DbService = require('../services/dbService');
 const db = require('../config/dbConfig');
 
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
+  // Token sources, in order: Authorization: Bearer <jwt> (API clients),
+  // then the HttpOnly session cookie set by /api/auth/otp/verify.
+  // Query-string tokens are deliberately NOT accepted — URLs leak into
+  // logs, history and referrer headers.
   const header = req.get('authorization') || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : (req.query.token || '');
+  const bearer = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
+  const cookieToken = (req.cookies && req.cookies[config.cookie.name]) || '';
+  const token = bearer || cookieToken;
   if (!token) {
     return res.status(401).json({ error: 'Authentication required. Please sign in.' });
   }
@@ -23,12 +30,18 @@ function authenticate(req, res, next) {
   }
 
   const data = db.get();
-  const session = data.sessions.find(s => s.id === payload.sid);
+  let session = (data.sessions || []).find(s => s.id === payload.sid);
+  if (!session) {
+    session = await DbService.findSession(payload.sid).catch(() => null);
+  }
   if (!session || session.revoked) {
     return res.status(401).json({ error: 'This session was terminated. Please sign in again.', code: 'session_terminated' });
   }
 
-  const user = data.users.find(u => u.id === payload.sub);
+  let user = (data.users || []).find(u => u.id === payload.sub);
+  if (!user) {
+    user = await DbService.findUserById(payload.sub).catch(() => null);
+  }
   if (!user || user.accountStatus === 'suspended') {
     return res.status(403).json({ error: 'Account unavailable. Contact support.', code: 'account_unavailable' });
   }

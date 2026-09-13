@@ -1,4 +1,4 @@
-# LegalConnect — AI Service
+# Nyay Setu — AI Service
 
 Python microservice reserved for the client-facing AI features:
 legal-assistant chat, lawyer matching and the virtual court simulator.

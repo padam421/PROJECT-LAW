@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — UTILITY FUNCTIONS
+   Nyay Setu — UTILITY FUNCTIONS
    utils.js — Toast, Modal, Validation, Formatting, Ripple
    ============================================================ */
 
@@ -11,6 +11,21 @@ const Utils = {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substring(2, 8);
     return `${prefix}_${timestamp}_${random}`;
+  },
+
+  /* --------------------------------------------------------
+     HTML ESCAPING
+     -------------------------------------------------------- */
+  escapeHtml(str) {
+    if (str == null) return '';
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return String(str).replace(/[&<>"']/g, m => map[m]);
   },
 
   /* --------------------------------------------------------
@@ -282,14 +297,20 @@ const Utils = {
      RIPPLE EFFECT
      -------------------------------------------------------- */
   createRipple(event) {
-    const button = event.currentTarget;
-    const circle = document.createElement('span');
-    const diameter = Math.max(button.clientWidth, button.clientHeight);
-    const radius = diameter / 2;
+    const button = (event.currentTarget && event.currentTarget.getBoundingClientRect)
+      ? event.currentTarget
+      : event.target?.closest?.('.btn-primary, .btn-secondary, .btn-danger, .btn-accent, .btn, .u-btn');
+    if (!button || typeof button.getBoundingClientRect !== 'function') return;
 
+    const diameter = Math.max(button.clientWidth || 0, button.clientHeight || 0);
+    if (!diameter) return;
+    const radius = diameter / 2;
+    const rect = button.getBoundingClientRect();
+
+    const circle = document.createElement('span');
     circle.style.width = circle.style.height = `${diameter}px`;
-    circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
-    circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
+    circle.style.left = `${event.clientX - rect.left - radius}px`;
+    circle.style.top = `${event.clientY - rect.top - radius}px`;
     circle.classList.add('ripple');
 
     const existingRipple = button.querySelector('.ripple');

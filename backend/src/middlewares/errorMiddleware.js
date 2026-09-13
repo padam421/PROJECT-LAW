@@ -1,5 +1,5 @@
 /* ============================================================
-   LEGALCONNECT — ERROR HANDLING MIDDLEWARE
+   Nyay Setu — ERROR HANDLING MIDDLEWARE
    ============================================================ */
 
 function notFoundHandler(req, res) {
