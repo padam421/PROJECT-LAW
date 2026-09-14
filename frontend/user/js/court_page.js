@@ -151,8 +151,42 @@ const UserCourtPage = {
           </div>
         </div>
 
+        <!-- AI Live Courtroom Simulation Studio -->
+        <div class="u-card" style="margin-top:24px;border:1px solid rgba(13,148,136,0.3);background:linear-gradient(180deg, #ffffff 0%, #f0fdfa 100%)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:36px;height:36px;border-radius:10px;background:var(--u-accent-gradient);display:grid;place-items:center;color:#fff">
+              <span class="material-symbols-rounded" style="font-size:20px">smart_toy</span>
+            </div>
+            <div>
+              <h3 style="font-size:1.1rem;font-weight:800;color:var(--u-primary);margin:0">AI Courtroom Argument Simulator</h3>
+              <p style="font-size:0.8rem;color:var(--u-text-tertiary);margin:0">Simulate Judge, Defense Counsel, and Public Prosecutor arguing your case based on Supreme Court precedents</p>
+            </div>
+          </div>
+
+          <div class="u-input-group" style="margin-bottom:12px">
+            <label class="u-input-label" style="font-weight:700">Enter Your Case Summary / Legal Dispute:</label>
+            <textarea id="court-sim-summary" class="u-textarea" rows="3" placeholder="e.g. My brother filed a false FIR under Section 420 IPC and Section 307 for an alleged family land dispute. We have registered sale deeds and eyewitness affidavits proving absence from the scene..."></textarea>
+          </div>
+
+          <!-- Quick Samples -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+            <span style="font-size:0.75rem;color:var(--u-text-tertiary);align-self:center">Try Sample:</span>
+            <button class="u-btn u-btn-secondary u-btn-sm" style="font-size:0.75rem;padding:4px 10px" onclick="UserCourtPage.fillSample(1)">UAPA Anticipatory Bail</button>
+            <button class="u-btn u-btn-secondary u-btn-sm" style="font-size:0.75rem;padding:4px 10px" onclick="UserCourtPage.fillSample(2)">NDPS Search Non-Compliance</button>
+            <button class="u-btn u-btn-secondary u-btn-sm" style="font-size:0.75rem;padding:4px 10px" onclick="UserCourtPage.fillSample(3)">Property Partition & Injunction</button>
+          </div>
+
+          <button id="court-sim-btn" class="u-btn u-btn-primary u-btn-pill" onclick="UserCourtPage.runSimulation()" style="width:100%;justify-content:center">
+            <span class="material-symbols-rounded">gavel</span> Start Live AI Courtroom Simulation
+          </button>
+
+          <!-- Simulation Results Container -->
+          <div id="court-sim-results" style="display:none;margin-top:20px;padding:18px;border-radius:12px;background:#ffffff;border:1px solid var(--u-border);line-height:1.7;font-size:0.9rem">
+          </div>
+        </div>
+
         <!-- Courtroom Etiquette Tips -->
-        <div class="u-court-tips">
+        <div class="u-court-tips" style="margin-top:24px">
           <div class="u-court-tip">
             <div class="u-court-tip-icon"><span class="material-symbols-rounded">record_voice_over</span></div>
             <div class="u-court-tip-text"><strong>Addressing Judge:</strong> Always address the Judge as <em>"Your Honour"</em> or <em>"My Lord"</em>.</div>
@@ -170,6 +204,78 @@ const UserCourtPage = {
     `;
 
     return UserComponents.AppLayout(content, 'court', 'Court Simulator', true);
+  },
+
+  fillSample(num) {
+    const input = document.getElementById('court-sim-summary');
+    if (!input) return;
+    if (num === 1) {
+      input.value = "Accused is charged under Section 43-D(5) of UAPA along with conspiracy charges. Investigation has been ongoing for 14 months without a supplementary chargesheet. We are seeking bail based on violation of Article 21 and Supreme Court right to speedy trial rulings.";
+    } else if (num === 2) {
+      input.value = "Client apprehended with alleged commercial quantity of contraband under NDPS Act. Police failed to give mandatory written notice under Section 50 regarding right to be searched before Gazetted Officer or Magistrate. Independent seizure witnesses turned hostile.";
+    } else if (num === 3) {
+      input.value = "Ancestral property partition suit. Defendant attempting to alienate joint Hindu family property and create third party rights using an unregistered gift deed. Plaintiff seeking interim injunction under Order 39 Rules 1 & 2 CPC.";
+    }
+  },
+
+  async runSimulation() {
+    const input = document.getElementById('court-sim-summary');
+    const btn = document.getElementById('court-sim-btn');
+    const resDiv = document.getElementById('court-sim-results');
+    const summary = input?.value.trim();
+
+    if (!summary) {
+      Utils.showToast('Please enter your case summary first.', 'warning');
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-rounded" style="animation:spin 1s infinite linear">sync</span> Simulating Judge, Defense Counsel & Prosecutor Arguments...';
+    }
+    if (resDiv) {
+      resDiv.style.display = 'block';
+      resDiv.innerHTML = `
+        <div style="text-align:center;padding:30px;color:var(--u-text-tertiary)">
+          <div style="width:40px;height:40px;border:3px solid var(--u-accent-light);border-top-color:transparent;border-radius:50%;animation:spin 1s infinite linear;margin:0 auto 12px"></div>
+          <strong style="color:var(--u-primary)">Analyzing Supreme Court Database & Convening Courtroom Bench...</strong>
+          <p style="font-size:0.8rem;margin-top:6px">Reviewing precedents, testing maintainability, and generating multi-scenario arguments.</p>
+        </div>
+      `;
+    }
+
+    try {
+      const simulation = await UserApiClient.simulateCourtroom(summary);
+      if (resDiv) {
+        // Convert markdown headings and bold to rich HTML
+        let formatted = Utils.escapeHtml(simulation)
+          .replace(/^### (.*$)/gim, '<h4 style="color:var(--u-primary);margin-top:18px;margin-bottom:8px;font-weight:800;font-size:1.05rem;border-bottom:1px solid #e2e8f0;padding-bottom:4px">$1</h4>')
+          .replace(/^## (.*$)/gim, '<h3 style="color:var(--u-primary);margin-top:20px;margin-bottom:10px;font-weight:800;font-size:1.2rem">$1</h3>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/\n\n/g, '<br><br>')
+          .replace(/\n/g, '<br>');
+
+        resDiv.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:2px solid #e2e8f0;padding-bottom:10px">
+            <span style="font-weight:800;color:#0d9488;display:flex;align-items:center;gap:6px">
+              <span class="material-symbols-rounded">verified</span> Authentic Supreme Court Simulation
+            </span>
+            <button class="u-btn u-btn-secondary u-btn-sm" onclick="window.print()">Print Dossier</button>
+          </div>
+          ${formatted}
+        `;
+      }
+    } catch (err) {
+      if (resDiv) {
+        resDiv.innerHTML = `<div style="color:#ef4444;padding:12px">Failed to generate courtroom simulation. Please check connection.</div>`;
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-rounded">gavel</span> Start Live AI Courtroom Simulation';
+      }
+    }
   },
 
   /* ==================== 3. HEARING DAY SCREEN (STEP 41) ==================== */

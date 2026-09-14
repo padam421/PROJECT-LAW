@@ -268,15 +268,85 @@ const UserApiClient = {
     return UserStore.getConsultations();
   },
 
-  async getAIResponse(message, caseContext = null) {
-    await new Promise(r => setTimeout(r, 1200));
-    const responses = [
-      'Based on your case information and Indian legal statutes, here is what you should consider...',
-      'According to the Civil Procedure Code and applicable precedents, your situation has clear statutory remedies...',
-      'I understand your concern. You can consult with verified advocates like Adv. Padam Kishore directly through this platform...',
-      'This relates directly to property and civil jurisprudence. You can schedule a direct encrypted video consultation to discuss documents.'
-    ];
-    return responses[Math.floor(Math.random() * responses.length)] +
-      '\n\nPlease note: For case-specific legal advice, always consult your verified advocate.';
+  async getAIResponse(message, caseContext = null, language = 'auto') {
+    try {
+      const url = this.getUrl('/api/ai/chat');
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: message,
+          role: 'user',
+          caseContext: caseContext,
+          language: language
+        })
+      });
+      const data = await resp.json();
+      if (data && data.ok && data.message) {
+        return data.message;
+      }
+      return data.error || 'Unable to fetch legal precedent response. Please try again.';
+    } catch (err) {
+      console.warn('Backend proxy unreachable, attempting direct AI service on port 5000:', err.message);
+      try {
+        const directResp = await fetch('http://127.0.0.1:5000/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: message,
+            role: 'user',
+            caseContext: caseContext,
+            language: language
+          })
+        });
+        const directData = await directResp.json();
+        if (directData && directData.ok && directData.message) {
+          return directData.message;
+        }
+      } catch (directErr) {
+        console.error('Direct AI Service fetch failed:', directErr);
+      }
+      return 'Nyay Setu Supreme Court AI Service se connect karne mein samasya aa rahi hai. Kripya sunishchit karein ki backend (port 3000) ya AI service (port 5000) active hai.';
+    }
+  },
+
+  async simulateCourtroom(summary, category = null, language = 'auto') {
+    try {
+      const url = this.getUrl('/api/ai/court');
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          summary: summary,
+          category: category,
+          language: language
+        })
+      });
+      const data = await resp.json();
+      if (data && data.ok && data.simulation) {
+        return data.simulation;
+      }
+      return data.error || 'Court simulation could not be generated.';
+    } catch (err) {
+      console.warn('Backend proxy unreachable for simulation, attempting direct port 5000:', err.message);
+      try {
+        const directResp = await fetch('http://127.0.0.1:5000/api/ai/court', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            summary: summary,
+            category: category,
+            language: language
+          })
+        });
+        const directData = await directResp.json();
+        if (directData && directData.ok && directData.simulation) {
+          return directData.simulation;
+        }
+      } catch (directErr) {
+        console.error('Direct Courtroom simulation failed:', directErr);
+      }
+      return 'Unable to connect to Courtroom Simulation Engine. Please ensure the AI service is running on port 5000.';
+    }
   }
 };

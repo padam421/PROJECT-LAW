@@ -29,6 +29,8 @@ ai-service/models/saved_models/*
 !ai-service/models/saved_models/.keep
 backend/data/uploads/*
 !backend/data/uploads/.gitkeep
+data/chroma_db/
+data/raw_data/
 
 # System & IDE files
 .DS_Store

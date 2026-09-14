@@ -6,11 +6,14 @@
    ============================================================ */
 
 const UserDemoData = {
-  DEMO_ACTIVE: true, // ← Flip to false to disable all demo data
+  DEMO_ACTIVE: false, // ← Set to false: cleans synthetic data for live production use
 
   /** Call after UserStore.init() to seed empty collections */
   seed() {
-    if (!this.DEMO_ACTIVE) return;
+    if (!this.DEMO_ACTIVE) {
+      this.purge();
+      return;
+    }
     console.log('[DemoData] 🎯 Seeding user-side demo data for presentation...');
 
     this._seedCases();
@@ -168,6 +171,12 @@ const UserDemoData = {
         UserStore.set(key, items.filter(i => !i._isDemo));
       }
     });
+    // Purge old synthetic chat history so user starts completely fresh
+    const convs = UserStore.get('conversations') || [];
+    const hasStaleConv = convs.some(c => c.messages && c.messages.some(m => m.text && (m.text.includes('shhhh') || m.text.includes('relates directly to property'))));
+    if (hasStaleConv) {
+      UserStore.set('conversations', []);
+    }
     const myLawyer = UserStore.getLawyer();
     if (myLawyer && myLawyer._isDemo) UserStore.set('myLawyer', null);
     console.log('[DemoData] ✅ User demo data purged.');

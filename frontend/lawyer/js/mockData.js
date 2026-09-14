@@ -6,11 +6,14 @@
    ============================================================ */
 
 const LawyerDemoData = {
-  DEMO_ACTIVE: true, // ← Flip to false to disable all demo data
+  DEMO_ACTIVE: false, // ← Set to false: cleans synthetic demo data for production usage
 
   /** Call after Store.init() to seed empty collections */
   seed() {
-    if (!this.DEMO_ACTIVE) return;
+    if (!this.DEMO_ACTIVE) {
+      this.purge();
+      return;
+    }
     console.log('[DemoData] 🎯 Seeding lawyer-side demo data for presentation...');
 
     this._seedClients();

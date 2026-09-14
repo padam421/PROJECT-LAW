@@ -281,4 +281,55 @@ router.patch('/notifications/:id/read', optionalAuth, async (req, res) => {
   }
 });
 
+// ============================================================
+// AI SERVICE PROXY (RAG Chatbot & Virtual Court Simulator)
+// ============================================================
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:5000';
+
+router.post('/ai/chat', async (req, res) => {
+  try {
+    const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await aiResp.json();
+    res.status(aiResp.status).json(data);
+  } catch (err) {
+    console.error('AI Proxy Error:', err.message);
+    res.status(502).json({
+      ok: false,
+      error: 'Nyay Setu AI Service is currently connecting or offline. Please ensure the AI service is running on port 5000.'
+    });
+  }
+});
+
+router.post('/ai/court', async (req, res) => {
+  try {
+    const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/court`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await aiResp.json();
+    res.status(aiResp.status).json(data);
+  } catch (err) {
+    console.error('AI Court Proxy Error:', err.message);
+    res.status(502).json({
+      ok: false,
+      error: 'Courtroom Simulator AI service is currently unavailable.'
+    });
+  }
+});
+
+router.get('/ai/health', async (_req, res) => {
+  try {
+    const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/health`);
+    const data = await aiResp.json();
+    res.json(data);
+  } catch (err) {
+    res.status(502).json({ ok: false, status: 'offline', error: err.message });
+  }
+});
+
 module.exports = router;
