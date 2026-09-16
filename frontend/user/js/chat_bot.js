@@ -158,6 +158,11 @@ const UserChatBot = {
             <span></span><span></span><span></span><span></span>
           </div>
         </button>
+        <button type="button" class="u-vc-chat-btn" onclick="VirtualCourtSimulator.launchFromChat('${msgId}')" title="🏛️ Virtual Courtroom Simulation शुरू करें">
+          <span class="material-symbols-rounded">gavel</span>
+          <span>🏛️ Virtual Court</span>
+          <span class="material-symbols-rounded u-vc-arr">arrow_forward</span>
+        </button>
       </div>
     ` : '';
 

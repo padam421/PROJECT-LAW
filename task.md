@@ -1,0 +1,32 @@
+# Virtual Court V2: Implementation Tasks
+
+- [x] Analyze user requirements, real courtroom photos, and approve plan
+- [x] Process and prepare multi-pose courtroom assets (seated/standing crops, accused dock, audience, judge dais)
+- [ ] Build `court.css` V2:
+  - [ ] 3D perspective courtroom layout (`perspective: 1100px`)
+  - [ ] Elevated Judge dais with Ashoka emblem, wooden bench, and gavel tap animation
+  - [ ] Defense and Prosecution podiums with standing/sitting transition states
+  - [ ] Witness dock (Kathghara) with accused & police constable
+  - [ ] Complainant dock & peshkar clerk desk
+  - [ ] Gallery audience row in foreground
+  - [ ] Skeletal & micro-animation keyframes (breathing, speaking gestures, head tilt, eye blinking)
+  - [ ] SVG Viseme lip-sync morphing engine (6 mouth phoneme shapes)
+  - [ ] Cinematic camera views (Judge close-up, Defense podium, Prosecution podium, Wide bench, Split dual)
+  - [ ] Retain hearing day & post-hearing sections
+- [ ] Build `court_simulator.js` V2:
+  - [ ] Multi-character state machine (Judge, Defense, Prosecution, Court Clerk)
+  - [ ] Procedural Court Workflow (All Rise -> Case Calling -> Petitioner Argument -> Prosecution Counter -> Rebuttal -> Judicial Order -> Case Adjourned)
+  - [ ] Stand/Sit transition controller (lawyer stands when turn starts, speaks with gestures, sits down on completion)
+  - [ ] Advanced Speech Synthesis with distinct voice profiles (Judge: pitch 0.55, rate 0.78; Prosecution: pitch 1.25, rate 1.05; Defense: pitch 0.90, rate 0.95; Clerk: pitch 1.10, rate 1.15)
+  - [ ] Real-time Viseme lip-sync driver (SVG mouth morphing linked to syllable rate)
+  - [ ] Dynamic gesture analysis based on speech keywords ("My Lord", "Your Honour", "I submit", "Notice", "Section")
+  - [ ] Interactive 3D gavel tapping with authentic audio synthesis
+  - [ ] Full simulation controls: Play/Pause, Next/Prev, Speed (0.75x, 1x, 1.25x, 1.5x), Camera switcher, Fullscreen, Transcript modal
+  - [ ] Preserve all existing public API methods (`render`, `renderLanding`, `launchFromChat`, `startSimulation`, `parseScript`, etc.)
+- [ ] Verification:
+  - [ ] Test simulated hearing in browser
+  - [ ] Verify standing/sitting animations
+  - [ ] Verify viseme lip-sync and eye blinking
+  - [ ] Verify clerk "All Rise" opening and gavel tapping
+  - [ ] Verify voice pitch differences
+  - [ ] Record browser video demo and update walkthrough.md

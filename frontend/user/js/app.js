@@ -190,6 +190,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     requiresAuth: true
   });
 
+  Router.register('/court/simulate/:msgId', (params) => {
+    if (typeof VirtualCourtSimulator !== 'undefined' && params && params.msgId) {
+      VirtualCourtSimulator.launchFromChat(params.msgId);
+    }
+    return UserCourtPage.renderSimulator();
+  }, {
+    title: 'Virtual Courtroom Simulator',
+    requiresAuth: true
+  });
+
   Router.register('/hearing/today', () => UserCourtPage.renderHearingDay(), {
     title: 'Hearing Day Hub',
     requiresAuth: true
