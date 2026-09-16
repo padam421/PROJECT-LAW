@@ -131,6 +131,57 @@
   opacity: 1;
 }
 
+/* Playback Controls (Pause/Play) */
+.v3-playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.v3-play-btn {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0;
+}
+
+.v3-play-btn .material-symbols-rounded {
+  font-size: 22px;
+  transition: transform 0.2s ease;
+}
+
+.v3-play-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+.v3-play-btn.paused {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+}
+
+.v3-play-btn.paused .material-symbols-rounded {
+  color: #34d399;
+}
+
+.v3-play-btn.paused:hover {
+  background: rgba(16, 185, 129, 0.35);
+  transform: scale(1.1);
+}
+
 .v3-hud-status {
   background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(8px);

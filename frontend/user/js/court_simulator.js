@@ -1,10 +1,12 @@
 /* ============================================================
-   Nyay Setu USER — VIRTUAL COURT SIMULATOR (V4 — 3-Avatar Debate)
+   Nyay Setu USER — VIRTUAL COURT SIMULATOR (V5 — Enhanced)
    court_simulator.js — Three.js Scene, 3D Avatars, Camera Director
+   Pause/Play, Dynamic Facing, Manual Camera, Wood Bench, Black Hair
    ============================================================ */
 
 const VirtualCourtSimulator = {
   _isPlaying: false,
+  _isPaused: false,
   _currentStep: 0,
 
   // Three.js Core
@@ -16,7 +18,9 @@ const VirtualCourtSimulator = {
 
   // Multi-Avatar System
   _mixers: {},   // { JUDGE: AnimationMixer, DEFENSE: AnimationMixer, PROSECUTION: AnimationMixer }
-  _actions: {},  // { JUDGE: AnimationAction, DEFENSE: AnimationAction, PROSECUTION: AnimationAction }
+  _actions: {},  // { JUDGE: AnimationAction, ... }
+  _models: {},   // Store model references for dynamic rotation
+  _targetRotations: {},  // Target rotation.y for each actor (lerped in animate loop)
 
   // Audio
   _audioContext: null,
@@ -33,6 +37,9 @@ const VirtualCourtSimulator = {
   _spotLightTarget: null,
   _speakerRings: {},
   _namePlates: {},
+
+  // Pause/Play
+  _pendingStepTimeout: null,
 
   // Avatar Model Files
   AVATAR_FILES: {
@@ -123,12 +130,12 @@ const VirtualCourtSimulator = {
     }
   ],
 
-  // Camera Presets — frontal angles to show faces
+  // Camera Presets — adjusted for correct facing directions
   CAMERAS: {
-    WIDE:        { pos: [0, 4, 16],     target: [0, 1.0, 0] },
-    JUDGE:       { pos: [0, 3.5, 4],    target: [0, 2.5, -1.8] },
-    DEFENSE:     { pos: [-2, 2.5, 6],   target: [-4, 1.5, 1] },
-    PROSECUTION: { pos: [2, 2.5, 6],    target: [4, 1.5, 1] }
+    WIDE:        { pos: [0, 5, 14],     target: [0, 1.5, 0] },
+    JUDGE:       { pos: [0, 3.5, 3],    target: [0, 2.5, -1.8] },
+    DEFENSE:     { pos: [-2, 2.8, -1],  target: [-4, 1.5, 1] },
+    PROSECUTION: { pos: [2, 2.8, -1],   target: [4, 1.5, 1] }
   },
 
   // Avatar Placement (world coordinates)
@@ -145,7 +152,7 @@ const VirtualCourtSimulator = {
         <div class="vc-hero-banner">
           <div class="vc-status-badge">
             <span class="material-symbols-rounded">view_in_ar</span>
-            V4 WebGL Engine — 3-Avatar Debate
+            V5 WebGL Engine — 3-Avatar Debate
           </div>
           <h1>3D Virtual Courtroom Simulator</h1>
           <p>Experience an immersive 3D courtroom debate with Judge, Defense & Prosecution avatars, cinematic cameras, and AI speech.</p>
@@ -182,6 +189,11 @@ const VirtualCourtSimulator = {
               <button class="v3-cam-btn" onclick="VirtualCourtSimulator.setCamera('DEFENSE')">DEFENSE</button>
               <button class="v3-cam-btn" onclick="VirtualCourtSimulator.setCamera('PROSECUTION')">PROS</button>
             </div>
+            <div class="v3-playback-controls">
+              <button class="v3-play-btn" id="v3-pause-btn" onclick="VirtualCourtSimulator.togglePause()" title="Pause / Play">
+                <span class="material-symbols-rounded" id="v3-pause-icon">pause</span>
+              </button>
+            </div>
             <div class="v3-hud-status recording" id="v3-status">
               <span class="material-symbols-rounded">fiber_manual_record</span> IN SESSION
             </div>
@@ -210,9 +222,12 @@ const VirtualCourtSimulator = {
   startSimulation() {
     if (this._isPlaying) return;
     this._isPlaying = true;
+    this._isPaused = false;
     this._currentStep = 0;
     this._mixers = {};
     this._actions = {};
+    this._models = {};
+    this._targetRotations = {};
     this._speakerRings = {};
 
     // Preload speech synthesis voices (required in Chrome)
@@ -339,12 +354,12 @@ const VirtualCourtSimulator = {
     floor.receiveShadow = true;
     this._scene.add(floor);
 
-    // === JUDGE'S BENCH (Elevated Platform) ===
+    // === JUDGE'S BENCH (Elevated Platform — Rich Wood) ===
     const benchGeo = new THREE.BoxGeometry(8, 2.0, 3);
     const benchMat = new THREE.MeshStandardMaterial({
-      color: 0x3d2214,
-      roughness: 0.6,
-      metalness: 0.05
+      color: 0x8B5A2B,
+      roughness: 0.55,
+      metalness: 0.08
     });
     const bench = new THREE.Mesh(benchGeo, benchMat);
     bench.position.set(0, 1.0, -2);
@@ -352,12 +367,12 @@ const VirtualCourtSimulator = {
     bench.receiveShadow = true;
     this._scene.add(bench);
 
-    // Bench front panel accent
+    // Bench front panel accent (warm polished wood)
     const panelGeo = new THREE.BoxGeometry(8.2, 1.6, 0.1);
     const panelMat = new THREE.MeshStandardMaterial({
-      color: 0x5a3520,
-      roughness: 0.5,
-      metalness: 0.1
+      color: 0xA0522D,
+      roughness: 0.45,
+      metalness: 0.12
     });
     const panel = new THREE.Mesh(panelGeo, panelMat);
     panel.position.set(0, 1.2, -0.45);
@@ -379,9 +394,9 @@ const VirtualCourtSimulator = {
     // === ADVOCATE PODIUMS (Left = Defense, Right = Prosecution) ===
     const podiumGeo = new THREE.BoxGeometry(2.5, 1.2, 1.5);
     const podiumMat = new THREE.MeshStandardMaterial({
-      color: 0x4a2c17,
-      roughness: 0.65,
-      metalness: 0.05
+      color: 0x6B3A20,
+      roughness: 0.6,
+      metalness: 0.06
     });
 
     const leftPodium = new THREE.Mesh(podiumGeo, podiumMat);
@@ -438,7 +453,7 @@ const VirtualCourtSimulator = {
     rightWall.rotation.y = -Math.PI / 2;
     this._scene.add(rightWall);
 
-    // === 3D NAMEPLATE LABELS (HTML labels via 3D positioned objects — we use rings as glow indicators) ===
+    // === 3D NAMEPLATE LABELS (glowing ring indicators for active speaker) ===
     Object.keys(this.SPEAKER_COORDS).forEach(key => {
       const coord = this.SPEAKER_COORDS[key];
 
@@ -458,12 +473,13 @@ const VirtualCourtSimulator = {
     });
 
     // === LOAD 3 AVATARS ===
-    // All face Math.PI = toward the camera (+Z direction, since FBX models face -Z by default)
-    this._loadAvatar(this.AVATAR_FILES.JUDGE, 'JUDGE', 2.5, Math.PI, 0);
-    // Defense: face camera with very slight angle toward judge
-    this._loadAvatar(this.AVATAR_FILES.DEFENSE, 'DEFENSE', 2.5, Math.PI - Math.PI / 8, 0);
-    // Prosecution: face camera with very slight angle toward judge
-    this._loadAvatar(this.AVATAR_FILES.PROSECUTION, 'PROSECUTION', 2.5, Math.PI + Math.PI / 8, 0);
+    // Judge faces +Z (toward lawyers and audience — front-facing)
+    this._loadAvatar(this.AVATAR_FILES.JUDGE, 'JUDGE', 2.5, 0, 0);
+    // Defense and Prosecution face toward judge (dynamically adjusted during simulation)
+    const defRot = Math.atan2(0 - (-4), -1.8 - 1); // Direction from defense to judge
+    this._loadAvatar(this.AVATAR_FILES.DEFENSE, 'DEFENSE', 2.5, defRot, 0);
+    const prosRot = Math.atan2(0 - 4, -1.8 - 1);   // Direction from prosecution to judge
+    this._loadAvatar(this.AVATAR_FILES.PROSECUTION, 'PROSECUTION', 2.5, prosRot, 0);
   },
 
   _loadAvatar(url, actorKey, scale, rotY, adjustY) {
@@ -479,20 +495,44 @@ const VirtualCourtSimulator = {
       model.scale.set(scale, scale, scale);
       model.rotation.y = rotY;
 
-      // Enable shadows AND apply professional BLACK SUIT dress
+      // Store model reference for dynamic rotation
+      this._models[actorKey] = model;
+      this._targetRotations[actorKey] = rotY;
+
+      // Enable shadows, apply BLACK SUIT dress, and force BLACK HAIR
       model.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
 
-          // Force solid black professional attire on ALL mesh parts
           if (child.material) {
             const mat = child.material.clone();
-            // Skin-toned parts (head/hands) have names containing 'head', 'face', 'hand', 'skin'
-            const name = (child.name || '').toLowerCase();
-            const isSkin = name.includes('head') || name.includes('face') || name.includes('hand') || name.includes('skin');
-            if (!isSkin) {
-              // Everything that's not explicitly skin = BLACK SUIT
+            const meshName = (child.name || '').toLowerCase();
+            const matName = (mat.name || '').toLowerCase();
+            const combined = meshName + ' ' + matName;
+
+            // Hair detection (by mesh/material name keywords)
+            const isHair = combined.includes('hair') || combined.includes('bangs') ||
+                           combined.includes('ponytail') || combined.includes('scalp');
+            // Skin detection (head, face, hands — but NOT hair parts)
+            const isSkin = !isHair && (combined.includes('head') || combined.includes('face') ||
+                           combined.includes('hand') || combined.includes('skin'));
+
+            if (isHair) {
+              // Force JET BLACK hair
+              mat.color = new THREE.Color(0x080808);
+              mat.roughness = 0.85;
+              mat.metalness = 0.05;
+            } else if (isSkin) {
+              // Keep skin tone — fix overly white/default mesh colors
+              const c = mat.color;
+              if (c && (c.r + c.g + c.b) > 2.5) {
+                mat.color = new THREE.Color(0xc8956c);
+                mat.roughness = 0.7;
+                mat.metalness = 0.02;
+              }
+            } else {
+              // Everything else = BLACK SUIT (professional courtroom attire)
               mat.color = new THREE.Color(0x0a0a0a);
               mat.roughness = 0.7;
               mat.metalness = 0.08;
@@ -578,11 +618,26 @@ const VirtualCourtSimulator = {
     this._animationFrameId = requestAnimationFrame(this._animate.bind(this));
     this._cameraDriftTime += 0.008;
 
-    // Update all avatar animation mixers
+    // Update all avatar animation mixers (skip when paused)
     if (this._clock) {
       const delta = this._clock.getDelta();
-      Object.values(this._mixers).forEach(mixer => mixer.update(delta));
+      if (!this._isPaused) {
+        Object.values(this._mixers).forEach(mixer => mixer.update(delta));
+      }
     }
+
+    // Smooth rotation lerping for character facing directions
+    Object.keys(this._models).forEach(key => {
+      const model = this._models[key];
+      const target = this._targetRotations[key];
+      if (model && target !== undefined) {
+        let diff = target - model.rotation.y;
+        // Normalize angle difference to [-PI, PI] for shortest path
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        model.rotation.y += diff * 0.04;
+      }
+    });
 
     // 1. Cinematic Camera Lerping
     if (this._camera && this._cameraPos && this._cameraTarget) {
@@ -642,6 +697,12 @@ const VirtualCourtSimulator = {
   },
 
   _playNextStep() {
+    // If paused, wait and re-check every 300ms
+    if (this._isPaused) {
+      this._pendingStepTimeout = setTimeout(() => this._playNextStep(), 300);
+      return;
+    }
+
     if (this._currentStep >= this._script.length) {
       this._endSimulation();
       return;
@@ -650,8 +711,8 @@ const VirtualCourtSimulator = {
     const step = this._script[this._currentStep];
     this._activeSpeakerId = step.actor;
 
-    // 1. Auto-Switch Camera to Actor
-    this.setCamera(step.actor);
+    // 1. Update character facing directions (camera stays on user's manual choice — NO auto-switch)
+    this._updateCharacterFacing(step.actor);
 
     // 2. Play Gavel Strike if indicated
     if (step.gavel) {
@@ -686,7 +747,7 @@ const VirtualCourtSimulator = {
       Object.values(this._actions).forEach(action => { action.paused = true; });
 
       this._currentStep++;
-      setTimeout(() => this._playNextStep(), 1200);
+      this._pendingStepTimeout = setTimeout(() => this._playNextStep(), 1200);
     });
   },
 
@@ -752,6 +813,83 @@ const VirtualCourtSimulator = {
     window.speechSynthesis.speak(utterance);
   },
 
+  /* ==================== 7. PAUSE / PLAY CONTROL ==================== */
+  togglePause() {
+    this._isPaused = !this._isPaused;
+
+    const icon = document.getElementById('v3-pause-icon');
+    const btn = document.getElementById('v3-pause-btn');
+
+    if (this._isPaused) {
+      // PAUSE — freeze speech and animations
+      if (window.speechSynthesis) window.speechSynthesis.pause();
+      Object.values(this._actions).forEach(action => { action.paused = true; });
+      if (icon) icon.textContent = 'play_arrow';
+      if (btn) btn.classList.add('paused');
+
+      // Update status badge
+      const statusEl = document.getElementById('v3-status');
+      if (statusEl) {
+        statusEl.innerHTML = '<span class="material-symbols-rounded">pause_circle</span> PAUSED';
+        statusEl.classList.remove('recording');
+        statusEl.style.color = '#fbbf24';
+        statusEl.style.borderColor = 'rgba(251, 191, 36, 0.3)';
+      }
+    } else {
+      // RESUME — continue speech and active speaker's animation from where we left off
+      if (window.speechSynthesis) window.speechSynthesis.resume();
+      // Resume ONLY the active speaker's animation
+      if (this._activeSpeakerId && this._actions[this._activeSpeakerId]) {
+        this._actions[this._activeSpeakerId].paused = false;
+      }
+      if (icon) icon.textContent = 'pause';
+      if (btn) btn.classList.remove('paused');
+
+      // Restore status badge
+      const statusEl = document.getElementById('v3-status');
+      if (statusEl) {
+        statusEl.innerHTML = '<span class="material-symbols-rounded">fiber_manual_record</span> IN SESSION';
+        statusEl.classList.add('recording');
+        statusEl.style.color = '';
+        statusEl.style.borderColor = '';
+      }
+    }
+  },
+
+  /* ==================== 8. DYNAMIC CHARACTER FACING ==================== */
+  _updateCharacterFacing(speakerKey) {
+    const c = this.SPEAKER_COORDS;
+
+    // Judge ALWAYS faces forward (+Z direction, toward both lawyers and audience)
+    this._targetRotations['JUDGE'] = 0;
+
+    if (speakerKey === 'JUDGE') {
+      // When judge speaks → both lawyers face the judge
+      this._targetRotations['DEFENSE'] = Math.atan2(
+        c.JUDGE.x - c.DEFENSE.x, c.JUDGE.z - c.DEFENSE.z
+      );
+      this._targetRotations['PROSECUTION'] = Math.atan2(
+        c.JUDGE.x - c.PROSECUTION.x, c.JUDGE.z - c.PROSECUTION.z
+      );
+    } else if (speakerKey === 'DEFENSE') {
+      // Defense faces judge while arguing; Prosecution looks toward Defense (opponent)
+      this._targetRotations['DEFENSE'] = Math.atan2(
+        c.JUDGE.x - c.DEFENSE.x, c.JUDGE.z - c.DEFENSE.z
+      );
+      this._targetRotations['PROSECUTION'] = Math.atan2(
+        c.DEFENSE.x - c.PROSECUTION.x, c.DEFENSE.z - c.PROSECUTION.z
+      );
+    } else if (speakerKey === 'PROSECUTION') {
+      // Prosecution faces judge while arguing; Defense looks toward Prosecution (opponent)
+      this._targetRotations['PROSECUTION'] = Math.atan2(
+        c.JUDGE.x - c.PROSECUTION.x, c.JUDGE.z - c.PROSECUTION.z
+      );
+      this._targetRotations['DEFENSE'] = Math.atan2(
+        c.PROSECUTION.x - c.DEFENSE.x, c.PROSECUTION.z - c.DEFENSE.z
+      );
+    }
+  },
+
   _endSimulation() {
     this.setCamera('WIDE');
     this._playGavelSound();
@@ -774,6 +912,11 @@ const VirtualCourtSimulator = {
 
   stopSimulation() {
     this._isPlaying = false;
+    this._isPaused = false;
+    if (this._pendingStepTimeout) {
+      clearTimeout(this._pendingStepTimeout);
+      this._pendingStepTimeout = null;
+    }
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
@@ -791,6 +934,8 @@ const VirtualCourtSimulator = {
     }
     this._mixers = {};
     this._actions = {};
+    this._models = {};
+    this._targetRotations = {};
     this._speakerRings = {};
   }
 };
