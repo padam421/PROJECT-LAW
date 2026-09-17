@@ -51,6 +51,7 @@ def chat():
     user_role = data.get('role', 'user')  # 'user' or 'lawyer'
     case_context = data.get('caseContext', None)
     language = data.get('language', 'auto')
+    chat_history = data.get('chatHistory', None) or data.get('chat_history', None)
 
     if not message:
         return jsonify({
@@ -63,7 +64,8 @@ def chat():
             query=message,
             user_role=user_role,
             case_context=case_context,
-            language=language
+            language=language,
+            chat_history=chat_history
         )
         if isinstance(result, tuple):
             response_text, lang_info = result

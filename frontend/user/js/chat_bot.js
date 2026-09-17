@@ -64,7 +64,7 @@ const UserChatBot = {
           </div>
 
           <!-- Quick Questions -->
-          <div class="u-quick-questions" id="quick-questions">
+          <div class="u-quick-questions" id="quick-questions" ${activeConv.messages.length > 0 ? 'style="display:none"' : ''}>
             <span class="u-quick-q" onclick="UserChatBot.sendQuickQ(this)">What are my legal rights?</span>
             <span class="u-quick-q" onclick="UserChatBot.sendQuickQ(this)">Explain my case in simple words</span>
             <span class="u-quick-q" onclick="UserChatBot.sendQuickQ(this)">What documents do I need?</span>
@@ -148,6 +148,28 @@ const UserChatBot = {
 
     const isPlaying = (typeof NyaySetuTTS !== 'undefined') && NyaySetuTTS.isSpeaking(msgId);
 
+    const feedbackHtml = !isSent ? `
+      <div class="u-feedback-group" id="feedback-group-${msgId}">
+        <span class="u-feedback-label">सहायक रहा?</span>
+        <button type="button" class="u-feedback-btn satisfied ${msg.feedback === 'satisfied' ? 'selected' : ''}"
+                id="fb-sat-${msgId}"
+                onclick="UserChatBot.handleFeedback('${msgId}', 'satisfied')"
+                ${msg.feedback ? 'disabled' : ''}
+                title="विश्लेषण से संतुष्ट (Satisfied with Legal Analysis)">
+          <span class="material-symbols-rounded">thumb_up</span>
+          <span>संतुष्ट (Satisfied)</span>
+        </button>
+        <button type="button" class="u-feedback-btn not-satisfied ${msg.feedback === 'not-satisfied' ? 'selected' : ''}"
+                id="fb-unsat-${msgId}"
+                onclick="UserChatBot.handleFeedback('${msgId}', 'not-satisfied')"
+                ${msg.feedback ? 'disabled' : ''}
+                title="असंतोषजनक — नए दृष्टिकोण व अधिक गहराई के साथ पुनः विश्लेषण करें (Generate Alternative Deeper Analysis)">
+          <span class="material-symbols-rounded">refresh</span>
+          <span>असंतोषजनक (Try Again)</span>
+        </button>
+      </div>
+    ` : '';
+
     const ttsActionHtml = !isSent ? `
       <div class="u-msg-actions">
         <button type="button" class="u-tts-btn ${isPlaying ? 'playing' : ''}" id="tts-btn-${msgId}"
@@ -163,6 +185,7 @@ const UserChatBot = {
           <span>🏛️ Virtual Court</span>
           <span class="material-symbols-rounded u-vc-arr">arrow_forward</span>
         </button>
+        ${feedbackHtml}
       </div>
     ` : '';
 
@@ -182,7 +205,10 @@ const UserChatBot = {
     if (!text) return '';
     let escaped = Utils.escapeHtml(text);
 
-    // Markdown Headings
+    // Scenario Badges: #### 📌 Scenario 1: ... or ### 📌 Scenario 1: ...
+    escaped = escaped.replace(/^#{2,4}\s*(?:📌)?\s*(Scenario\s*\d*[^:\n]*:?[^\n]*)/gim, '<div class="u-debate-scenario-badge"><span class="material-symbols-rounded">gavel</span><span>$1</span></div>');
+
+    // Section Headings: ### 1. ...
     escaped = escaped.replace(/^### (.*$)/gim, '<div style="font-size:1.02rem;font-weight:700;color:var(--u-accent-light);margin:14px 0 6px 0;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:6px;">$1</div>');
     escaped = escaped.replace(/^## (.*$)/gim, '<div style="font-size:1.1rem;font-weight:700;color:var(--u-text-primary);margin:16px 0 8px 0;">$1</div>');
 
@@ -193,14 +219,94 @@ const UserChatBot = {
     // Horizontal divider
     escaped = escaped.replace(/^---$/gim, '<hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin:12px 0;">');
 
-    // Role highlight badges for Courtroom Simulation
-    escaped = escaped.replace(/(🛡️|⚖️|🏛️)\s*(.*?):/g, '<div style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;background:rgba(255,255,255,0.06);border-radius:6px;margin:8px 0 4px 0;font-size:0.85rem;font-weight:600;color:var(--u-accent-light);border:1px solid rgba(255,255,255,0.1);">$1 <span>$2:</span></div>');
+    // Parse Courtroom Debate exchanges into styled conversational debate cards
+    escaped = this._formatDebateBlocks(escaped);
 
     // Line breaks and list bullets
     return escaped
       .replace(/\n\n/g, '<br><br>')
       .replace(/\n/g, '<br>')
       .replace(/•/g, '<span style="color:var(--u-accent-light)">•</span>');
+  },
+
+  _formatDebateBlocks(html) {
+    if (!html.includes('🏛️') && !html.includes('🛡️') && !html.includes('⚖️')) {
+      return html;
+    }
+
+    const lines = html.split('\n');
+    const output = [];
+    let inCard = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+      // Match debate turn prefix: (🏛️|🛡️|⚖️) followed by role name and colon
+      const speakerMatch = line.match(/^(\s*[-*•]?\s*)(🏛️|🛡️|⚖️)\s*(?:<strong[^>]*>|\*\*)?(.*?)(?:<\/strong>|\*\*)?\s*:\s*(.*)$/i)
+        || line.match(/^(\s*[-*•]?\s*)(🏛️|🛡️|⚖️)\s*(.*?):\s*(.*)$/);
+
+      if (speakerMatch) {
+        if (inCard) {
+          output.push('</div></div>');
+          inCard = false;
+        }
+
+        const emoji = speakerMatch[2];
+        let roleName = (speakerMatch[3] || '')
+          .replace(/<\/?strong[^>]*>/gi, '')
+          .replace(/\*\*/g, '')
+          .trim();
+        const statement = speakerMatch[4] || '';
+
+        let cardClass = 'u-debate-card-judge';
+        let tagClass = 'judge';
+        let defaultRole = 'माननीय न्यायाधीश (Hon\'ble Judge)';
+        let tagLabel = 'Bench';
+
+        if (emoji === '🛡️') {
+          cardClass = 'u-debate-card-defense';
+          tagClass = 'defense';
+          defaultRole = 'मेरा वकील (My Lawyer)';
+          tagLabel = 'Defense';
+        } else if (emoji === '⚖️') {
+          cardClass = 'u-debate-card-prosecution';
+          tagClass = 'prosecution';
+          defaultRole = 'विपक्षी वकील (Opponent Lawyer)';
+          tagLabel = 'Prosecution';
+        }
+
+        const displayRole = roleName || defaultRole;
+
+        output.push(`
+          <div class="u-debate-card ${cardClass}">
+            <div class="u-debate-card-header">
+              <span class="u-debate-icon">${emoji}</span>
+              <span class="u-debate-role-title">${displayRole}</span>
+              <span class="u-debate-role-tag ${tagClass}">${tagLabel}</span>
+            </div>
+            <div class="u-debate-card-body">${statement}
+        `);
+        inCard = true;
+      } else {
+        // If line is a section heading, scenario badge, or horizontal rule, close any open debate card
+        const isBoundary = line.includes('u-debate-scenario-badge') ||
+                           line.includes('border-bottom:1px solid') ||
+                           line.startsWith('<div style="font-size:1.') ||
+                           line.startsWith('<hr') ||
+                           line.match(/^\s*#{1,4}\s/);
+
+        if (isBoundary && inCard) {
+          output.push('</div></div>');
+          inCard = false;
+        }
+        output.push(line);
+      }
+    }
+
+    if (inCard) {
+      output.push('</div></div>');
+    }
+
+    return output.join('\n');
   },
 
   sendQuickQ(el) {
@@ -471,7 +577,16 @@ const UserChatBot = {
 
     // Get AI response with caseContext and selected regional language
     const selectedLang = document.getElementById('chat-lang-select')?.value || this._selectedLanguage || 'auto';
-    const response = await UserApiClient.getAIResponse(queryText, caseContext, selectedLang);
+    const aiResult = await UserApiClient.getAIResponse(queryText, caseContext, selectedLang);
+
+    let responseText = '';
+    let detectedLang = selectedLang;
+    if (aiResult && typeof aiResult === 'object') {
+      responseText = aiResult.message || '';
+      detectedLang = aiResult.detectedLang || selectedLang;
+    } else {
+      responseText = aiResult || '';
+    }
 
     // Remove typing and show response
     this._hideTyping();
@@ -479,8 +594,8 @@ const UserChatBot = {
     const aiMsgObj = {
       id: aiMsgId,
       sender: 'ai',
-      text: response,
-      lang: selectedLang,
+      text: responseText,
+      lang: detectedLang,
       time: new Date().toISOString()
     };
     this._appendMessage(aiMsgObj);
@@ -611,6 +726,118 @@ const UserChatBot = {
   _hideTyping() {
     const el = document.getElementById('typing-indicator');
     if (el) el.remove();
+  },
+
+  async handleFeedback(msgId, status) {
+    const btnSat = document.getElementById(`fb-sat-${msgId}`);
+    const btnUnsat = document.getElementById(`fb-unsat-${msgId}`);
+
+    if (btnSat) btnSat.disabled = true;
+    if (btnUnsat) btnUnsat.disabled = true;
+
+    if (status === 'satisfied') {
+      if (btnSat) btnSat.classList.add('selected');
+      if (btnUnsat) btnUnsat.classList.remove('selected');
+
+      // Update store
+      const conversations = UserStore.get('conversations') || [];
+      const conv = conversations.find(c => c.type === 'ai');
+      if (conv && conv.messages) {
+        const target = conv.messages.find(m => m.id === msgId);
+        if (target) target.feedback = 'satisfied';
+        UserStore.set('conversations', conversations);
+      }
+
+      if (window.Utils && typeof window.Utils.showToast === 'function') {
+        window.Utils.showToast('धन्यवाद! आपकी संतुष्टि हमारे लिए महत्वपूर्ण है।', 'success');
+      }
+      return;
+    }
+
+    if (status === 'not-satisfied') {
+      if (btnUnsat) btnUnsat.classList.add('selected');
+      if (btnSat) btnSat.classList.remove('selected');
+
+      // Update store
+      const conversations = UserStore.get('conversations') || [];
+      let conv = conversations.find(c => c.type === 'ai');
+      if (conv && conv.messages) {
+        const target = conv.messages.find(m => m.id === msgId);
+        if (target) target.feedback = 'not-satisfied';
+        UserStore.set('conversations', conversations);
+      }
+
+      if (window.Utils && typeof window.Utils.showToast === 'function') {
+        window.Utils.showToast('न्याय सेतु: नए कानूनी दृष्टिकोण और अधिक गहराई के साथ पुनः विश्लेषण किया जा रहा है...', 'info');
+      }
+
+      // Find user query & conversation history
+      let originalQuery = '';
+      let caseContext = null;
+      let historyList = [];
+
+      if (conv && conv.messages) {
+        const msgIdx = conv.messages.findIndex(m => m.id === msgId);
+        // Look backwards for the user message that prompted this AI response
+        const startIdx = msgIdx !== -1 ? msgIdx : conv.messages.length - 1;
+        for (let i = startIdx; i >= 0; i--) {
+          if (conv.messages[i].sender === 'user') {
+            originalQuery = conv.messages[i].text;
+            if (conv.messages[i].attachment) {
+              caseContext = `ATTACHED DOCUMENT: ${conv.messages[i].attachment.name} (${conv.messages[i].attachment.sizeStr})`;
+            }
+            break;
+          }
+        }
+        historyList = conv.messages.slice(-6).map(m => ({ sender: m.sender, text: m.text }));
+      }
+
+      if (!originalQuery) {
+        const input = document.getElementById('chat-input');
+        originalQuery = input?.value || 'Please re-analyze my legal issue with deeper scrutiny and alternative legal strategies.';
+      }
+
+      // Show typing indicator
+      this._showTyping();
+
+      const selectedLang = document.getElementById('chat-lang-select')?.value || this._selectedLanguage || 'auto';
+      const aiResult = await UserApiClient.getAIResponse(originalQuery, caseContext, selectedLang, historyList);
+
+      let responseText = '';
+      let detectedLang = selectedLang;
+      if (aiResult && typeof aiResult === 'object') {
+        responseText = aiResult.message || '';
+        detectedLang = aiResult.detectedLang || selectedLang;
+      } else {
+        responseText = aiResult || '';
+      }
+
+      // Hide typing
+      this._hideTyping();
+
+      const newAiMsgId = 'msg_ai_' + Date.now();
+      const newAiMsgObj = {
+        id: newAiMsgId,
+        sender: 'ai',
+        text: responseText,
+        lang: detectedLang,
+        isRegenerated: true,
+        time: new Date().toISOString()
+      };
+      this._appendMessage(newAiMsgObj);
+
+      // Save to store
+      if (!conv) {
+        conv = { id: 'conv_ai', type: 'ai', name: 'Nyay Setu AI', messages: [] };
+        conversations.push(conv);
+      }
+      conv.messages.push(newAiMsgObj);
+      UserStore.set('conversations', conversations);
+
+      if (window.Utils && typeof window.Utils.showToast === 'function') {
+        window.Utils.showToast('नया विस्तृत कानूनी विश्लेषण तैयार है!', 'success');
+      }
+    }
   },
 
   startNewChat() {

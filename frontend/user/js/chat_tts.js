@@ -169,8 +169,31 @@ const NyaySetuTTS = {
     const chunks = this.splitIntoChunks(cleaned);
     if (chunks.length === 0) return false;
 
-    const shortLang = this._LANG_MAP[langCode] || 'hi';
-    const bcp47 = this._BCP47_MAP[langCode] || 'hi-IN';
+    let resolvedLang = langCode;
+    if (!resolvedLang || resolvedLang === 'auto') {
+      // Auto-detect based on text script
+      const hasDevanagari = /[\u0900-\u097F]/.test(cleaned);
+      const hasBengali = /[\u0980-\u09FF]/.test(cleaned);
+      const hasTamil = /[\u0B80-\u0BFF]/.test(cleaned);
+      const hasTelugu = /[\u0C00-\u0C7F]/.test(cleaned);
+      const hasGujarati = /[\u0A80-\u0AFF]/.test(cleaned);
+      const hasKannada = /[\u0C80-\u0CFF]/.test(cleaned);
+      const hasMalayalam = /[\u0D00-\u0D7F]/.test(cleaned);
+      const hasGurmukhi = /[\u0A00-\u0A7F]/.test(cleaned);
+      if (hasDevanagari) resolvedLang = 'hi';
+      else if (hasBengali) resolvedLang = 'bn';
+      else if (hasTamil) resolvedLang = 'ta';
+      else if (hasTelugu) resolvedLang = 'te';
+      else if (hasGujarati) resolvedLang = 'gu';
+      else if (hasKannada) resolvedLang = 'kn';
+      else if (hasMalayalam) resolvedLang = 'ml';
+      else if (hasGurmukhi) resolvedLang = 'pa';
+      else if (/[a-zA-Z]{3,}/.test(cleaned)) resolvedLang = 'en';
+      else resolvedLang = 'hi';
+    }
+
+    const shortLang = this._LANG_MAP[resolvedLang] || 'hi';
+    const bcp47 = this._BCP47_MAP[resolvedLang] || 'hi-IN';
 
     this._activeMsgId = msgId;
     this._activeLangCode = shortLang;

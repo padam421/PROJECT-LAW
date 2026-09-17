@@ -5,9 +5,17 @@
    ============================================================ */
 
 /* --- Chat Layout --- */
+.u-content:has(.u-chat-layout) {
+  max-width: 1400px;
+  width: 100%;
+  padding: var(--u-space-4) var(--u-space-6);
+}
+
 .u-chat-layout {
   display: flex;
-  height: calc(100vh - var(--u-topbar-height) - var(--u-space-12));
+  width: 100%;
+  min-width: 0;
+  height: calc(100vh - var(--u-topbar-height) - var(--u-space-8));
   border-radius: var(--u-radius-xl);
   overflow: hidden;
   border: 1px solid var(--u-border);
@@ -121,9 +129,12 @@
 /* --- Chat Main Area --- */
 .u-chat-main {
   flex: 1;
+  min-width: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   background: #ffffff;
+  height: 100%;
 }
 
 .u-chat-header {
@@ -167,6 +178,7 @@
 /* --- Messages Area --- */
 .u-chat-messages {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: var(--u-space-5);
   display: flex;
@@ -176,7 +188,7 @@
 }
 
 .u-msg {
-  max-width: 75%;
+  max-width: 82%;
   display: flex;
   flex-direction: column;
   animation: msgIn 0.3s var(--u-ease-out) forwards;
@@ -189,10 +201,13 @@
 
 .u-msg-sent {
   align-self: flex-end;
+  max-width: 75%;
 }
 
 .u-msg-received {
   align-self: flex-start;
+  max-width: 90%;
+  width: 100%;
 }
 
 .u-msg-bubble {
@@ -330,6 +345,237 @@
   background: rgba(99, 102, 241, 0.16) !important;
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.35);
   border-radius: 6px;
+}
+
+/* --- Virtual Courtroom Launch Button in AI Message --- */
+.u-vc-chat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--u-duration-fast);
+  outline: none;
+  user-select: none;
+  text-decoration: none;
+}
+
+.u-vc-chat-btn:hover {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: #10b981;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+.u-vc-chat-btn .material-symbols-rounded {
+  font-size: 16px;
+}
+
+.u-vc-chat-btn .u-vc-arr {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.u-vc-chat-btn:hover .u-vc-arr {
+  transform: translateX(3px);
+}
+
+/* --- User Satisfaction Feedback Buttons (Satisfied / Not-Satisfied) --- */
+.u-feedback-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.u-feedback-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--u-text-tertiary, #94a3b8);
+  margin-right: 2px;
+}
+
+.u-feedback-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--u-duration-fast, 0.2s);
+  outline: none;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.u-feedback-btn .material-symbols-rounded {
+  font-size: 15px;
+}
+
+.u-feedback-btn.satisfied {
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.07);
+}
+
+.u-feedback-btn.satisfied:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: #10b981;
+  transform: translateY(-1px);
+}
+
+.u-feedback-btn.satisfied.selected {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.35);
+}
+
+.u-feedback-btn.not-satisfied {
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.07);
+}
+
+.u-feedback-btn.not-satisfied:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: #ef4444;
+  transform: translateY(-1px);
+}
+
+.u-feedback-btn.not-satisfied.selected {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #dc2626;
+  box-shadow: 0 1px 4px rgba(239, 68, 68, 0.35);
+}
+
+.u-feedback-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+  pointer-events: none;
+  transform: none !important;
+}
+
+.u-msg-actions {
+  flex-wrap: wrap;
+}
+
+/* --- Courtroom Debate Conversation Cards --- */
+.u-debate-scenario-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 15px;
+  margin: 14px 0 10px 0;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--u-radius-md, 8px);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #4338ca;
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.08);
+}
+
+.u-debate-scenario-badge .material-symbols-rounded {
+  font-size: 18px;
+  color: #6366f1;
+}
+
+.u-debate-card {
+  margin: 8px 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid var(--u-border, #e2e8f0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.u-debate-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.07);
+}
+
+.u-debate-card-judge {
+  border-left: 4px solid #f59e0b;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.06) 0%, #ffffff 100%);
+  border-top: 1px solid rgba(245, 158, 11, 0.18);
+  border-right: 1px solid rgba(245, 158, 11, 0.12);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.12);
+}
+
+.u-debate-card-defense {
+  border-left: 4px solid #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, #ffffff 100%);
+  border-top: 1px solid rgba(16, 185, 129, 0.18);
+  border-right: 1px solid rgba(16, 185, 129, 0.12);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.12);
+}
+
+.u-debate-card-prosecution {
+  border-left: 4px solid #ef4444;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, #ffffff 100%);
+  border-top: 1px solid rgba(239, 68, 68, 0.18);
+  border-right: 1px solid rgba(239, 68, 68, 0.12);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.12);
+}
+
+.u-debate-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.u-debate-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.u-debate-role-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--u-text-primary, #0f172a);
+}
+
+.u-debate-role-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  margin-left: auto;
+}
+
+.u-debate-role-tag.judge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
+
+.u-debate-role-tag.defense {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+}
+
+.u-debate-role-tag.prosecution {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+
+.u-debate-card-body {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--u-text-secondary, #334155);
 }
 
 /* --- AI Indicator --- */

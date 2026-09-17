@@ -226,7 +226,7 @@ class LegalRAGEngine:
                 "temperature": temperature,
                 "topP": 0.85,
                 "topK": 40,
-                "maxOutputTokens": 2048
+                "maxOutputTokens": 8192
             }
         }
 
@@ -320,13 +320,14 @@ Respond strictly in valid JSON format:
         # Fallback if call fails or non-JSON
         return {"detected_language_code": "auto", "language_name": "Hindi/English", "english_translation": query}
 
-    def answer_query(self, query: str, user_role: str = "user", case_context: str = None, language: str = "auto"):
+    def answer_query(self, query: str, user_role: str = "user", case_context: str = None, language: str = "auto", chat_history: list = None):
         """
         Main Zero-Hallucination RAG QA & 3-Party Courtroom Argument Engine.
         - Supports all 22 Scheduled Indian Regional Languages + English.
         - Translates vernacular query to legal English for Supreme Court vector retrieval.
         - Enforces strict zero-hallucination guard when query is out-of-scope.
-        - Synthesizes 3-party courtroom argument dynamics strictly in the user's regional language.
+        - Synthesizes an exhaustive, deep 4-section legal brief with an extended 3-minute courtroom debate (8-12 dialogue exchanges).
+        - Handles iterative regeneration / Not-Satisfied feedback using chat_history context.
         """
         combined_query = query
         if case_context:
@@ -343,34 +344,45 @@ Respond strictly in valid JSON format:
 
         # STRICT ZERO-HALLUCINATION GUARD:
         if not precedents:
-            # If the user asked in a regional language other than Hindi/English, localize the refusal message
-            if lang_code not in ["hi", "en", "auto"] and lang_name.lower() not in ["english", "hindi"]:
+            # Provide a natural, polite refusal strictly in the user's regional language
+            if lang_code == "hi" or lang_name.lower() == "hindi":
+                refusal_text = (
+                    "### ⚖️ न्याय सेतु — न्यायिक सूचना (डेटाबेस सीमा)\n\n"
+                    "**आपके द्वारा पूछे गए कानूनी मामले पर हमारे सुप्रीम कोर्ट डेटाबेस में पर्याप्त न्यायिक नज़ीर (precedents) उपलब्ध नहीं हैं।**\n\n"
+                    "न्यायिक सत्यनिष्ठा और नियमों के अंतर्गत, न्याय सेतु एआई बिना प्रमाणित अदालती फैसलों के कोई अनुमानित या मनगढ़ंत कानूनी सलाह नहीं देता।\n\n"
+                    "📌 **सुझाव**:\n"
+                    "- कृपया अपने मामले की विशिष्ट कानूनी धाराएं (जैसे IPC 302 / BNS 101, NDPS Sec 50, POCSO, या अनुच्छेद 226/32 आदि) स्पष्ट करें।\n"
+                    "- मामले के मुख्य प्रक्रियात्मक तथ्य (एफआईआर, तलाशी, गवाह, जब्ती आदि) दर्ज करें।\n"
+                    "- उचित कानूनी सलाह और प्रतिनिधित्व के लिए हमारे पोर्टल पर उपलब्ध सत्यापित अधिवक्ता (Advocate) से परामर्श लें।"
+                )
+                return refusal_text, lang_info
+            elif lang_code == "en" or lang_name.lower() == "english":
+                refusal_text = (
+                    "### ⚖️ Nyay Setu — Judicial Notice (Out of Database Scope)\n\n"
+                    "**Adequate Supreme Court precedents for your specific legal query were not found in our database.**\n\n"
+                    "Under judicial integrity standards, Nyay Setu AI does not generate speculative or hallucinated legal advice without authentic court precedents.\n\n"
+                    "📌 **Recommendations**:\n"
+                    "- Please specify the applicable statutory sections (e.g., Section 302 IPC / BNS 101, NDPS Section 50, POCSO, or Article 226/32).\n"
+                    "- Include key procedural facts (FIR, witness statements, search or seizure details).\n"
+                    "- Consult a verified advocate on our portal for tailored legal assistance."
+                )
+                return refusal_text, lang_info
+            else:
                 refusal_prompt = (
                     f"The user asked a legal question in {lang_name}, but our database does not contain Supreme Court precedents for their specific query.\n"
-                    f"Generate a polite, authoritative zero-hallucination refusal message strictly in {lang_name} explaining that Nyay Setu AI strictly adheres to verified Supreme Court precedents and does not hallucinate legal advice.\n"
-                    f"Mention the 5 covered categories: Constitutional Writs, Murder/Homicide (IPC 302 / BNS 101), Narcotics (NDPS Act), Rape/POCSO Act, and Terrorism (UAPA/NIA), and advise consulting a verified advocate."
+                    f"Generate a polite, concise, natural-sounding zero-hallucination notice strictly in {lang_name}.\n"
+                    f"Explain that authentic Supreme Court precedents were not found for this specific query, and advise mentioning specific statutory sections or consulting a verified legal advocate.\n"
+                    f"Do NOT invent legal advice. Keep it natural, respectful, and authoritative in {lang_name}."
                 )
                 localized_refusal = self.call_gemini(refusal_prompt, temperature=0.1)
                 if localized_refusal and not localized_refusal.startswith("Error") and not localized_refusal.startswith("Hamare AI Service"):
                     return localized_refusal, lang_info
 
-            refusal_text = (
-                "### 🛡️ Nyay Setu — Zero-Hallucination Guard (Out of Database Scope)\n\n"
-                "**Aapka sawaal / mudda hamare Supreme Court legal database ke dayre mein shamil nahi hai.**\n\n"
-                "Kanooni niyam aur judicial integrity ke antargat, Nyay Setu AI bina authentic court precedents ke "
-                "koi bhi man-ghadant (hallucinated) ya anumanit kanooni salah generate nahi karta.\n\n"
-                "**Hamare database mein nimn 5 mukhya vishayon par Supreme Court ke 10+ Lakh authentic precedents uplabdh hain:**\n"
-                "1. 📜 **Constitutional Writs & Fundamental Rights** (Article 32, Article 226, Service, Land & Property Writs)\n"
-                "2. ⚖️ **Murder & Homicide** (Section 302 IPC / BNS 101, Eyewitness & Circumstantial Evidence)\n"
-                "3. 🌿 **Narcotics & NDPS Act** (Section 50 mandatory search, Section 37 bail restrictions, Seizure procedures)\n"
-                "4. 🛡️ **Rape & POCSO Act** (Section 376 IPC / BNS 64, Section 29 statutory presumption, Section 164 statements)\n"
-                "5. 🚨 **Terrorism & UAPA / NIA** (Section 43D bail bar, National Security, Special Court trials)\n\n"
-                "📌 **Sujhav**:\n"
-                "- Apne case ka specific statutory section (jaise Section 302 IPC, NDPS Sec 50, POCSO, Art 226) mention karein.\n"
-                "- Apne case ke mukhya factual points (police FIR, search, panchnama, witnesses) likhein.\n"
-                "- Yadi aapka case kisi anya civil ya criminal matter se juda hai, toh hamare portal ke verified advocate se paramarsh lein."
-            )
-            return refusal_text, lang_info
+                refusal_text = (
+                    "### ⚖️ Nyay Setu — Notice (Out of Scope)\n\n"
+                    "हमारे डेटाबेस में इस विषय पर पर्याप्त न्यायिक डेटा उपलब्ध नहीं है। कृपया विशिष्ट धाराएं दर्ज करें या किसी सत्यापित वकील से परामर्श लें।"
+                )
+                return refusal_text, lang_info
 
         # 3. Build Grounding Context from authentic ChromaDB precedents
         context_blocks = []
@@ -396,42 +408,72 @@ Respond strictly in valid JSON format:
         context_str = "\n".join(context_blocks)
         is_lawyer = (user_role == "lawyer")
 
+        # Format previous chat history if user requested a regeneration (Not-Satisfied)
+        history_str = ""
+        is_retry = False
+        if chat_history and isinstance(chat_history, list) and len(chat_history) > 0:
+            is_retry = True
+            h_lines = []
+            for item in chat_history[-4:]:  # last 4 turns
+                sender = item.get("sender", "user")
+                t = item.get("text", "")[:600]
+                h_lines.append(f"[{sender.upper()}]: {t}")
+            history_str = "\nPREVIOUS CONVERSATION CONTEXT & PRIOR ATTEMPTS:\n" + "\n".join(h_lines) + "\n"
+
         system_instruction = (
-            "You are 'Nyay Setu Supreme Court AI' — a premier Indian Judicial Counsel & Virtual Courtroom Simulator.\n"
+            "You are 'Nyay Setu Supreme Court AI' — India's Premier High-Stakes Judicial Counsel & Courtroom Simulation Engine.\n"
             f"CRITICAL REGIONAL LANGUAGE MANDATE: The user's query is in {lang_name} (Language code: {lang_code}).\n"
-            f"You MUST generate the ENTIRE legal analysis, precedent explanation, tactical advice, and 3-party courtroom simulation STRICTLY AND FLUENTLY in {lang_name}.\n"
-            "Use natural vernacular legal phrasing. Keep statutory section numbers (e.g., Section 302 IPC, NDPS Sec 50, BNS 101, Art 226) and case citations in standard legal format.\n\n"
-            "STRICT RULES (ZERO-HALLUCINATION POLICY & 3-PARTY COURTROOM THEME):\n"
-            "1. You MUST base your legal analysis strictly on the PROVIDED AUTHENTIC SUPREME COURT PRECEDENTS and established Indian Statutes (IPC/BNS 2023, CrPC/BNSS 2023, Evidence Act/BSA 2023, NDPS, POCSO, UAPA, Constitution).\n"
-            "2. Read the retrieved precedent excerpts carefully to understand how past benches resolved similar facts.\n"
-            "3. Structure your answer strictly using the following 4 core sections with clean Markdown:\n\n"
-            "### 1. 📌 Case Classification & Statutory Matrix\n"
-            "- Specify applicable legal acts, exact charging sections (with new BNS/BNSS 2023 equivalents), and jurisdictional court.\n\n"
-            "### 2. 📚 Supreme Court Landmark Precedents (from Database)\n"
-            "- Explicitly cite the case name, year, and ratio decidendi from the provided context excerpts.\n"
-            "- Highlight how previous courts handled these specific evidentiary or procedural flaws.\n\n"
-            "### 3. 🏛️ Live Courtroom Simulation (3-Party Judicial Exchange)\n"
-            "- 🛡️ **Mera Lawyer / Counsel for Defense/Petitioner**:\n"
-            "  * **Opening Statement & Core Submission**: Clear articulation of the defense position.\n"
-            "  * **Legal & Precedent Arguments**: Direct reliance on the cited Supreme Court judgments.\n"
-            "  * **Plea for Relief**: Specific prayer before the bench.\n"
-            "- ⚖️ **Opponent Lawyer / Public Prosecutor (Respondent)**:\n"
-            "  * **Prosecution Objections**: Strong grounds of opposition, statutory presumptions, gravity of allegations.\n"
-            "  * **Counter-Arguments**: Arguments distinguishing the precedent.\n"
-            "- 🏛️ **Honorable Bench (AI Judge)**:\n"
-            "  * **Bench Observation & Evidentiary Scrutiny**: Questioning procedural compliance, testing the precedents.\n"
-            "  * **Judicial Reaction & Interim Order**: Likely bench inclination, interim relief, or court directions.\n\n"
-            "### 4. 🧭 Tactical Roadmap & Action Plan\n"
-            "- Clear, practical next steps, documents to prepare, and court precautions for the "
-            + ("Advocate Counsel." if is_lawyer else "Litigant / Citizen in simple language.")
+            f"You MUST generate the ENTIRE legal analysis, precedent breakdown, courtroom debate scenarios, and tactical roadmap STRICTLY, NATURALLY, AND COMPREHENSIVELY in {lang_name}.\n"
+            "Do NOT mix languages except standard statutory provisions (e.g., Section 302 IPC, NDPS Sec 50, BNS 101, Art 226/32) and official case citations.\n\n"
+            "EXHAUSTIVE DEPTH & ZERO-HALLUCINATION POLICY:\n"
+            "1. Ground all legal analysis strictly on the PROVIDED AUTHENTIC SUPREME COURT PRECEDENTS and established Indian Statutes (IPC/BNS 2023, CrPC/BNSS 2023, Evidence Act/BSA 2023, NDPS, POCSO, UAPA, Constitution of India).\n"
+            "2. Do NOT give brief or superficial bullet points. Deliver an in-depth, thorough, professional legal analysis that educates the user with supreme clarity.\n"
+            + (
+                "\n3. RE-ANALYSIS & ALTERNATIVE TACTICAL STRATEGY (NOT-SATISFIED RETRY):\n"
+                "The user was not satisfied with previous explanations. Provide a FRESH, DEEPER, and MORE CRITICAL PERSPECTIVE. "
+                "Scrutinize procedural lapses, investigative defects, alternative evidentiary defenses, and sharper judicial counter-arguments not emphasized previously.\n"
+                if is_retry else ""
+            )
+            + "\nREQUIRED 4-SECTION STRUCTURE (USE CLEAN MARKDOWN):\n\n"
+            "### 1. 📌 Comprehensive Case Analysis & Statutory Framework\n"
+            "- **विस्तृत समस्या का विश्लेषण (Factual & Legal Analysis)**: Break down the client's problem fact-by-fact.\n"
+            "- **लागू धाराएं और कानून (Applicable Statutory Sections)**: State exact charging and defense sections under old (IPC/CrPC) and new (BNS 2023 / BNSS 2023 / BSA 2023) codes.\n"
+            "- **अपराध के आवश्यक तत्व एवं प्रक्रियात्मक खामियां (Essential Ingredients & Procedural Flaws)**: What must the prosecution prove? What procedural safeguards protect the accused/citizen?\n"
+            "- **अधिकार क्षेत्र वाली अदालत (Competent Court & Forum)**: Session Court, High Court (Art 226 / 482 CrPC), or Supreme Court (SLP / Art 32).\n"
+            "- **अनिवार्य दस्तावेजों की चेकलिस्ट (Mandatory Documents Checklist)**: FIR, charge-sheet, panchnama, medical report, summon/warrant, seizure memo, etc.\n\n"
+            "### 2. 📚 Supreme Court Precedents & Legal Ratios (from Database)\n"
+            "- For each provided authentic Supreme Court precedent, explain:\n"
+            "  * Case Title, Year, Bench, and Citation\n"
+            "  * Factual background of the precedent\n"
+            "  * The core Ratio Decidendi (कानूनी सिद्धांत) laid down by the Supreme Court\n"
+            "  * How this judgment directly shields or applies to the user's specific case.\n\n"
+            "### 3. 🏛️ Courtroom Debate Simulation (Extended 3-Minute Live Hearing Dialogue)\n"
+            "Simulate an intense, realistic Indian Courtroom Hearing equivalent to a 3-minute live hearing. "
+            "Write an extended, substantive multi-round argument with AT LEAST 8 to 12 sequential dialogue exchanges between the 3 courtroom actors.\n"
+            "Format EVERY speaker turn using these exact prefixes on a new line so the frontend renders them into styled debate cards:\n\n"
+            "🏛️ **माननीय न्यायाधीश (Hon'ble Judge)**: [Opens the hearing, challenges counsels, points out factual defects, asks piercing questions, warns against delays, delivers bench directions]\n"
+            "🛡️ **मेरा वकील (Counsel for Defense/Petitioner)**: [Presents forceful defense, quotes specific Supreme Court precedents from Section 2, highlights police lapses or lack of evidence, argues fundamental rights under Article 21, prays for relief/bail]\n"
+            "⚖️ **विपक्षी वकील (Opponent Lawyer / Public Prosecutor)**: [Fiercely opposes, argues prima facie evidence, public interest, flight risk, severity of offense, statutory bar on bail]\n\n"
+            "The debate MUST progress through sequential phases:\n"
+            "Phase 1: Opening arguments & Bench interrogation\n"
+            "Phase 2: Fierce opposition by Prosecutor on merits & admissibility\n"
+            "Phase 3: Defense counter-strike quoting the authentic Supreme Court precedent\n"
+            "Phase 4: Cross-examination of investigative loopholes & forensic/procedural lapses\n"
+            "Phase 5: Final Bench observation, interim protection/directions, and next hearing order.\n\n"
+            "### 4. 🧭 Strategic Tactical Roadmap & Immediate Action Plan\n"
+            "- **तत्काल 24-48 घंटे की कार्ययोजना (Immediate 24-48 Hours Action Plan)**: Exact steps to take today.\n"
+            "- **सावधानी एवं बचाव (Critical Precautions)**: What NOT to say to police, how to avoid waiver of rights.\n"
+            "- **कानूनी आवेदन (Drafting Applications to File)**: Anticipatory bail, quashing petition, regular bail, preservation of CCTV/call records.\n"
+            "- **" + ("अधिवक्ता हेतु कोर्ट रणनीति (Counsel Trial Tactics)" if is_lawyer else "नागरिक हेतु स्पष्ट कानूनी मार्गदर्शन (Simple Citizen Guidance)") + "**."
         )
 
         user_prompt = (
-            f"USER CASE QUERY / SUMMARY (Language: {lang_name}):\n{query}\n\n"
-            + (f"CASE RECORD CONTEXT:\n{case_context}\n\n" if case_context else "")
+            f"USER CASE QUERY / PROBLEM STATEMENT (Language: {lang_name}):\n{query}\n\n"
+            + (f"CASE RECORD CONTEXT / ATTACHMENT:\n{case_context}\n\n" if case_context else "")
+            + (f"{history_str}\n" if history_str else "")
             + f"AUTHENTIC SUPREME COURT JUDICIAL PRECEDENTS RETRIEVED FROM DATABASE:\n"
             f"{context_str}\n\n"
-            f"Generate the full zero-hallucination analysis and 3-party courtroom simulation strictly in {lang_name}."
+            f"Generate the comprehensive, in-depth legal analysis and full 3-minute extended courtroom debate simulation strictly in {lang_name}."
         )
 
         response_text = self.call_gemini(user_prompt, system_instruction=system_instruction, temperature=0.15)

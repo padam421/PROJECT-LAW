@@ -268,7 +268,7 @@ const UserApiClient = {
     return UserStore.getConsultations();
   },
 
-  async getAIResponse(message, caseContext = null, language = 'auto') {
+  async getAIResponse(message, caseContext = null, language = 'auto', chatHistory = null) {
     try {
       const url = this.getUrl('/api/ai/chat');
       const resp = await fetch(url, {
@@ -278,14 +278,22 @@ const UserApiClient = {
           message: message,
           role: 'user',
           caseContext: caseContext,
-          language: language
+          language: language,
+          chatHistory: chatHistory
         })
       });
       const data = await resp.json();
       if (data && data.ok && data.message) {
-        return data.message;
+        const detectedCode = (data.detected_language && (data.detected_language.detected_language_code || data.detected_language.language_code)) || language;
+        return {
+          message: data.message,
+          detectedLang: (detectedCode && detectedCode !== 'auto') ? detectedCode : (language !== 'auto' ? language : 'hi')
+        };
       }
-      return data.error || 'Unable to fetch legal precedent response. Please try again.';
+      return {
+        message: data.error || 'Unable to fetch legal precedent response. Please try again.',
+        detectedLang: language !== 'auto' ? language : 'hi'
+      };
     } catch (err) {
       console.warn('Backend proxy unreachable, attempting direct AI service on port 5000:', err.message);
       try {
@@ -296,17 +304,25 @@ const UserApiClient = {
             message: message,
             role: 'user',
             caseContext: caseContext,
-            language: language
+            language: language,
+            chatHistory: chatHistory
           })
         });
         const directData = await directResp.json();
         if (directData && directData.ok && directData.message) {
-          return directData.message;
+          const detectedCode = (directData.detected_language && (directData.detected_language.detected_language_code || directData.detected_language.language_code)) || language;
+          return {
+            message: directData.message,
+            detectedLang: (detectedCode && detectedCode !== 'auto') ? detectedCode : (language !== 'auto' ? language : 'hi')
+          };
         }
       } catch (directErr) {
         console.error('Direct AI Service fetch failed:', directErr);
       }
-      return 'Nyay Setu Supreme Court AI Service se connect karne mein samasya aa rahi hai. Kripya sunishchit karein ki backend (port 3000) ya AI service (port 5000) active hai.';
+      return {
+        message: 'Nyay Setu Supreme Court AI Service se connect karne mein samasya aa rahi hai. Kripya sunishchit karein ki backend (port 3000) ya AI service (port 5000) active hai.',
+        detectedLang: language !== 'auto' ? language : 'hi'
+      };
     }
   },
 
