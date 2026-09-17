@@ -21,10 +21,10 @@ const UserCourtPage = {
       : '<div style="padding:40px;text-align:center">Loading Courtroom Simulation...</div>';
 
     setTimeout(() => {
-      if (typeof VirtualCourtSimulator !== 'undefined' && !VirtualCourtSimulator._isPlaying) {
+      if (typeof VirtualCourtSimulator !== 'undefined') {
         VirtualCourtSimulator.startSimulation();
       }
-    }, 400);
+    }, 350);
 
     return UserComponents.AppLayout(content, 'court', 'Court Simulator', true);
   },

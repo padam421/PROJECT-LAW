@@ -52,102 +52,371 @@ const VirtualCourtSimulator = {
     JUDGE: 'assets/judge_talking.glb'
   },
 
-  // Court Hearing Script — Extended ~1 Minute Debate with Dynamic Lawyer Facing:
-  // DEFENSE lawyer: 0.85 = facing Judge bench, 1.42 = facing Opponent across aisle
-  // PROSECUTION lawyer: -0.85 = facing Judge bench, -1.42 = facing Opponent across aisle
-  _script: [
-    {
-      actor: 'JUDGE',
-      name: 'Hon\'ble Justice R.K. Desai (Presiding)',
-      text: 'Order, order! The Court is now in session. We will hear final arguments in the matter of Sharma versus Sharma, Civil Suit Number 247 of 2024. Counsel for the Defense, you may proceed with your opening submission.',
-      pitch: 0.75, rate: 0.9, gavel: true,
-      facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
-    },
-    {
-      actor: 'DEFENSE',
-      name: 'Adv. Rajesh V. Rao (Defense Counsel)',
-      text: 'Much obliged, Milord. The core of our argument rests on Exhibit B, the original registered will dated 14th October 2012, which unequivocally partitions the disputed ancestral property in favour of my client, Shri Ramesh Sharma.',
-      pitch: 1.0, rate: 1.0, gavel: false,
-      facing: { DEFENSE: 0.85, PROSECUTION: -1.4 }
-    },
-    {
-      actor: 'PROSECUTION',
-      name: 'Adv. Smita Patel (State Counsel)',
-      text: 'Objection, Milord! Exhibit B has been conclusively proven to be a forged instrument by the lower civil court. The forensic handwriting report in Exhibit D leaves absolutely no ambiguity. The signatures do not match the testator\'s known specimens.',
-      pitch: 1.15, rate: 1.0, gavel: false,
-      facing: { DEFENSE: 1.4, PROSECUTION: -0.85 }
-    },
-    {
-      actor: 'JUDGE',
-      name: 'Hon\'ble Justice R.K. Desai (Presiding)',
-      text: 'Objection sustained. Defense counsel, you are instructed to restrict your arguments strictly to verified documentary records. Let Exhibit D, the forensic report, be formally placed on record.',
-      pitch: 0.75, rate: 0.9, gavel: true,
-      facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
-    },
-    {
-      actor: 'DEFENSE',
-      name: 'Adv. Rajesh V. Rao (Defense Counsel)',
-      text: 'Milord, with due respect, we challenge the authenticity of the forensic report itself. Our expert witness, Dr. Suresh Kapoor, a graphologist with 25 years of experience, has submitted an independent analysis in Exhibit F which directly contradicts the findings of Exhibit D.',
-      pitch: 1.0, rate: 1.0, gavel: false,
-      facing: { DEFENSE: 1.4, PROSECUTION: -1.4 }
-    },
-    {
-      actor: 'PROSECUTION',
-      name: 'Adv. Smita Patel (State Counsel)',
-      text: 'Milord, the defense is attempting to introduce a privately commissioned report to override the court-appointed forensic laboratory\'s findings. This is a clear attempt to mislead this Hon\'ble Court. We request that Exhibit F be struck from the record.',
-      pitch: 1.15, rate: 1.0, gavel: false,
-      facing: { DEFENSE: 1.4, PROSECUTION: -1.4 }
-    },
-    {
-      actor: 'JUDGE',
-      name: 'Hon\'ble Justice R.K. Desai (Presiding)',
-      text: 'The Court will examine both reports. Defense counsel, your expert witness shall be cross-examined in the next hearing. Both parties are directed to file their written submissions within two weeks. Is there anything further?',
-      pitch: 0.75, rate: 0.9, gavel: false,
-      facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
-    },
-    {
-      actor: 'DEFENSE',
-      name: 'Adv. Rajesh V. Rao (Defense Counsel)',
-      text: 'Yes, Milord. We also place reliance on the Supreme Court judgment in Balwant Singh versus Daulat Singh, 2019, where the Hon\'ble Apex Court held that a registered will carries a presumption of due execution unless rebutted by cogent and compelling evidence.',
-      pitch: 1.0, rate: 1.0, gavel: false,
-      facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
-    },
-    {
-      actor: 'PROSECUTION',
-      name: 'Adv. Smita Patel (State Counsel)',
-      text: 'Milord, the cited precedent is clearly distinguishable. In Balwant Singh, the will was not contested on grounds of forgery but on grounds of undue influence. Here, we have direct forensic evidence of fabrication. The facts are entirely different.',
-      pitch: 1.15, rate: 1.0, gavel: false,
-      facing: { DEFENSE: 1.35, PROSECUTION: -0.85 }
-    },
-    {
-      actor: 'JUDGE',
-      name: 'Hon\'ble Justice R.K. Desai (Presiding)',
-      text: 'Both counsels have raised important legal points. The Court takes note of the Supreme Court citation and the forensic evidence. I am inclined to allow the cross-examination of both expert witnesses before arriving at any conclusion.',
-      pitch: 0.75, rate: 0.9, gavel: false,
-      facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
-    },
-    {
-      actor: 'DEFENSE',
-      name: 'Adv. Rajesh V. Rao (Defense Counsel)',
-      text: 'We are grateful, Milord. We also request that the original will be sent for fresh forensic examination to an independent government laboratory, preferably the Central Forensic Science Laboratory in Hyderabad.',
-      pitch: 1.0, rate: 1.0, gavel: false,
-      facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
-    },
-    {
-      actor: 'PROSECUTION',
-      name: 'Adv. Smita Patel (State Counsel)',
-      text: 'We have no objection to a fresh forensic examination, provided it is conducted under the supervision of this Hon\'ble Court and both parties are given an opportunity to be present during the analysis.',
-      pitch: 1.15, rate: 1.0, gavel: false,
-      facing: { DEFENSE: 1.35, PROSECUTION: -0.85 }
-    },
-    {
-      actor: 'JUDGE',
-      name: 'Hon\'ble Justice R.K. Desai (Presiding)',
-      text: 'So ordered. The original will, Exhibit B, shall be sent to the Central Forensic Science Laboratory, Hyderabad, for fresh examination. The next date of hearing is fixed for 15th November, 2024. The Court is adjourned.',
-      pitch: 0.75, rate: 0.9, gavel: true,
-      facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
+  // Dynamic Case & Debate State
+  _activeCaseTitle: 'Supreme Court Special Bench Hearing',
+  _activeLanguage: 'auto',
+  _script: [],
+
+  /**
+   * Parses Section 3 (🏛️ Courtroom Debate Simulation) from raw AI response text
+   * into executable 3D avatar dialogue turns with dynamic facing, gavel, and pitch.
+   */
+  parseDebateFromText(fullText) {
+    if (!fullText) return [];
+
+    // 1. Locate Section 3: Courtroom Debate Simulation
+    let sec3Content = '';
+    const sec3Regex = /###\s*3\.\s*[^\n]*\n([\s\S]*?)(?=###\s*4\.|\n---\s*\n###\s*4\.|\n##\s*4\.|$)/i;
+    const match = fullText.match(sec3Regex);
+    if (match && match[1]) {
+      sec3Content = match[1];
+    } else {
+      const emojiIndex = fullText.search(/(?:🏛️|🛡️|⚖️)/);
+      if (emojiIndex !== -1) {
+        sec3Content = fullText.substring(emojiIndex);
+      } else {
+        sec3Content = fullText;
+      }
     }
-  ],
+
+    const lines = sec3Content.split('\n');
+    const parsedSteps = [];
+    let currentStep = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      // Match speaker turn: (🏛️|🛡️|⚖️) followed by role name and speech
+      const turnMatch = line.match(/^[-*•]?\s*(🏛️|🛡️|⚖️)\s*(?:\*\*)?(.*?)(?:\*\*)?\s*:\s*(.*)$/);
+
+      if (turnMatch) {
+        if (currentStep && currentStep.text.trim()) {
+          parsedSteps.push(currentStep);
+        }
+
+        const emoji = turnMatch[1];
+        let role = (turnMatch[2] || '')
+          .replace(/<\/?strong[^>]*>/gi, '')
+          .replace(/\*\*/g, '')
+          .trim();
+        const speech = turnMatch[3] || '';
+
+        let actor = 'JUDGE';
+        let defaultName = 'माननीय न्यायाधीश (Hon\'ble Judge)';
+        let pitch = 0.75;
+        let rate = 0.92;
+        let facing = { DEFENSE: 0.85, PROSECUTION: -0.85 };
+
+        if (emoji === '🛡️') {
+          actor = 'DEFENSE';
+          defaultName = 'मेरा वकील (Defense Counsel)';
+          pitch = 1.0;
+          rate = 1.0;
+          facing = { DEFENSE: 0.85, PROSECUTION: -1.4 };
+        } else if (emoji === '⚖️') {
+          actor = 'PROSECUTION';
+          defaultName = 'विपक्षी वकील (Public Prosecutor)';
+          pitch = 1.22;
+          rate = 1.02;
+          facing = { DEFENSE: 1.4, PROSECUTION: -0.85 };
+        }
+
+        currentStep = {
+          actor: actor,
+          name: role || defaultName,
+          text: speech,
+          pitch: pitch,
+          rate: rate,
+          gavel: false,
+          facing: facing,
+          _isDynamic: true
+        };
+      } else if (currentStep) {
+        // Continuation line
+        if (!line.startsWith('#') && !line.startsWith('---') && !line.includes('u-debate-scenario-badge')) {
+          currentStep.text += ' ' + line;
+        }
+      }
+    }
+
+    if (currentStep && currentStep.text.trim()) {
+      parsedSteps.push(currentStep);
+    }
+
+    // Set gavel strikes on Judge opening and final order
+    if (parsedSteps.length > 0) {
+      const judgeIndices = [];
+      parsedSteps.forEach((s, idx) => {
+        if (s.actor === 'JUDGE') judgeIndices.push(idx);
+      });
+      if (judgeIndices.length > 0) {
+        parsedSteps[judgeIndices[0]].gavel = true;
+        parsedSteps[judgeIndices[judgeIndices.length - 1]].gavel = true;
+      }
+    }
+
+    return parsedSteps;
+  },
+
+  /**
+   * Primary entrypoint when user clicks '🏛️ Virtual Court' from a chat message.
+   * Dynamically extracts Section 3 dialogue, configures the 3D actors, and navigates.
+   */
+  launchFromChat(msgId) {
+    let targetMsg = null;
+    let userQuery = '';
+
+    const conversations = (typeof UserStore !== 'undefined' && UserStore.get('conversations')) || [];
+    const conv = conversations.find(c => c.type === 'ai');
+
+    if (conv && conv.messages && conv.messages.length > 0) {
+      if (msgId) {
+        const idx = conv.messages.findIndex(m => m.id === msgId);
+        if (idx !== -1) {
+          targetMsg = conv.messages[idx];
+          for (let j = idx - 1; j >= 0; j--) {
+            if (conv.messages[j].sender === 'user') {
+              userQuery = conv.messages[j].text;
+              break;
+            }
+          }
+        }
+      }
+
+      // If not found by msgId, pick the latest AI message with debate content
+      if (!targetMsg) {
+        for (let k = conv.messages.length - 1; k >= 0; k--) {
+          if (conv.messages[k].sender === 'ai' && conv.messages[k].text && (conv.messages[k].text.includes('🏛️') || conv.messages[k].text.includes('Courtroom Debate'))) {
+            targetMsg = conv.messages[k];
+            for (let j = k - 1; j >= 0; j--) {
+              if (conv.messages[j].sender === 'user') {
+                userQuery = conv.messages[j].text;
+                break;
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    if (!targetMsg || !targetMsg.text) {
+      if (window.Utils && typeof window.Utils.showToast === 'function') {
+        window.Utils.showToast('Pehle AI se case analysis karwayein taaki courtroom debate generate ho sake.', 'info');
+      }
+      Router.navigate('/chat');
+      return;
+    }
+
+    const parsedScript = this.parseDebateFromText(targetMsg.text);
+
+    if (!parsedScript || parsedScript.length === 0) {
+      if (window.Utils && typeof window.Utils.showToast === 'function') {
+        window.Utils.showToast('Is message mein courtroom debate nahi mili. Default debate chalayi ja rahi hai.', 'warning');
+      }
+      this._script = this._getDefaultFallbackScript();
+    } else {
+      this._script = parsedScript;
+    }
+
+    // Determine clean case title
+    let caseTitle = 'Supreme Court Hearing';
+    if (userQuery) {
+      caseTitle = userQuery.substring(0, 65).trim();
+      if (userQuery.length > 65) caseTitle += '...';
+    } else {
+      const sec1Match = targetMsg.text.match(/###\s*1\.\s*[^\n]*\n([\s\S]*?)(?=###\s*2\.|$)/);
+      if (sec1Match) {
+        const firstLine = sec1Match[1].trim().split('\n')[0].replace(/[*#]/g, '').trim();
+        if (firstLine) caseTitle = firstLine.substring(0, 65);
+      }
+    }
+
+    this._activeCaseTitle = caseTitle;
+    this._activeLanguage = targetMsg.lang || 'auto';
+
+    // Persist in session storage for persistence across reloads/routes
+    try {
+      sessionStorage.setItem('nyay_active_court_script', JSON.stringify({
+        script: this._script,
+        title: caseTitle,
+        lang: this._activeLanguage
+      }));
+    } catch (_) {}
+
+    if (window.Utils && typeof window.Utils.showToast === 'function') {
+      window.Utils.showToast(`🏛️ ${this._script.length} अदालती दलीलों के साथ 3D Virtual Court शुरू हो रहा है...`, 'success');
+    }
+
+    if (typeof NyaySetuTTS !== 'undefined') {
+      NyaySetuTTS.stop();
+    }
+
+    // Direct transition to 3D Virtual Courtroom Simulator
+    Router.navigate('/court/simulate');
+  },
+
+  /**
+   * Loads the active script from session storage or latest chat conversation.
+   */
+  loadActiveScript() {
+    if (this._script && this._script.length > 0 && this._script[0]._isDynamic) {
+      return;
+    }
+
+    // Check sessionStorage
+    try {
+      const cached = sessionStorage.getItem('nyay_active_court_script');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && Array.isArray(parsed.script) && parsed.script.length > 0) {
+          this._script = parsed.script.map(s => ({ ...s, _isDynamic: true }));
+          this._activeCaseTitle = parsed.title || 'Supreme Court Special Bench';
+          this._activeLanguage = parsed.lang || 'auto';
+          return;
+        }
+      }
+    } catch (_) {}
+
+    // Fallback: check UserStore conversations
+    const conversations = (typeof UserStore !== 'undefined' && UserStore.get('conversations')) || [];
+    const conv = conversations.find(c => c.type === 'ai');
+    if (conv && conv.messages) {
+      for (let k = conv.messages.length - 1; k >= 0; k--) {
+        const msg = conv.messages[k];
+        if (msg.sender === 'ai' && msg.text && (msg.text.includes('🏛️') || msg.text.includes('Courtroom Debate'))) {
+          const parsed = this.parseDebateFromText(msg.text);
+          if (parsed.length > 0) {
+            this._script = parsed.map(s => ({ ...s, _isDynamic: true }));
+            this._activeCaseTitle = 'Live Case Debate';
+            this._activeLanguage = msg.lang || 'auto';
+            return;
+          }
+        }
+      }
+    }
+
+    // Default fallback
+    this._script = this._getDefaultFallbackScript();
+  },
+
+  _getDefaultFallbackScript() {
+    return [
+      {
+        actor: 'JUDGE',
+        name: 'Hon\'ble Chief Justice (Presiding)',
+        text: 'Order, order in the Court. The Special Bench is now in session. Counsel for the Petitioner, proceed with your opening submissions.',
+        pitch: 0.75, rate: 0.92, gavel: true,
+        facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
+      },
+      {
+        actor: 'DEFENSE',
+        name: 'Adv. Defense Counsel (मेरा वकील)',
+        text: 'Much obliged, Milord. We approach this Hon\'ble Bench challenging the grave procedural lapses and violations of constitutional safeguards under Article 21.',
+        pitch: 1.0, rate: 1.0, gavel: false,
+        facing: { DEFENSE: 0.85, PROSECUTION: -1.4 }
+      },
+      {
+        actor: 'PROSECUTION',
+        name: 'Adv. Public Prosecutor (विपक्षी वकील)',
+        text: 'Objection, Milord! The prosecution has established a prima facie case based on cogent material on record. The petitioner cannot seek relief on mere procedural technicalities.',
+        pitch: 1.22, rate: 1.02, gavel: false,
+        facing: { DEFENSE: 1.4, PROSECUTION: -0.85 }
+      },
+      {
+        actor: 'JUDGE',
+        name: 'Hon\'ble Chief Justice (Presiding)',
+        text: 'The Bench has noted the submissions. Procedural safeguards under the law are substantive rights. Both parties are directed to file their affidavits. The Court is adjourned.',
+        pitch: 0.75, rate: 0.92, gavel: true,
+        facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
+      }
+    ];
+  },
+
+  _cleanTextForVoice(text) {
+    if (!text) return '';
+    let cleaned = text;
+    // Remove stage directions: *[Scrutinizing file]* or [Standing up]
+    cleaned = cleaned.replace(/\*?\[.*?\]\*?/g, '');
+    cleaned = cleaned.replace(/\*.*?\*/g, '');
+    // Remove emojis
+    cleaned = cleaned.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+    // Remove markdown symbols
+    cleaned = cleaned.replace(/[*_#`~]/g, '');
+    // Normalize spacing
+    return cleaned.replace(/\s+/g, ' ').trim();
+  },
+
+  _detectIndianLanguage(text, hintLang = 'auto') {
+    const str = (text || '').trim();
+    const h = (hintLang || this._activeLanguage || 'auto').toLowerCase();
+
+    // 1. Gujarati
+    if (/[\u0A80-\u0AFF]/.test(str) || h === 'gu') {
+      return { code: 'gu-IN', shortCode: 'gu', name: 'ગુજરાતી (Gujarati)', toneLabel: 'Indian Tone', displayBadge: 'ગુજરાતી (Indian Tone)' };
+    }
+    // 2. Telugu
+    if (/[\u0C00-\u0C7F]/.test(str) || h === 'te') {
+      return { code: 'te-IN', shortCode: 'te', name: 'తెలుగు (Telugu)', toneLabel: 'Indian Tone', displayBadge: 'తెలుగు (Indian Tone)' };
+    }
+    // 3. Tamil
+    if (/[\u0B80-\u0BFF]/.test(str) || h === 'ta') {
+      return { code: 'ta-IN', shortCode: 'ta', name: 'தமிழ் (Tamil)', toneLabel: 'Indian Tone', displayBadge: 'தமிழ் (Indian Tone)' };
+    }
+    // 4. Kannada
+    if (/[\u0C80-\u0CFF]/.test(str) || h === 'kn') {
+      return { code: 'kn-IN', shortCode: 'kn', name: 'ಕನ್ನಡ (Kannada)', toneLabel: 'Indian Tone', displayBadge: 'ಕನ್ನಡ (Indian Tone)' };
+    }
+    // 5. Malayalam
+    if (/[\u0D00-\u0D7F]/.test(str) || h === 'ml') {
+      return { code: 'ml-IN', shortCode: 'ml', name: 'മലയാളം (Malayalam)', toneLabel: 'Indian Tone', displayBadge: 'മലയാളം (Indian Tone)' };
+    }
+    // 6. Gurmukhi / Punjabi
+    if (/[\u0A00-\u0A7F]/.test(str) || h === 'pa') {
+      return { code: 'pa-IN', shortCode: 'pa', name: 'ਪੰਜਾਬੀ (Punjabi)', toneLabel: 'Indian Tone', displayBadge: 'ਪੰਜਾਬੀ (Indian Tone)' };
+    }
+    // 7. Bengali / Assamese
+    if (/[\u0980-\u09FF]/.test(str) || h === 'bn' || h === 'as') {
+      if (h === 'as' || /[ৰৱ]/.test(str)) {
+        return { code: 'as-IN', shortCode: 'as', name: 'অসমীয়া (Assamese)', toneLabel: 'Indian Tone', displayBadge: 'অসমীয়া (Indian Tone)' };
+      }
+      return { code: 'bn-IN', shortCode: 'bn', name: 'বাংলা (Bengali)', toneLabel: 'Indian Tone', displayBadge: 'বাংলা (Indian Tone)' };
+    }
+    // 8. Odia
+    if (/[\u0B00-\u0B7F]/.test(str) || h === 'or') {
+      return { code: 'or-IN', shortCode: 'or', name: 'ଓଡ଼ିଆ (Odia)', toneLabel: 'Indian Tone', displayBadge: 'ଓଡ଼ିଆ (Indian Tone)' };
+    }
+    // 9. Perso-Arabic / Urdu
+    if (/[\u0600-\u06FF]/.test(str) || h === 'ur') {
+      return { code: 'ur-IN', shortCode: 'ur', name: 'اردو (Urdu)', toneLabel: 'Indian Tone', displayBadge: 'اردو (Indian Tone)' };
+    }
+    // 10. Devanagari (Marathi / Sanskrit / Nepali / Hindi)
+    if (/[\u0900-\u097F]/.test(str)) {
+      if (h === 'mr' || /(?:^|\s|[.,!?।])(आहे|नाही|झाले|केले|यांनी|दिले|म्हणून|असावे)(?:$|\s|[.,!?।])/.test(str)) {
+        return { code: 'mr-IN', shortCode: 'mr', name: 'मराठी (Marathi)', toneLabel: 'Indian Tone', displayBadge: 'मराठी (Indian Tone)' };
+      }
+      if (h === 'sa' || /(?:^|\s|[.,!?।])(अस्ति|भवति|इति|च|तथा|न्यायालयम्|वादिः|प्रतिवादिः|धर्मो|रक्षति|कदापि)(?:$|\s|[.,!?।])/.test(str)) {
+        return { code: 'sa-IN', shortCode: 'sa', name: 'संस्कृतम् (Sanskrit)', toneLabel: 'Indian Tone', displayBadge: 'संस्कृतम् (Indian Tone)' };
+      }
+      if (h === 'ne') {
+        return { code: 'ne-NP', shortCode: 'ne', name: 'नेपाली (Nepali)', toneLabel: 'Indian Tone', displayBadge: 'नेपाली (Indian Tone)' };
+      }
+      return { code: 'hi-IN', shortCode: 'hi', name: 'हिन्दी (Hindi)', toneLabel: 'Indian Tone', displayBadge: 'हिन्दी (Indian Tone)' };
+    }
+
+    // 11. Latin Script: Hinglish vs Indian English
+    if (h === 'hi' || /\b(mera|meri|zamin|zameen|padosi|kabza|farzi|vakeel|shikayat|karna|hoga|hai|hain|nahi|diya|tha|the|thi)\b/i.test(str)) {
+      return { code: 'hi-IN', shortCode: 'hi', name: 'Hinglish (हिन्दी/English)', toneLabel: 'Indian Tone', displayBadge: 'Hinglish (Indian Tone)' };
+    }
+
+    // Default to Indian English Tone
+    return { code: 'en-IN', shortCode: 'en', name: 'English (Indian)', toneLabel: 'Indian Tone', displayBadge: 'English (Indian Tone)' };
+  },
+
+  _getSpeechLanguageCode(text) {
+    return this._detectIndianLanguage(text, this._activeLanguage).code;
+  },
 
   // Camera Presets — default is WIDE; user can switch anytime
   CAMERAS: {
@@ -166,24 +435,74 @@ const VirtualCourtSimulator = {
 
   /* ==================== 1. UI RENDERING ==================== */
   renderLanding() {
+    this.loadActiveScript();
+    const hasActiveCase = this._script && this._script.length > 0 && this._script[0]._isDynamic;
+    const caseTitle = this._activeCaseTitle || 'Supreme Court Special Bench Hearing';
+    const totalTurns = (this._script && this._script.length) || 0;
+
     return `
-      <div class="vc-hub-container">
-        <div class="vc-hero-banner">
-          <div class="vc-status-badge">
-            <span class="material-symbols-rounded">view_in_ar</span>
-            V4 WebGL Engine — 3-Avatar Debate
+      <div class="vc-hub-container" style="max-width:960px;margin:0 auto;padding:24px 20px;">
+        <div class="vc-hero-banner" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border-radius:16px;padding:36px;color:#fff;border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 25px rgba(0,0,0,0.3);">
+          <div class="vc-status-badge" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:20px;font-size:0.75rem;font-weight:700;color:#818cf8;text-transform:uppercase;margin-bottom:16px;">
+            <span class="material-symbols-rounded" style="font-size:16px">gavel</span>
+            V4 WebGL Engine — 3-Avatar Courtroom Simulator
           </div>
-          <h1>3D Virtual Courtroom Simulator</h1>
-          <p>Experience an immersive 3D courtroom debate with Judge, Defense & Prosecution avatars, cinematic cameras, and AI speech.</p>
-          <button class="u-btn u-btn-primary u-btn-lg u-btn-pill" onclick="Router.navigate('/court/simulate')">
-            <span class="material-symbols-rounded">play_arrow</span> Enter 3D Simulation
-          </button>
+
+          <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:12px;color:#f8fafc;">3D Virtual Courtroom Simulator</h1>
+          <p style="font-size:0.95rem;color:#94a3b8;max-width:680px;line-height:1.6;margin-bottom:24px;">
+            Experience an immersive 3D courtroom hearing featuring real Supreme Court judge & advocate avatars, authentic gavel strikes, dynamic lawyer argument facing, and synchronized regional speech.
+          </p>
+
+          ${hasActiveCase ? `
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:14px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+              <div>
+                <div style="font-size:0.72rem;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                  <span class="material-symbols-rounded" style="font-size:16px;color:#38bdf8">chat</span>
+                  सक्रिय केस विश्लेषण (Active Case from Chat)
+                </div>
+                <div style="font-size:1.15rem;font-weight:700;color:#fff;">${Utils.escapeHtml(caseTitle)}</div>
+                <div style="font-size:0.85rem;color:#cbd5e1;margin-top:4px;">🏛️ ${totalTurns} वास्तविक अदालती दलीलें (Judge, Defense & Prosecution Dialogue Exchanges) तैयार हैं</div>
+                <div style="font-size:0.75rem;font-weight:700;color:#34d399;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);padding:3px 12px;border-radius:12px;display:inline-flex;align-items:center;gap:6px;margin-top:8px;">
+                  <span class="material-symbols-rounded" style="font-size:15px;color:#10b981">translate</span>
+                  <span>भाषा (Language & Tone): ${this._detectIndianLanguage((this._script && this._script[0] && this._script[0].text) || '', this._activeLanguage).displayBadge}</span>
+                </div>
+              </div>
+              <button class="u-btn u-btn-primary u-btn-lg u-btn-pill" onclick="Router.navigate('/court/simulate')" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;font-weight:700;box-shadow:0 4px 14px rgba(13,148,136,0.35);">
+                <span class="material-symbols-rounded">play_arrow</span> Start 3D Court Debate
+              </button>
+            </div>
+          ` : `
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+              <div>
+                <div style="font-size:0.72rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">No Active Case Chat</div>
+                <div style="font-size:1rem;font-weight:600;color:#fff;">Ask Nyay Setu चैट में अपना मामला दर्ज करें</div>
+                <div style="font-size:0.82rem;color:#94a3b8;margin-top:4px;">AI आपकी समस्या के आधार पर 3-मिनट की वास्तविक अदालती बहस तैयार करेगा।</div>
+              </div>
+              <button class="u-btn u-btn-primary u-btn-pill" onclick="Router.navigate('/chat')" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;font-weight:700;">
+                <span class="material-symbols-rounded">chat</span> Go to Ask Nyay Setu
+              </button>
+            </div>
+          `}
+
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <button class="u-btn u-btn-secondary u-btn-pill" onclick="Router.navigate('/chat')" style="display:inline-flex;align-items:center;gap:6px;">
+              <span class="material-symbols-rounded">arrow_back</span> Return to Chat
+            </button>
+            ${!hasActiveCase ? `
+              <button class="u-btn u-btn-outline u-btn-pill" onclick="Router.navigate('/court/simulate')" style="display:inline-flex;align-items:center;gap:6px;border-color:rgba(255,255,255,0.25);color:#fff;">
+                <span class="material-symbols-rounded">play_arrow</span> View Demo Simulation
+              </button>
+            ` : ''}
+          </div>
         </div>
       </div>
     `;
   },
 
   render() {
+    this.loadActiveScript();
+    const caseTitle = this._activeCaseTitle || 'Supreme Court Special Bench Hearing';
+
     return `
       <div class="v3-simulation-wrapper" id="v3-wrapper">
         <div class="v3-loading-overlay" id="v3-loader">
@@ -203,6 +522,12 @@ const VirtualCourtSimulator = {
         <div class="v3-hud-overlay">
           <div class="v3-hud-top">
             <div class="v3-hud-controls">
+              <!-- Back to Chat Button -->
+              <button class="v3-control-btn" onclick="VirtualCourtSimulator.exitToChat()" title="Return to Ask Nyay Setu Chat" style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);">
+                <span class="material-symbols-rounded">arrow_back</span>
+                <span>Chat</span>
+              </button>
+
               <div class="v3-camera-controls" id="v3-cams">
                 <button class="v3-cam-btn active" id="v3-cam-wide" onclick="VirtualCourtSimulator.setCamera('WIDE', true)" title="Wide Courtroom View (Default)">
                   <span class="material-symbols-rounded">panorama</span> WIDE
@@ -225,9 +550,26 @@ const VirtualCourtSimulator = {
               </button>
             </div>
 
-            <div class="v3-hud-status recording" id="v3-status">
-              <span class="material-symbols-rounded" id="v3-status-icon">fiber_manual_record</span>
-              <span id="v3-status-text">IN SESSION</span>
+            <!-- Case Title & Exchange Progress in HUD -->
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="v3-case-title-badge" id="v3-case-title" style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(15,23,42,0.75);border:1px solid rgba(255,255,255,0.2);border-radius:20px;font-size:0.76rem;font-weight:600;color:#f8fafc;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${Utils.escapeHtml(caseTitle)}">
+                <span class="material-symbols-rounded" style="font-size:15px;color:#f59e0b">balance</span>
+                <span id="v3-case-title-text">${Utils.escapeHtml(caseTitle)}</span>
+              </div>
+
+              <!-- Active Language & Indian Tone Badge -->
+              <div class="v3-lang-badge" id="v3-lang-badge" title="Active Courtroom Language & Tone">
+                <span class="material-symbols-rounded">translate</span>
+                <span id="v3-lang-badge-text">${this._detectIndianLanguage((this._script && this._script[0] && this._script[0].text) || '', this._activeLanguage).displayBadge}</span>
+              </div>
+
+              <span class="v3-exchange-badge" id="v3-exchange-badge" style="font-size:0.72rem;font-weight:700;color:#38bdf8;padding:3px 10px;background:rgba(56,189,248,0.15);border-radius:12px;border:1px solid rgba(56,189,248,0.35);">
+                Turn 1 / ${this._script.length || 1}
+              </span>
+              <div class="v3-hud-status recording" id="v3-status">
+                <span class="material-symbols-rounded" id="v3-status-icon">fiber_manual_record</span>
+                <span id="v3-status-text">IN SESSION</span>
+              </div>
             </div>
           </div>
 
@@ -250,9 +592,17 @@ const VirtualCourtSimulator = {
     `;
   },
 
+  exitToChat() {
+    this.stopSimulation();
+    Router.navigate('/chat');
+  },
+
   /* ==================== 2. WEBGL INITIALIZATION ==================== */
   startSimulation() {
-    if (this._isPlaying) return;
+    if (this._isPlaying) {
+      this.stopSimulation();
+    }
+    this.loadActiveScript();
     this._isPlaying = true;
     this._isPaused = false;
     this._currentStep = 0;
@@ -1017,7 +1367,7 @@ const VirtualCourtSimulator = {
     const textEl = document.getElementById('v3-subtitle-text');
 
     if (speakerTextEl) speakerTextEl.innerText = step.name;
-    if (textEl) textEl.innerText = step.text;
+    if (textEl) textEl.innerHTML = this._highlightLegalPointsInText(step.text);
     if (subContainer) subContainer.classList.add('active');
 
     this._speakText(step.text, step.pitch, step.rate, () => {
@@ -1042,6 +1392,26 @@ const VirtualCourtSimulator = {
     const step = this._script[this._currentStep];
     this._activeSpeakerId = step.actor;
 
+    // Update Turn Badge in HUD
+    const exchangeBadge = document.getElementById('v3-exchange-badge');
+    if (exchangeBadge) {
+      exchangeBadge.style.display = 'inline-block';
+      exchangeBadge.innerText = `Turn ${this._currentStep + 1} / ${this._script.length}`;
+    }
+
+    // Update Case Title in HUD
+    const titleEl = document.getElementById('v3-case-title-text');
+    if (titleEl && this._activeCaseTitle) {
+      titleEl.innerText = this._activeCaseTitle;
+    }
+
+    // Update Active Language & Indian Tone Badge in HUD
+    const langBadgeText = document.getElementById('v3-lang-badge-text');
+    if (langBadgeText) {
+      const stepLangInfo = this._detectIndianLanguage(step.text, this._activeLanguage);
+      langBadgeText.innerText = stepLangInfo.displayBadge;
+    }
+
     // 1. Dynamic Lawyer Orientation based on who is being addressed
     if (step.facing) {
       if (step.facing.DEFENSE !== undefined) {
@@ -1057,13 +1427,13 @@ const VirtualCourtSimulator = {
       this._playGavelSound();
     }
 
-    // 3. Show Subtitles & Audio Wave
+    // 3. Show Subtitles & Audio Wave with Legal Highlighting
     const subContainer = document.getElementById('v3-subtitle');
     const speakerTextEl = document.getElementById('v3-speaker-text');
     const textEl = document.getElementById('v3-subtitle-text');
 
     if (speakerTextEl) speakerTextEl.innerText = step.name;
-    if (textEl) textEl.innerText = step.text;
+    if (textEl) textEl.innerHTML = this._highlightLegalPointsInText(step.text);
     if (subContainer) subContainer.classList.add('active');
 
     // 4. Sync Avatar Animation — only active speaker animates
@@ -1076,7 +1446,7 @@ const VirtualCourtSimulator = {
       }
     });
 
-    // 5. Speak text via Web Speech API
+    // 5. Speak text via Web Speech API with clean spoken text
     this._speakText(step.text, step.pitch, step.rate, () => {
       if (this._isPaused) return; // Do not advance if user paused while speaking
       if (subContainer) subContainer.classList.remove('active');
@@ -1090,39 +1460,189 @@ const VirtualCourtSimulator = {
     });
   },
 
-  // Voice preference per actor for distinct speech
-  _voicePrefs: {
-    JUDGE: { gender: 'male', keywords: ['david', 'james', 'daniel', 'male', 'man'], fallbackPitch: 0.7 },
-    DEFENSE: { gender: 'male', keywords: ['mark', 'richard', 'george', 'english', 'uk'], fallbackPitch: 1.0 },
-    PROSECUTION: { gender: 'female', keywords: ['zira', 'sarah', 'female', 'woman', 'hazel', 'fiona'], fallbackPitch: 1.3 }
+  // Highlighting of statutory sections, precedents, and critical arguments in subtitles
+  _highlightLegalPointsInText(text) {
+    if (!text) return '';
+    let escaped = Utils.escapeHtml(text);
+
+    // 1. Highlight Statutory Sections & Acts (Amber badge)
+    escaped = escaped.replace(
+      /(?:धारा|दफा|Section|Sec\.?)\s*\d+[\w\s\(\)]*|Order\s*\d+\s*Rule\s*\d+|ऑर्डर\s*\d+\s*रूल\s*\d+|आदेश\s*\d+\s*नियम\s*\d+|Article\s*\d+|अनुच्छेद\s*\d+|IPC|आईपीसी|CrPC|सीआरपीसी|CPC|सीपीसी|BNS|BNSS|NDPS|NI Act/gi,
+      '<span class="v3-legal-badge-section">$&</span>'
+    );
+
+    // 2. Highlight Landmark Principles & Precedents (Cyan badge)
+    escaped = escaped.replace(
+      /Unbroken Chain of Circumstances|Due process of law|Civil Appeal[^\,\.\n\<]*|Supreme Court|High Court|साक्ष्यों की अटूट श्रृंखला|कानून की उचित प्रक्रिया|Interim Injunction|Stay Order|अस्थाई निषेधाज्ञा|Prima facie/gi,
+      '<span class="v3-legal-badge-precedent">$&</span>'
+    );
+
+    // 3. Highlight Crucial Evidentiary & Statutory Arguments (Rose/Red badge)
+    escaped = escaped.replace(
+      /निर्ममता से हत्या|शव को छुपाया|हल्की धारा|अपराध स्वीकार|forged agreement|farzi agreement|illegal kabza|balpurvak kabza|Mandatory requirement|mandatory statutory safeguard|Fatal defect|Order, order/gi,
+      '<span class="v3-legal-badge-critical">$&</span>'
+    );
+
+    return escaped;
   },
 
-  _findVoice(actorKey) {
+  // Voice preference per actor: Exactly 1 Female Voice (Prosecution) + 2 Distinct Male Voices (Judge & Defense)
+  _voicePrefs: {
+    JUDGE: { gender: 'male', preferredName: 'david', basePitch: 0.74, baseRate: 0.88 },
+    DEFENSE: { gender: 'male', preferredName: 'mark', basePitch: 1.02, baseRate: 0.98 },
+    PROSECUTION: { gender: 'female', preferredName: 'zira', basePitch: 1.16, baseRate: 1.02 }
+  },
+
+  _findVoice(actorKey, langCode = 'hi-IN') {
     if (!window.speechSynthesis) return null;
     const voices = window.speechSynthesis.getVoices();
     if (!voices || voices.length === 0) return null;
 
-    const pref = this._voicePrefs[actorKey];
-    if (!pref) return null;
+    const shortLang = (langCode || 'hi').split('-')[0].toLowerCase();
 
-    // Try to find a matching voice by keyword
-    for (const kw of pref.keywords) {
-      const found = voices.find(v => v.name.toLowerCase().includes(kw));
-      if (found) return found;
+    // 1. Identify Indian voices explicitly (marked with '-IN', 'India', 'Indian', or authentic Indian names)
+    const isIndianVoice = (v) => {
+      const l = (v.lang || '').toUpperCase();
+      const n = (v.name || '').toLowerCase();
+      return l.includes('-IN') || l.includes('_IN') ||
+             n.includes('india') || n.includes('indian') ||
+             n.includes('ravi') || n.includes('heera') || n.includes('hemant') ||
+             n.includes('kalpana') || n.includes('madhav') || n.includes('valluvar') ||
+             n.includes('swara') || n.includes('neerja') || n.includes('veena') ||
+             n.includes('हिन्दी') || n.includes('বাংলা') || n.includes('తెలుగు') ||
+             n.includes('தமிழ்') || n.includes('मराठी') || n.includes('ગુજરાતી');
+    };
+
+    const isFemale = (v) => {
+      const n = (v.name || '').toLowerCase();
+      return n.includes('female') || n.includes('woman') || n.includes('zira') ||
+             n.includes('kalpana') || n.includes('heera') || n.includes('swara') ||
+             n.includes('neerja') || n.includes('hazel') || n.includes('catherine') ||
+             n.includes('fiona') || n.includes('veena') || n.includes('susan') ||
+             n.includes('linda') || n.includes('samantha') || n.includes('victoria');
+    };
+
+    const isMale = (v) => !isFemale(v);
+
+    // Exact regional language voices
+    const langExactVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith(shortLang));
+    // Any Indian locale voice
+    const indianVoices = voices.filter(isIndianVoice);
+
+    if (actorKey === 'PROSECUTION') {
+      // 1 FEMALE VOICE (Public Prosecutor)
+      // Highest priority: exact language female Indian voice
+      let female = langExactVoices.find(v => isFemale(v) && isIndianVoice(v));
+      if (!female) female = langExactVoices.find(isFemale);
+      if (!female) female = indianVoices.find(isFemale); // Fallback to Indian female voice
+      if (!female) female = voices.find(isFemale);        // Global fallback (e.g. Zira)
+      return female || voices[voices.length - 1];
     }
 
-    // Fallback: pick any English voice
-    const enVoices = voices.filter(v => v.lang && v.lang.startsWith('en'));
-    if (enVoices.length > 0) {
-      const actorIdx = { JUDGE: 0, DEFENSE: 1, PROSECUTION: 2 };
-      const idx = actorIdx[actorKey] || 0;
-      return enVoices[idx % enVoices.length];
+    if (actorKey === 'JUDGE') {
+      // MALE VOICE 1: Senior Presiding Male (Deep baritone, authoritative)
+      let judgeVoice = langExactVoices.find(v => isMale(v) && isIndianVoice(v));
+      if (!judgeVoice) judgeVoice = langExactVoices.find(isMale);
+      if (!judgeVoice) judgeVoice = indianVoices.find(isMale); // Fallback to Indian male voice
+      if (!judgeVoice) {
+        judgeVoice = voices.find(v => {
+          const n = (v.name || '').toLowerCase();
+          return isMale(v) && (n.includes('david') || n.includes('george') || n.includes('daniel') || n.includes('james'));
+        }) || voices.find(isMale);
+      }
+      return judgeVoice || voices[0];
     }
 
-    return null;
+    if (actorKey === 'DEFENSE') {
+      // MALE VOICE 2: Distinct Male Voice (Defense Counsel, strictly different from Judge!)
+      const judgeVoice = this._findVoice('JUDGE', langCode);
+      const judgeName = judgeVoice ? judgeVoice.name : '';
+
+      let defenseVoice = langExactVoices.find(v => isMale(v) && isIndianVoice(v) && v.name !== judgeName);
+      if (!defenseVoice) defenseVoice = langExactVoices.find(v => isMale(v) && v.name !== judgeName);
+      if (!defenseVoice) defenseVoice = indianVoices.find(v => isMale(v) && v.name !== judgeName);
+      if (!defenseVoice) {
+        defenseVoice = voices.find(v => {
+          const n = (v.name || '').toLowerCase();
+          return isMale(v) && v.name !== judgeName && (n.includes('mark') || n.includes('madhav') || n.includes('valluvar') || n.includes('richard') || n.includes('guy') || n.includes('brian'));
+        }) || voices.find(v => isMale(v) && v.name !== judgeName);
+      }
+      return defenseVoice || judgeVoice || voices[0];
+    }
+
+    return voices[0] || null;
   },
 
-  _speakText(text, pitch, rate, onEnd) {
+  // Dynamic Cadence & Tone Modulation for Statutory Sections & Critical Arguments
+  _analyzeSegmentTone(text, actorKey) {
+    const isSection = /(?:धारा|दफा|Section|Sec\.?)\s*\d+[\w\s\(\)]*|Order\s*\d+\s*Rule\s*\d+|ऑर्डर\s*\d+\s*रूल\s*\d+|आदेश\s*\d+\s*नियम\s*\d+|Article\s*\d+|अनुच्छेद\s*\d+|IPC|आईपीसी|CrPC|सीआरपीसी|CPC|सीपीसी|BNS|BNSS|NDPS|NI Act/i.test(text);
+    const isPrecedent = /Unbroken Chain of Circumstances|Due process of law|Civil Appeal[^\,\.\n]*|Supreme Court|High Court|साक्ष्यों की अटूट श्रृंखला|कानून की उचित प्रक्रिया|Interim Injunction|Stay Order|अस्थाई निषेधाज्ञा|Prima facie/i.test(text);
+    const isCritical = /निर्ममता से हत्या|शव को छुपाया|हल्की धारा|अपराध स्वीकार|forged agreement|farzi agreement|illegal kabza|balpurvak kabza|Mandatory requirement|mandatory statutory safeguard|Fatal defect|Order, order/i.test(text);
+    const isImportant = isSection || isPrecedent || isCritical;
+
+    if (actorKey === 'JUDGE') {
+      if (isImportant) {
+        return {
+          isImportant: true,
+          pitch: isSection ? 0.62 : 0.78, // Deep, commanding judicial baritone on statutory provisions
+          rate: 0.78, // Slower, grave, measured judicial pronouncement
+          type: isSection ? 'section' : (isPrecedent ? 'precedent' : 'critical')
+        };
+      }
+      return { isImportant: false, pitch: 0.74, rate: 0.88, type: 'normal' };
+    }
+
+    if (actorKey === 'DEFENSE') {
+      if (isImportant) {
+        return {
+          isImportant: true,
+          pitch: 1.22, // Elevated impassioned advocacy
+          rate: 0.86, // Crisp, articulate emphasis on client's statutory rights
+          type: isSection ? 'section' : (isPrecedent ? 'precedent' : 'critical')
+        };
+      }
+      return { isImportant: false, pitch: 1.02, rate: 0.98, type: 'normal' };
+    }
+
+    if (actorKey === 'PROSECUTION') {
+      if (isImportant) {
+        return {
+          isImportant: true,
+          pitch: 1.38, // Sharp, piercing prosecutorial punch
+          rate: 0.88, // Assertive, rhythmic emphasis driving the gravity of the crime
+          type: isSection ? 'section' : (isPrecedent ? 'precedent' : 'critical')
+        };
+      }
+      return { isImportant: false, pitch: 1.16, rate: 1.02, type: 'normal' };
+    }
+
+    return { isImportant: false, pitch: 1.0, rate: 1.0, type: 'normal' };
+  },
+
+  _segmentDialogue(text, actorKey) {
+    if (!text) return [];
+    // Protect abbreviations like No., Sec., Hon'ble before splitting
+    let protectedText = text.replace(/\b(No|Sec|Art|Adv|vs|v|Dr|Mr|Mrs|AIR|Co|Ltd|i\.e|e\.g)\./gi, (m, g) => g + '___DOT___');
+
+    const rawSentences = protectedText
+      .split(/(?<=[.!?।;:\n])\s+/)
+      .map(s => s.replace(/___DOT___/g, '.').trim())
+      .filter(Boolean);
+
+    if (rawSentences.length === 0) {
+      return [{ text, ...this._analyzeSegmentTone(text, actorKey) }];
+    }
+
+    return rawSentences.map(sentence => {
+      const analysis = this._analyzeSegmentTone(sentence, actorKey);
+      return {
+        text: sentence,
+        ...analysis
+      };
+    });
+  },
+
+  _speakText(text, defaultPitch, defaultRate, onEnd) {
     if (!window.speechSynthesis) {
       this._stepTimeout = setTimeout(onEnd, 3500);
       return;
@@ -1130,24 +1650,70 @@ const VirtualCourtSimulator = {
 
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.pitch = pitch;
-    utterance.rate = rate;
-
-    // Assign distinct voice per actor
-    const actorKey = this._activeSpeakerId;
-    const voice = this._findVoice(actorKey);
-    if (voice) {
-      utterance.voice = voice;
-    } else {
-      const pref = this._voicePrefs[actorKey];
-      if (pref) utterance.pitch = pref.fallbackPitch;
+    // Clean spoken text: strip bracketed stage directions like *[Scrutinizing file]*
+    const cleanedText = this._cleanTextForVoice(text);
+    if (!cleanedText) {
+      onEnd();
+      return;
     }
 
-    utterance.onend = () => { onEnd(); };
-    utterance.onerror = () => { onEnd(); };
+    // Segment dialogue with tone modulation per sentence
+    const segments = this._segmentDialogue(cleanedText, this._activeSpeakerId);
+    if (!segments || segments.length === 0) {
+      onEnd();
+      return;
+    }
 
-    window.speechSynthesis.speak(utterance);
+    let segIndex = 0;
+    const totalSegs = segments.length;
+
+    const speakNextSegment = () => {
+      if (!this._isPlaying || this._isPaused) return;
+      if (segIndex >= totalSegs) {
+        onEnd();
+        return;
+      }
+
+      const seg = segments[segIndex];
+      const utterance = new SpeechSynthesisUtterance(seg.text);
+      utterance.pitch = seg.pitch;
+      utterance.rate = seg.rate;
+      utterance.volume = 1.0;
+
+      const lang = this._getSpeechLanguageCode(seg.text);
+      const voice = this._findVoice(this._activeSpeakerId, lang);
+      if (voice) {
+        utterance.voice = voice;
+        if (voice.lang) utterance.lang = voice.lang;
+      } else {
+        utterance.lang = lang;
+      }
+
+      utterance.onend = () => {
+        segIndex++;
+        if (segIndex < totalSegs) {
+          // Dramatic courtroom micro-pause before an important statutory section or precedent
+          const pauseDelay = segments[segIndex].isImportant ? 110 : 35;
+          this._stepTimeout = setTimeout(speakNextSegment, pauseDelay);
+        } else {
+          onEnd();
+        }
+      };
+
+      utterance.onerror = (e) => {
+        console.warn('Speech synthesis notice:', e);
+        segIndex++;
+        if (segIndex < totalSegs) {
+          speakNextSegment();
+        } else {
+          onEnd();
+        }
+      };
+
+      window.speechSynthesis.speak(utterance);
+    };
+
+    speakNextSegment();
   },
 
   _endSimulation() {
@@ -1166,9 +1732,24 @@ const VirtualCourtSimulator = {
     // Pause all avatars
     Object.values(this._actions).forEach(action => { action.paused = true; });
 
-    setTimeout(() => {
-      Router.navigate('/hearing/day');
-    }, 4500);
+    // Show completion alert in subtitle bar with return to chat button
+    const subContainer = document.getElementById('v3-subtitle');
+    const speakerTextEl = document.getElementById('v3-speaker-text');
+    const textEl = document.getElementById('v3-subtitle-text');
+
+    if (speakerTextEl) speakerTextEl.innerText = '⚖️ सुनवाई समाप्त (Hearing Concluded)';
+    if (textEl) {
+      textEl.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;width:100%;">
+          <span>माननीय पीठ द्वारा अंतरिम निर्देश दर्ज किए गए हैं।</span>
+          <button class="u-btn u-btn-primary u-btn-sm u-btn-pill" onclick="VirtualCourtSimulator.exitToChat()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;font-weight:700;">
+            <span class="material-symbols-rounded" style="font-size:16px">chat</span>
+            वापस चैट पर जाएं (Return to Chat)
+          </button>
+        </div>
+      `;
+    }
+    if (subContainer) subContainer.classList.add('active');
   },
 
   stopSimulation() {

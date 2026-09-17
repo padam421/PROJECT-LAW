@@ -610,6 +610,23 @@ const UserChatBot = {
     conv.messages.push({ id: userMsgId, sender: 'user', text: queryText, attachment: attachedMeta, time: new Date().toISOString() });
     conv.messages.push(aiMsgObj);
     UserStore.set('conversations', conversations);
+
+    // Auto-prepare Courtroom Debate Simulation for 3D Virtual Court
+    if (typeof VirtualCourtSimulator !== 'undefined' && responseText && (responseText.includes('🏛️') || responseText.includes('Courtroom Debate'))) {
+      try {
+        const parsed = VirtualCourtSimulator.parseDebateFromText(responseText);
+        if (parsed && parsed.length > 0) {
+          sessionStorage.setItem('nyay_active_court_script', JSON.stringify({
+            script: parsed,
+            title: queryText.substring(0, 65).trim(),
+            lang: detectedLang
+          }));
+          VirtualCourtSimulator._script = parsed;
+          VirtualCourtSimulator._activeCaseTitle = queryText.substring(0, 65).trim();
+          VirtualCourtSimulator._activeLanguage = detectedLang;
+        }
+      } catch (_) {}
+    }
   },
 
   toggleSpeak(msgId) {
@@ -834,6 +851,23 @@ const UserChatBot = {
       conv.messages.push(newAiMsgObj);
       UserStore.set('conversations', conversations);
 
+      // Auto-prepare Courtroom Debate Simulation for 3D Virtual Court from regenerated response
+      if (typeof VirtualCourtSimulator !== 'undefined' && responseText && (responseText.includes('🏛️') || responseText.includes('Courtroom Debate'))) {
+        try {
+          const parsed = VirtualCourtSimulator.parseDebateFromText(responseText);
+          if (parsed && parsed.length > 0) {
+            sessionStorage.setItem('nyay_active_court_script', JSON.stringify({
+              script: parsed,
+              title: originalQuery.substring(0, 65).trim(),
+              lang: detectedLang
+            }));
+            VirtualCourtSimulator._script = parsed;
+            VirtualCourtSimulator._activeCaseTitle = originalQuery.substring(0, 65).trim();
+            VirtualCourtSimulator._activeLanguage = detectedLang;
+          }
+        } catch (_) {}
+      }
+
       if (window.Utils && typeof window.Utils.showToast === 'function') {
         window.Utils.showToast('नया विस्तृत कानूनी विश्लेषण तैयार है!', 'success');
       }
@@ -843,6 +877,13 @@ const UserChatBot = {
   startNewChat() {
     if (typeof NyaySetuTTS !== 'undefined') {
       NyaySetuTTS.stop();
+    }
+    try {
+      sessionStorage.removeItem('nyay_active_court_script');
+    } catch (_) {}
+    if (typeof VirtualCourtSimulator !== 'undefined') {
+      VirtualCourtSimulator._script = [];
+      VirtualCourtSimulator._activeCaseTitle = 'Supreme Court Special Bench Hearing';
     }
     const conversations = UserStore.get('conversations') || [];
     const conv = conversations.find(c => c.type === 'ai');
