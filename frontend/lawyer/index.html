@@ -47,6 +47,11 @@
     <link rel="stylesheet" href="css/reviews.css" />
     <link rel="stylesheet" href="css/profile.css" />
     <link rel="stylesheet" href="css/settings.css" />
+
+    <!-- Ask Nyay Setu & Court Preparation Styles (Shared with User Portal) -->
+    <link rel="stylesheet" href="../user/css/chat.css" />
+    <link rel="stylesheet" href="../user/css/court.css?v=11.0" />
+    <link rel="stylesheet" href="css/user_theme_bridge.css" />
   </head>
   <body>
     <!-- Root SPA Application Container -->
@@ -57,6 +62,10 @@
 
     <!-- Modal Container -->
     <div id="modal-container"></div>
+
+    <!-- Three.js Library & Loaders for 3D Court Simulator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
     <!-- Shared JavaScript Foundations -->
     <script src="../shared/js/utils.js?v=4.0"></script>
@@ -83,6 +92,7 @@
     <script src="js/payments_page.js?v=4.0"></script>
     <script src="js/reviews_page.js?v=4.0"></script>
     <script src="js/profile_page.js?v=4.0"></script>
+    <script src="../user/js/court_simulator.js?v=11.0"></script>
     <script src="js/court_page.js?v=4.0"></script>
     <script src="../user/js/chat_tts.js?v=4.2"></script>
     <script src="js/chat_bot.js?v=4.2"></script>

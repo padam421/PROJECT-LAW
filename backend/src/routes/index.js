@@ -13,7 +13,11 @@ const DbService = require('../services/dbService');
 const authService = require('../services/authService');
 const jwt = require('jsonwebtoken');
 const config = require('../config/envConfig');
-const { authenticate, requireRole, ensureNotLocked } = require('../middlewares/authMiddleware');
+const {
+  authenticate,
+  requireRole,
+  ensureNotLocked,
+} = require('../middlewares/authMiddleware');
 
 async function optionalAuth(req, res, next) {
   const header = req.get('authorization') || '';
@@ -35,8 +39,9 @@ router.get('/health', (req, res) => {
   res.json({
     status: 'online',
     timestamp: new Date().toISOString(),
-    emailChannel: require('../services/mailService').activeChannel() || 'console_dev_mode',
-    database: 'mysql+json_dual_engine'
+    emailChannel:
+      require('../services/mailService').activeChannel() || 'console_dev_mode',
+    database: 'mysql+json_dual_engine',
   });
 });
 
@@ -49,9 +54,9 @@ router.post('/auth/login', auth.login);
 router.post('/auth/forgot-password', auth.forgotPassword);
 router.post('/auth/reset-password', auth.resetPassword);
 router.post('/auth/otp/resend', auth.resendOTP);
-router.post('/auth/resend-otp', auth.resendOTP);          // spec name
+router.post('/auth/resend-otp', auth.resendOTP); // spec name
 router.post('/auth/otp/verify', auth.verifyOTP);
-router.post('/auth/verify-otp', auth.verifyOTP);          // spec name
+router.post('/auth/verify-otp', auth.verifyOTP); // spec name
 
 /* ---------------- Session-scoped ---------------- */
 router.get('/auth/session', authenticate, auth.session);
@@ -64,17 +69,36 @@ router.delete('/auth/devices/:deviceId', authenticate, auth.revokeDevice);
 router.get('/auth/activity', authenticate, auth.listActivity);
 router.get('/auth/sessions', authenticate, auth.listSessions);
 router.delete('/auth/sessions/:sessionId', authenticate, auth.terminateSession);
-router.post('/auth/incident/unrecognized-login', authenticate, auth.reportIncident);
+router.post(
+  '/auth/incident/unrecognized-login',
+  authenticate,
+  auth.reportIncident
+);
 
 /* ---------------- Workspace state sync ---------------- */
 router.get('/state', authenticate, state.getWorkspace);
 router.put('/state/:collection', authenticate, state.putCollection);
 
 /* ---------------- Verification & documents ---------------- */
-router.post('/lawyer/verification/bar-lookup', authenticate, ensureNotLocked, verify.lookupBarCouncil);
-router.post('/lawyer/documents/upload', authenticate, ensureNotLocked, verify.uploadMiddleware, verify.uploadDocument);
+router.post(
+  '/lawyer/verification/bar-lookup',
+  authenticate,
+  ensureNotLocked,
+  verify.lookupBarCouncil
+);
+router.post(
+  '/lawyer/documents/upload',
+  authenticate,
+  ensureNotLocked,
+  verify.uploadMiddleware,
+  verify.uploadDocument
+);
 router.get('/lawyer/documents', authenticate, verify.listDocuments);
-router.get('/lawyer/documents/:docId/download', authenticate, verify.downloadDocument);
+router.get(
+  '/lawyer/documents/:docId/download',
+  authenticate,
+  verify.downloadDocument
+);
 router.delete('/lawyer/documents/:docId', authenticate, verify.deleteDocument);
 router.post('/lawyer/identity-check', authenticate, verify.submitIdentityCheck);
 router.get('/lawyer/verification-summary', authenticate, verify.summary);
@@ -82,12 +106,25 @@ router.get('/lawyer/verification-summary', authenticate, verify.summary);
 /* ---------------- Advocate profile ---------------- */
 router.patch('/lawyer/profile', authenticate, (req, res) => {
   const user = req.user;
-  const allowed = ['professionalName', 'bio', 'city', 'state', 'primarySpecialization', 'additionalSpecializations', 'courts', 'languages', 'yearsOfPractice'];
+  const allowed = [
+    'professionalName',
+    'bio',
+    'city',
+    'state',
+    'primarySpecialization',
+    'additionalSpecializations',
+    'courts',
+    'languages',
+    'yearsOfPractice',
+  ];
   let reverify = false;
   for (const key of allowed) {
     if (Object.prototype.hasOwnProperty.call(req.body || {}, key)) {
       // Changing statutory credentials forces re-verification
-      if ((key === 'yearsOfPractice') && Number(req.body[key]) !== Number(user[key])) {
+      if (
+        key === 'yearsOfPractice' &&
+        Number(req.body[key]) !== Number(user[key])
+      ) {
         user[key] = Number(req.body[key]);
         continue;
       }
@@ -95,24 +132,52 @@ router.patch('/lawyer/profile', authenticate, (req, res) => {
     }
   }
   if (req.body.profilePhotoData !== undefined) {
-    if (typeof req.body.profilePhotoData === 'string' && req.body.profilePhotoData.length > 1_500_000) {
-      return res.status(413).json({ error: 'Photo too large. Please choose an image under 1 MB.' });
+    if (
+      typeof req.body.profilePhotoData === 'string' &&
+      req.body.profilePhotoData.length > 1_500_000
+    ) {
+      return res
+        .status(413)
+        .json({ error: 'Photo too large. Please choose an image under 1 MB.' });
     }
     user.profilePhoto = req.body.profilePhotoData;
   }
-  if (req.body.barCouncil && String(req.body.barCouncil).trim().toUpperCase() !== String(user.barCouncil).toUpperCase()) {
+  if (
+    req.body.barCouncil &&
+    String(req.body.barCouncil).trim().toUpperCase() !==
+      String(user.barCouncil).toUpperCase()
+  ) {
     user.barCouncil = String(req.body.barCouncil).trim().toUpperCase();
-    user.barNumberHash = require('../utils/helpers').sha256Short(user.barCouncil);
+    user.barNumberHash = require('../utils/helpers').sha256Short(
+      user.barCouncil
+    );
     user.verificationStatus = 'pending';
     user.verificationId = null;
     user.verificationDate = null;
     reverify = true;
     const data = db.get();
-    data.adminActions.push({ id: db.uid('adm'), type: 'reverification_triggered', lawyerId: user.id, summary: 'Bar Council registration number changed via portfolio.', status: 'open', createdAt: new Date().toISOString() });
-    authService.notifyUser(user.id, 'verification', 'Re-Verification Required', 'Your Bar Council registration number changed. Your verified badge is paused until the new number is confirmed.', '/settings/tab/notifications');
+    data.adminActions.push({
+      id: db.uid('adm'),
+      type: 'reverification_triggered',
+      lawyerId: user.id,
+      summary: 'Bar Council registration number changed via portfolio.',
+      status: 'open',
+      createdAt: new Date().toISOString(),
+    });
+    authService.notifyUser(
+      user.id,
+      'verification',
+      'Re-Verification Required',
+      'Your Bar Council registration number changed. Your verified badge is paused until the new number is confirmed.',
+      '/settings/tab/notifications'
+    );
   }
   db.save();
-  res.json({ ok: true, reVerificationTriggered: reverify, lawyer: authService.publicUser(user) });
+  res.json({
+    ok: true,
+    reVerificationTriggered: reverify,
+    lawyer: authService.publicUser(user),
+  });
 });
 
 /* ---------------- Deactivate / reactivate ---------------- */
@@ -131,19 +196,52 @@ router.post('/lawyer/reactivate', authenticate, (req, res) => {
 router.get('/payments/export.csv', authenticate, (req, res) => {
   const ws = db.workspaceFor(req.user.id);
   const rows = ws.transactions || [];
-  const esc = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+  const esc = (v) => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
   const csv = [
-    ['Client', 'Service', 'Date', 'Gross Paid (INR)', 'Platform Fee (INR)', 'Net Earnings (INR)', 'Method', 'Status'].join(','),
-    ...rows.map(t => [esc(t.clientName), esc(t.service), t.date, t.amount, t.platformFee, t.netEarnings, esc(t.paymentMethod || ''), t.paymentStatus].join(','))
+    [
+      'Client',
+      'Service',
+      'Date',
+      'Gross Paid (INR)',
+      'Platform Fee (INR)',
+      'Net Earnings (INR)',
+      'Method',
+      'Status',
+    ].join(','),
+    ...rows.map((t) =>
+      [
+        esc(t.clientName),
+        esc(t.service),
+        t.date,
+        t.amount,
+        t.platformFee,
+        t.netEarnings,
+        esc(t.paymentMethod || ''),
+        t.paymentStatus,
+      ].join(',')
+    ),
   ].join('\n');
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="Nyay Setu-statement-${new Date().toISOString().slice(0, 10)}.csv"`);
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="Nyay Setu-statement-${new Date().toISOString().slice(0, 10)}.csv"`
+  );
   res.send('\ufeff' + csv);
 });
 
 /* ---------------- Admin review console ---------------- */
-router.get('/admin/queue', authenticate, requireRole('admin'), verify.adminQueue);
-router.post('/admin/decide/:lawyerId', authenticate, requireRole('admin'), verify.adminDecide);
+router.get(
+  '/admin/queue',
+  authenticate,
+  requireRole('admin'),
+  verify.adminQueue
+);
+router.post(
+  '/admin/decide/:lawyerId',
+  authenticate,
+  requireRole('admin'),
+  verify.adminDecide
+);
 
 /* ---------------- Verified Lawyers Discovery ---------------- */
 router.get('/lawyers', async (req, res) => {
@@ -169,7 +267,8 @@ router.get('/lawyers/:id', async (req, res) => {
 router.get('/users/:id/profile', optionalAuth, async (req, res) => {
   try {
     const profile = await DbService.getClientProfile(req.params.id);
-    if (!profile) return res.status(404).json({ error: 'User profile not found' });
+    if (!profile)
+      return res.status(404).json({ error: 'User profile not found' });
     res.json({ ok: true, profile });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -180,7 +279,7 @@ router.get('/users/:id/profile', optionalAuth, async (req, res) => {
 router.post('/consultations/book', optionalAuth, async (req, res) => {
   try {
     // If authenticated, use req.user.id; otherwise use provided userId or default to Padam Kishore
-    let userId = req.user ? req.user.id : (req.body.userId || null);
+    let userId = req.user ? req.user.id : req.body.userId || null;
     if (!userId && req.body.email) {
       const existingUser = await DbService.findUserByEmail(req.body.email);
       if (existingUser) userId = existingUser.id;
@@ -192,7 +291,7 @@ router.post('/consultations/book', optionalAuth, async (req, res) => {
 
     const bookingPayload = {
       ...req.body,
-      userId
+      userId,
     };
 
     const consultation = await DbService.bookConsultation(bookingPayload);
@@ -205,7 +304,10 @@ router.post('/consultations/book', optionalAuth, async (req, res) => {
 
 router.get('/consultations/lawyer', optionalAuth, async (req, res) => {
   try {
-    const lawyerId = (req.user && req.user.role === 'lawyer' ? req.user.id : null) || req.query.lawyerId || 'law_adv_padam';
+    const lawyerId =
+      (req.user && req.user.role === 'lawyer' ? req.user.id : null) ||
+      req.query.lawyerId ||
+      'law_adv_padam';
     const consultations = await DbService.getLawyerConsultations(lawyerId);
     res.json({ ok: true, consultations });
   } catch (err) {
@@ -215,7 +317,10 @@ router.get('/consultations/lawyer', optionalAuth, async (req, res) => {
 
 router.get('/consultations/user', optionalAuth, async (req, res) => {
   try {
-    const userId = (req.user ? req.user.id : null) || req.query.userId || 'usr_mtlac008z0vvsq';
+    const userId =
+      (req.user ? req.user.id : null) ||
+      req.query.userId ||
+      'usr_mtlac008z0vvsq';
     const consultations = await DbService.getUserConsultations(userId);
     res.json({ ok: true, consultations });
   } catch (err) {
@@ -226,8 +331,12 @@ router.get('/consultations/user', optionalAuth, async (req, res) => {
 router.patch('/consultations/:id/status', optionalAuth, async (req, res) => {
   try {
     const status = req.body.status || 'accepted';
-    const lawyerId = req.user ? req.user.id : (req.body.lawyerId || null);
-    const result = await DbService.updateConsultationStatus(req.params.id, status, lawyerId);
+    const lawyerId = req.user ? req.user.id : req.body.lawyerId || null;
+    const result = await DbService.updateConsultationStatus(
+      req.params.id,
+      status,
+      lawyerId
+    );
     res.json({ ok: true, ...result });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -236,7 +345,10 @@ router.patch('/consultations/:id/status', optionalAuth, async (req, res) => {
 
 router.put('/users/profile', optionalAuth, async (req, res) => {
   try {
-    const userId = (req.user ? req.user.id : null) || req.body.userId || 'usr_mtlac008z0vvsq';
+    const userId =
+      (req.user ? req.user.id : null) ||
+      req.body.userId ||
+      'usr_mtlac008z0vvsq';
     const { fullName, phone, city, state } = req.body;
     await DbService.updateUserProfile(userId, { fullName, phone, city, state });
     res.json({ ok: true, message: 'Profile updated in MySQL successfully.' });
@@ -251,9 +363,15 @@ router.get('/notifications', optionalAuth, async (req, res) => {
     const role = req.query.role || (req.user ? req.user.role : null);
     let userId;
     if (role === 'lawyer') {
-      userId = (req.user && req.user.role === 'lawyer' ? req.user.id : null) || req.query.userId || 'law_adv_padam';
+      userId =
+        (req.user && req.user.role === 'lawyer' ? req.user.id : null) ||
+        req.query.userId ||
+        'law_adv_padam';
     } else {
-      userId = (req.user && req.user.role !== 'lawyer' ? req.user.id : null) || req.query.userId || 'usr_mtlac008z0vvsq';
+      userId =
+        (req.user && req.user.role !== 'lawyer' ? req.user.id : null) ||
+        req.query.userId ||
+        'usr_mtlac008z0vvsq';
     }
     const notifications = await DbService.getUserNotifications(userId, role);
     res.json({ ok: true, notifications });
@@ -264,7 +382,10 @@ router.get('/notifications', optionalAuth, async (req, res) => {
 
 router.patch('/notifications/read-all', optionalAuth, async (req, res) => {
   try {
-    const userId = (req.user ? req.user.id : null) || req.body.userId || (req.query.role === 'lawyer' ? 'law_adv_padam' : 'usr_mtlac008z0vvsq');
+    const userId =
+      (req.user ? req.user.id : null) ||
+      req.body.userId ||
+      (req.query.role === 'lawyer' ? 'law_adv_padam' : 'usr_mtlac008z0vvsq');
     await DbService.markAllNotificationsRead(userId);
     res.json({ ok: true, message: 'All notifications marked as read.' });
   } catch (err) {
@@ -291,15 +412,18 @@ router.post('/ai/chat', async (req, res) => {
     const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(req.body),
     });
     const data = await aiResp.json();
     res.status(aiResp.status).json(data);
   } catch (err) {
     console.error('AI Proxy Error:', err.message);
+    const { ensureAIServiceRunning } = require('../services/aiSupervisor');
+    ensureAIServiceRunning().catch(() => {});
     res.status(502).json({
       ok: false,
-      error: 'Nyay Setu AI Service is currently connecting or offline. Please ensure the AI service is running on port 5000.'
+      error:
+        'Nyay Setu AI Service is currently connecting or initializing. Please wait a moment and try again.',
     });
   }
 });
@@ -309,7 +433,7 @@ router.post('/ai/court', async (req, res) => {
     const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/court`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(req.body),
     });
     const data = await aiResp.json();
     res.status(aiResp.status).json(data);
@@ -317,7 +441,7 @@ router.post('/ai/court', async (req, res) => {
     console.error('AI Court Proxy Error:', err.message);
     res.status(502).json({
       ok: false,
-      error: 'Courtroom Simulator AI service is currently unavailable.'
+      error: 'Courtroom Simulator AI service is currently unavailable.',
     });
   }
 });

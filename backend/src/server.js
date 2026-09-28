@@ -22,6 +22,10 @@ async function main() {
     console.log(`  Database    : ${db.DB_FILE}`);
     console.log(`  Email       : ${require('./services/mailService').activeChannel() || 'NOT CONFIGURED (dev: OTPs print to this console)'}`);
     console.log('──────────────────────────────────────────────');
+
+    // Auto-check Supreme Court AI RAG Service status
+    const { ensureAIServiceRunning } = require('./services/aiSupervisor');
+    ensureAIServiceRunning().catch(() => {});
   });
 }
 

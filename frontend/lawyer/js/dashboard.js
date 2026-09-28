@@ -54,7 +54,7 @@ const DashboardPage = {
               </div>
               <div>
                 <div style="font-size:0.75rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:0.5px">Interactive 3D Practice</div>
-                <h3 style="font-size:1.2rem;font-weight:800;color:var(--color-primary);margin:0">Virtual Courtroom Simulator</h3>
+                <h3 style="font-size:1.2rem;font-weight:800;color:var(--color-primary);margin:0">Court Preparation</h3>
               </div>
             </div>
             <span class="badge badge-accent" style="background:rgba(245,158,11,0.15);color:#d97706;border:1px solid rgba(245,158,11,0.3)">Advocate Mode</span>
@@ -64,9 +64,9 @@ const DashboardPage = {
           </p>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn btn-primary btn-sm" onclick="Router.navigate('/court')">
-              <span class="material-symbols-rounded">sports_esports</span> Enter Court Simulator
+              <span class="material-symbols-rounded">sports_esports</span> Enter Court Preparation
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="AdvocateCourtPage ? AdvocateCourtPage.showProtocols() : Router.navigate('/court')">
+            <button class="btn btn-secondary btn-sm" onclick="AdvocateCourtPage ? (AdvocateCourtPage.showProtocols ? AdvocateCourtPage.showProtocols() : Router.navigate('/court')) : Router.navigate('/court')">
               <span class="material-symbols-rounded">menu_book</span> Bench Protocols
             </button>
           </div>
@@ -81,7 +81,7 @@ const DashboardPage = {
               </div>
               <div>
                 <div style="font-size:0.75rem;font-weight:700;color:var(--color-accent);text-transform:uppercase;letter-spacing:0.5px">Instant Legal Intelligence</div>
-                <h3 style="font-size:1.2rem;font-weight:800;color:var(--color-primary);margin:0">Ask Nyay Setu AI Assistant</h3>
+                <h3 style="font-size:1.2rem;font-weight:800;color:var(--color-primary);margin:0">Ask Nyay Setu</h3>
               </div>
             </div>
             <span class="badge badge-accent">BNS / IPC / Precedents</span>
@@ -101,7 +101,7 @@ const DashboardPage = {
             </span>
           </div>
           <button class="btn btn-primary btn-sm" onclick="Router.navigate('/ai-assistant')">
-            <span class="material-symbols-rounded">chat</span> Open AI Legal Assistant
+            <span class="material-symbols-rounded">chat</span> Open Ask Nyay Setu
           </button>
         </div>
       </div>

@@ -1,0 +1,373 @@
+/* ============================================================
+   Nyay Setu Advocate Portal — User Theme Bridge
+   Imports user portal design tokens & component classes
+   so Ask Nyay Setu & Court Preparation render identically
+   to the User portal without altering existing advocate styles.
+   ============================================================ */
+
+:root {
+  /* --- Clean Surfaces (Light Theme) --- */
+  --u-bg-deep: #f8fafc;
+  --u-bg-primary: #ffffff;
+  --u-bg-secondary: #f1f5f9;
+  --u-bg-elevated: #ffffff;
+  --u-bg-card: #ffffff;
+  --u-bg-card-hover: #f8fafc;
+  --u-bg-input: #ffffff;
+
+  /* --- Translucent Glass & Borders --- */
+  --u-glass-bg: rgba(255, 255, 255, 0.9);
+  --u-glass-bg-hover: rgba(248, 250, 252, 0.95);
+  --u-glass-bg-active: #f1f5f9;
+  --u-glass-border: #e2e8f0;
+  --u-glass-border-hover: #cbd5e1;
+  --u-glass-border-active: #94a3b8;
+  --u-glass-blur: blur(20px);
+  --u-glass-blur-light: blur(12px);
+
+  /* --- Primary Brand (Deep Navy - matching Lawyer portal) --- */
+  --u-primary: #1a2744;
+  --u-primary-light: #243556;
+  --u-primary-lighter: #2e4268;
+  --u-primary-dark: #111b30;
+
+  /* --- Accent Colors (Professional Legal Teal & Gold) --- */
+  --u-accent: #0d9488;
+  --u-accent-light: #14b8a6;
+  --u-accent-lighter: #5eead4;
+  --u-accent-dark: #0a7a70;
+  --u-accent-glow: rgba(13, 148, 136, 0.25);
+  --u-accent-subtle: rgba(13, 148, 136, 0.08);
+  --u-accent-surface: rgba(13, 148, 136, 0.12);
+  --u-accent-gradient: linear-gradient(135deg, #1a2744 0%, #243556 100%);
+  --u-accent-gradient-teal: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  --u-accent-gradient-vibrant: linear-gradient(135deg, #1a2744 0%, #0d9488 100%);
+
+  /* --- Semantic Status Accents --- */
+  --u-emerald: #10b981;
+  --u-emerald-light: #059669;
+  --u-emerald-glow: rgba(16, 185, 129, 0.2);
+  --u-emerald-subtle: rgba(16, 185, 129, 0.08);
+
+  --u-amber: #f59e0b;
+  --u-amber-light: #d97706;
+  --u-amber-glow: rgba(245, 158, 11, 0.2);
+  --u-amber-subtle: rgba(245, 158, 11, 0.08);
+
+  --u-rose: #ef4444;
+  --u-rose-light: #dc2626;
+  --u-rose-glow: rgba(239, 68, 68, 0.2);
+  --u-rose-subtle: rgba(239, 68, 68, 0.08);
+
+  --u-cyan: #0284c7;
+  --u-cyan-light: #0369a1;
+  --u-cyan-glow: rgba(2, 132, 199, 0.2);
+
+  /* --- Text Hierarchy (Crisp, High-Contrast Typography) --- */
+  --u-text-primary: #111827;
+  --u-text-secondary: #374151;
+  --u-text-tertiary: #6b7280;
+  --u-text-disabled: #9ca3af;
+  --u-text-accent: #0d9488;
+
+  /* --- Borders & Dividers --- */
+  --u-border: #e5e7eb;
+  --u-border-light: #f1f5f9;
+  --u-border-strong: #d1d5db;
+  --u-divider: #e5e7eb;
+
+  /* --- Shadows (Clean, Subtle, Realistic Professional Depth) --- */
+  --u-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --u-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --u-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+  --u-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  --u-shadow-glow-accent: 0 4px 14px rgba(26, 39, 68, 0.15);
+  --u-shadow-glow-emerald: 0 4px 14px rgba(16, 185, 129, 0.15);
+  --u-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+
+  /* --- Radius Scale --- */
+  --u-radius-xs: 6px;
+  --u-radius-sm: 10px;
+  --u-radius-md: 14px;
+  --u-radius-lg: 18px;
+  --u-radius-xl: 22px;
+  --u-radius-2xl: 28px;
+  --u-radius-full: 9999px;
+
+  /* --- Spacing (8px grid) --- */
+  --u-space-1: 4px;
+  --u-space-2: 8px;
+  --u-space-3: 12px;
+  --u-space-4: 16px;
+  --u-space-5: 20px;
+  --u-space-6: 24px;
+  --u-space-8: 32px;
+  --u-space-10: 40px;
+  --u-space-12: 48px;
+  --u-space-16: 64px;
+  --u-space-20: 80px;
+
+  /* --- Transitions --- */
+  --u-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --u-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --u-duration-fast: 150ms;
+  --u-duration-base: 250ms;
+  --u-duration-slow: 400ms;
+}
+
+/* --- Container Fitting in Advocate Layout --- */
+.app-content:has(.u-chat-layout) {
+  padding: 12px 20px !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+.app-content:has(.u-chat-layout) .u-chat-layout {
+  height: calc(100vh - var(--topbar-height) - 40px);
+}
+
+.app-content:has(.vc-hub-container),
+.app-content:has(.v3-simulation-wrapper),
+.app-content:has(.u-hearing-day),
+.app-content:has(.u-post-hearing) {
+  padding: 16px 24px !important;
+  max-width: 1200px !important;
+  width: 100% !important;
+}
+
+/* --- User Button Utility Classes --- */
+.u-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--u-space-2);
+  padding: 0.65rem 1.4rem;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: var(--u-radius-sm);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--u-duration-fast) var(--u-ease-out);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+  text-decoration: none;
+}
+
+.u-btn:active {
+  transform: scale(0.98);
+}
+
+.u-btn-primary {
+  background: var(--u-accent-gradient);
+  color: #fff !important;
+  box-shadow: 0 2px 6px rgba(26, 39, 68, 0.2);
+}
+
+.u-btn-primary:hover {
+  background: linear-gradient(135deg, #243556 0%, #2e4268 100%);
+  box-shadow: 0 4px 12px rgba(26, 39, 68, 0.25);
+  color: #fff !important;
+}
+
+.u-btn-secondary {
+  background: var(--u-bg-primary);
+  color: var(--u-text-secondary) !important;
+  border: 1px solid var(--u-border-strong);
+  box-shadow: var(--u-shadow-sm);
+}
+
+.u-btn-secondary:hover {
+  background: var(--u-bg-secondary);
+  color: var(--u-text-primary) !important;
+  border-color: #9ca3af;
+}
+
+.u-btn-outline {
+  background: transparent;
+  border: 1px solid var(--u-border);
+  color: var(--u-text-primary);
+}
+
+.u-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.u-btn-block {
+  width: 100%;
+  display: flex;
+}
+
+.u-btn-lg {
+  padding: 0.85rem 1.85rem;
+  font-size: 0.95rem;
+  border-radius: var(--u-radius-md);
+}
+
+.u-btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.78rem;
+}
+
+.u-btn-pill {
+  border-radius: var(--u-radius-full);
+}
+
+.u-btn-icon {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--u-bg-primary);
+  border: 1px solid var(--u-border);
+  color: var(--u-text-secondary);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all var(--u-duration-fast);
+  box-shadow: var(--u-shadow-sm);
+}
+
+.u-btn-icon:hover {
+  background: var(--u-bg-secondary);
+  color: var(--u-primary);
+  border-color: var(--u-border-strong);
+}
+
+/* --- Card & Form Styles --- */
+.u-card {
+  background: var(--u-bg-card);
+  border: 1px solid var(--u-border);
+  border-radius: var(--u-radius-lg);
+  padding: var(--u-space-6);
+  box-shadow: var(--u-shadow-card);
+}
+
+.u-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-2);
+  margin-bottom: var(--u-space-5);
+}
+
+.u-input-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--u-text-secondary);
+}
+
+.u-input,
+.u-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--u-bg-input);
+  border: 1.5px solid var(--u-border-strong);
+  border-radius: var(--u-radius-sm);
+  color: var(--u-text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: all var(--u-duration-fast);
+  outline: none;
+}
+
+.u-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.u-input:focus,
+.u-textarea:focus {
+  border-color: var(--u-accent);
+  box-shadow: 0 0 0 3px var(--u-accent-subtle);
+  background: #ffffff;
+}
+
+/* --- Hearing Day Screen --- */
+.u-hearing-day {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--u-space-4) 0;
+}
+
+.u-hearing-day-hero {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: var(--u-radius-xl);
+  padding: 32px;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  margin-bottom: 24px;
+}
+
+.u-hearing-day-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  border-radius: var(--u-radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.u-hearing-day-case {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: #f8fafc;
+}
+
+.u-hearing-day-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.u-hearing-day-detail-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.u-hearing-day-detail-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.u-hearing-day-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* --- Post Hearing Update --- */
+.u-post-hearing {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--u-space-4) 0;
+}
+
+.u-success-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--u-emerald);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 16px auto;
+}
+
+.u-success-icon .material-symbols-rounded {
+  font-size: 32px;
+}

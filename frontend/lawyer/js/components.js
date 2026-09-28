@@ -42,13 +42,13 @@ const Components = {
       },
       {
         id: 'court',
-        label: 'Virtual Courtroom',
+        label: 'Court Preparation',
         icon: 'gavel',
         route: '/court',
       },
       {
         id: 'ai-assistant',
-        label: 'AI Legal Assistant',
+        label: 'Ask Nyay Setu',
         icon: 'auto_awesome',
         route: '/ai-assistant',
       },

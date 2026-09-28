@@ -49,14 +49,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     onLeave: () => DashboardPage.onLeave && DashboardPage.onLeave()
   });
 
-  Router.register('/court', () => AdvocateCourtPage.render(), {
+  Router.register('/court', () => AdvocateCourtPage.renderPrep ? AdvocateCourtPage.renderPrep() : AdvocateCourtPage.render(), {
+    title: 'Court Preparation',
+    requiresAuth: true
+  });
+
+  Router.register('/hearing/prepare', () => AdvocateCourtPage.renderPrep ? AdvocateCourtPage.renderPrep() : AdvocateCourtPage.render(), {
+    title: 'Hearing Prep Checklist',
+    requiresAuth: true
+  });
+
+  Router.register('/court/simulate', () => AdvocateCourtPage.renderSimulator(), {
     title: 'Virtual Courtroom Simulator',
     requiresAuth: true
   });
 
-  Router.register('/ai-assistant', () => AdvocateChatBot.render(), {
-    title: 'AI Legal Research Assistant',
+  Router.register('/court/simulate/:msgId', (params) => {
+    if (typeof VirtualCourtSimulator !== 'undefined' && params && params.msgId) {
+      VirtualCourtSimulator.launchFromChat(params.msgId);
+    }
+    return AdvocateCourtPage.renderSimulator();
+  }, {
+    title: 'Virtual Courtroom Simulator',
     requiresAuth: true
+  });
+
+  Router.register('/hearing/today', () => AdvocateCourtPage.renderHearingDay ? AdvocateCourtPage.renderHearingDay() : AdvocateCourtPage.render(), {
+    title: 'Hearing Day Hub',
+    requiresAuth: true
+  });
+
+  Router.register('/hearing/after', () => AdvocateCourtPage.renderPostHearing ? AdvocateCourtPage.renderPostHearing() : AdvocateCourtPage.render(), {
+    title: 'Post-Hearing Outcome',
+    requiresAuth: true
+  });
+
+  Router.register('/ai-assistant', () => AdvocateChatBot.render(), {
+    title: 'Ask Nyay Setu',
+    requiresAuth: true,
+    onEnter: () => AdvocateChatBot.onEnter && AdvocateChatBot.onEnter()
   });
 
   Router.register('/clients', (params) => ClientsPage.render(params), {
