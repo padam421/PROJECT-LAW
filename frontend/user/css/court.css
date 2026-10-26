@@ -462,3 +462,147 @@
   font-size: 15px;
   color: #10b981;
 }
+
+/* Indian courtroom collection. Scoped to the simulator; portal and login styles stay independent. */
+.vc-indian-hub { max-width: 1180px; padding: 24px 12px; gap: 26px; color: #223831; }
+.vc-eyebrow { display: block; font-size: 10px; letter-spacing: 1.8px; font-weight: 700; color: #60766b; }
+.vc-court-intro h1 { margin: 12px 0 8px; font-size: clamp(27px, 3vw, 39px); font-weight: 650; letter-spacing: -1.3px; }
+.vc-court-intro p, .vc-case-context p { color: #68756f; font-size: 14px; line-height: 1.6; margin: 0; }
+.vc-court-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.vc-court-card { --court-wood: #775443; --court-fabric: #74434c; text-align: left; display: flex; flex-direction: column; overflow: hidden; gap: 12px; padding: 0 22px 22px; background: #fffcf6; border: 1px solid #dfded5; border-radius: 16px; color: #334a3f; cursor: pointer; font: inherit; transition: transform .2s, box-shadow .2s; }
+.vc-court-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px #293f3314; }
+.vc-court-card:focus-visible { outline: 3px solid #098378; outline-offset: 4px; }
+.vc-court-high { --court-wood: #9c724a; --court-fabric: #435c48; }
+.vc-court-district { --court-wood: #b38b62; --court-fabric: #7b7465; }
+.vc-court-card > strong { font-size: 24px; letter-spacing: -.7px; }
+.vc-court-card > span:not(.vc-court-illustration):not(.vc-card-number) { font-size: 13px; line-height: 1.65; color: #6b756c; flex: 1; }
+.vc-court-card > b { margin-top: 10px; padding-top: 16px; border-top: 1px solid #e4e0d6; font-size: 13px; display: flex; justify-content: space-between; }
+.vc-card-number { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: #7d796d; }
+.vc-court-illustration { display: block; height: 170px; margin: 0 -22px 8px; position: relative; overflow: hidden; background: linear-gradient(90deg,#f1e9d9 12%,#d9c6a9 12% 14%,#f1e9d9 14% 86%,#d9c6a9 86% 88%,#f1e9d9 88%); border-bottom: 1px solid #d4c7b3; }
+.vc-bench-crest { position: absolute; left: 0; top: 12px; text-align: center; width: 100%; font-size: 27px; color: #836a42; }
+.vc-mini-judges { position: absolute; display: flex; justify-content: center; gap: 16px; bottom: 54px; left: 15%; right: 15%; }
+.vc-mini-judges i { display: block; background: var(--court-fabric); width: 36px; height: 51px; border: 4px solid var(--court-wood); border-radius: 8px 8px 0 0; }
+.vc-mini-bench { position: absolute; bottom: 28px; height: 44px; width: 72%; left: 14%; background: repeating-linear-gradient(90deg,transparent 0 19%,#ffffff24 19% 20%),var(--court-wood); border-top: 7px solid #513e30; box-shadow: 0 8px 10px #40331e20; }
+.vc-mini-aisle { position: absolute; bottom: -18px; left: 35%; width: 30%; height: 45px; background: var(--court-fabric); transform: perspective(60px) rotateX(35deg); }
+.vc-case-context { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px; background: #f0f4f0; border-radius: 14px; border: 1px solid #dce5dd; }
+.vc-case-context h2 { font-size: 17px; margin: 8px 0; font-weight: 650; }
+.vc-practice-note { font-size: 12px; color: #748078; line-height: 1.6; max-width: 850px; margin: 0; }
+
+.v3-indian-court { height: calc(100dvh - 138px); min-height: 680px; border-radius: 16px; background: #d4c9b8; border: 1px solid #c9c2b2; box-shadow: 0 12px 32px #29322924; color: #f6f3eb; }
+.v3-indian-court .v3-hud-overlay { padding: 14px; gap: 14px; }
+.v3-indian-court .v3-hud-top { display: flex; flex-direction: column; align-items: stretch; gap: 8px; background: linear-gradient(180deg,#182822ef,#182822d9); border: 1px solid #ffffff29; border-radius: 13px; padding: 10px; box-shadow: 0 5px 20px #17221d25; backdrop-filter: blur(14px); }
+.v3-room-bar { display: flex; align-items: center; gap: 8px; }
+.v3-court-tabs { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+.v3-court-tabs button { background: transparent; border: 1px solid transparent; padding: 9px 14px; border-radius: 8px; color: #d2d9d1; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.v3-court-tabs button[aria-pressed="true"] { background: #f4eddd; color: #293d32; border-color: #efe5cd; box-shadow: 0 2px 7px #0002; }
+.v3-court-tabs button:hover:not([aria-pressed="true"]) { background: #ffffff12; color: #fff; }
+.v3-room-context { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; border-top: 1px solid #ffffff13; padding: 8px 4px 2px; }
+.v3-room-context > div { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.v3-practice-tag { font-size: 9px; letter-spacing: 1.5px; color: #c7b689; }
+.v3-room-context strong { font-size: 11px; color: #dce1d6; font-weight: 500; }
+.v3-indian-court .v3-hud-status { font-size: 9px; letter-spacing: 1px; padding: 0; background: transparent; border: 0; box-shadow: none; color: #cee2c6; }
+.v3-indian-court .v3-hud-status .material-symbols-rounded { font-size: 12px; }
+.v3-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 7px; }
+.v3-indian-court .v3-camera-controls { flex-wrap: wrap; padding: 3px; gap: 2px; background: #ffffff08; border-color: #ffffff10; border-radius: 7px; box-shadow: none; }
+.v3-indian-court .v3-cam-btn { font-family: inherit; font-size: 10px; letter-spacing: 0; font-weight: 500; padding: 7px 9px; color: #cdd8ce; opacity: 1; }
+.v3-indian-court .v3-cam-btn.active { background: #567061; border-color: #8eaa93; color: #fff; box-shadow: none; }
+.v3-playback-controls { display: flex; flex-wrap: wrap; gap: 5px; }
+.v3-indian-court .v3-control-btn { padding: 7px 9px; font-family: inherit; font-size: 10px; letter-spacing: 0; font-weight: 600; border-color: #ffffff24; border-radius: 7px; background: #ffffff0c; box-shadow: none; white-space: nowrap; }
+.v3-indian-court .v3-control-btn .material-symbols-rounded { font-size: 17px; }
+.v3-indian-court #v3-pause-btn { background: #d8c798; color: #22392c; border-color: #deceaa; }
+.v3-indian-court button:disabled { opacity: .45; cursor: wait; }
+.v3-indian-court button:focus-visible { outline: 2px solid #f2d395; outline-offset: 2px; }
+.v3-indian-court .v3-hud-bottom { display: flex; flex-direction: column; width: min(100%, 960px); align-self: center; gap: 7px; pointer-events: auto; }
+.v3-case-strip { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 10px; background: #22362cf0; border: 1px solid #ffffff20; border-radius: 8px; padding: 7px 12px; color: #dce0d4; }
+.v3-case-title-badge { flex: 1 1 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v3-indian-court .v3-lang-badge { font-size: 9px; box-shadow: none; border: none; padding: 0; background: none; color: #c0d4bc; }
+.v3-indian-court .v3-subtitle-container { width: 100%; max-width: none; margin: 0; padding: 14px 20px; text-align: left; border: 1px solid #e2d7bd55; border-left: 3px solid #c9b88d; border-radius: 10px; background: #18271fef; box-shadow: 0 5px 20px #101d1529; backdrop-filter: blur(12px); max-height: 170px; overflow: auto; }
+.v3-indian-court .v3-speaker-name { color: #d7c492; margin-bottom: 7px; font-size: 10px; letter-spacing: 1px; }
+.v3-indian-court .v3-subtitle-text { font-size: clamp(13px, 1.1vw, 16px); line-height: 1.6; font-weight: 400; color: #f4f1e8; }
+.v3-indian-court .v3-audio-bar { background: #c7bd99; }
+.v3-indian-court .v3-subtitle-container.paused .v3-audio-bar { animation-play-state: paused; opacity: .3; }
+.v3-voice-hint { background: #27382c; font-size: 10px; border-radius: 5px; padding: 4px 9px; }
+.v3-voice-hint:empty { display: none; }
+.v3-indian-court .v3-gavel-alert { top: 205px; padding: 6px 13px; font-size: 10px; letter-spacing: .7px; background: #304a3ce8; box-shadow: 0 4px 12px #0002; border: 1px solid #cfbe9066; }
+.v3-indian-court .v3-gavel-alert .material-symbols-rounded { font-size: 17px; }
+.v3-room-guide { position: absolute; right: 14px; top: 205px; width: min(310px, calc(100% - 28px)); padding: 22px; border-radius: 12px; background: #f9f5eaf7; color: #34463b; box-shadow: 0 10px 25px #1c281b40; border: 1px solid #cfc6b2; pointer-events: auto; max-height: 45%; overflow: auto; z-index: 4; }
+.v3-room-guide[hidden] { display: none; }
+.v3-room-guide h2 { font-size: 23px; margin: 10px 0; color: #283e32; }
+.v3-room-guide p, .v3-room-guide li { font-size: 12px; line-height: 1.65; }
+.v3-room-guide ul { padding-left: 16px; margin: 12px 0; }
+.v3-room-guide .v3-guide-note { color: #697469; font-size: 10px; border-top: 1px solid #d5d2c6; padding-top: 12px; }
+.v3-indian-court .v3-loading-overlay { background: #e9e2d3; color: #304638; gap: 10px; z-index: 8; }
+.v3-loading-overlay > span { font-size: 12px; color: #677565; padding: 0 15px; text-align: center; }
+.v3-indian-court .v3-spinner { border: 2px solid #c6cebd; border-top-color: #52725c; margin: 0 0 8px; }
+@media (max-width: 1050px) {
+  .v3-indian-court { min-height: 740px; }
+  .v3-toolbar { gap: 8px; }
+  .v3-indian-court .v3-camera-controls { flex: 1 1 100%; }
+  .v3-indian-court .v3-gavel-alert, .v3-room-guide { top: 235px; }
+}
+@media (max-width: 680px) {
+  .vc-court-cards { grid-template-columns: 1fr; }
+  .vc-court-illustration { height: 145px; }
+  .vc-case-context { flex-direction: column; align-items: flex-start; }
+  .v3-indian-court { min-height: 770px; height: calc(100dvh - 100px); border-radius: 10px; }
+  .v3-indian-court .v3-hud-overlay { padding: 8px; }
+  .v3-indian-court .v3-hud-top { padding: 7px; gap: 6px; }
+  .v3-court-tabs { gap: 2px; }
+  .v3-court-tabs button { padding: 8px 6px; font-size: 11px; flex: 1; }
+  .v3-room-bar { flex-wrap: wrap; gap: 5px; }
+  .v3-guide-button { margin-left: auto; }
+  .v3-room-context strong { font-size: 10px; }
+  .v3-indian-court .v3-cam-btn { padding: 8px 7px; }
+  .v3-indian-court .v3-subtitle-container { padding: 12px; max-height: 210px; }
+  .v3-indian-court .v3-speaker-name { font-size: 9px; letter-spacing: .5px; }
+  .v3-indian-court .v3-gavel-alert, .v3-room-guide { top: 290px; }
+  .v3-room-guide { right: 8px; max-height: 33%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v3-indian-court *, .vc-indian-hub * { scroll-behavior: auto; transition: none !important; }
+  .v3-indian-court .v3-audio-bar { animation: none; }
+}
+
+/* Practice director: fullscreen, procedural controls and live stenographer record. */
+.v3-indian-court:fullscreen { width: 100vw; height: 100dvh; min-height: 0; border: 0; border-radius: 0; }
+.v3-indian-court.v3-expanded { position: fixed !important; inset: 0 !important; z-index: 10000; width: 100vw; height: 100dvh; min-height: 0; margin: 0; border: 0; border-radius: 0; }
+body:has(.v3-expanded) { overflow: hidden; }
+.v3-direction-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; border-top: 1px solid #ffffff14; padding-top: 7px; }
+.v3-direction-controls button[aria-pressed="true"] { background: #49634e; border-color: #8da284; }
+.v3-quality-label { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 10px; color: #d9dece; }
+.v3-quality-label select { color: #ede9dd; background: #294237; border: 1px solid #9cac8d66; border-radius: 5px; padding: 5px 7px; font: inherit; }
+.v3-stage-label { align-self: flex-start; padding: 4px 9px; border-radius: 5px; font-size: 9px; letter-spacing: .7px; color: #f3ebd3; background: #2e443ce8; }
+.v3-record { position: absolute; top: 265px; right: 14px; width: min(340px,calc(100% - 28px)); max-height: 40%; overflow: auto; border: 1px solid #d8d0bd; border-radius: 12px; padding: 20px; background: #f8f4eaf5; box-shadow: 0 10px 30px #152b2440; color: #334438; pointer-events: auto; z-index: 4; }
+.v3-record[hidden] { display: none; }
+.v3-record h2 { font-size: 14px; margin: 12px 0; }
+.v3-record p { font: 13px/1.8 'Roboto Mono', monospace; white-space: pre-wrap; }
+.v3-record p::after { content: '▍'; color: #587862; }
+.v3-record small { display: block; margin-top: 16px; color: #75806f; font-size: 10px; }
+.v3-interaction { pointer-events: auto; width: min(100%, 640px); align-self: center; padding: 12px; background: #f7f2e6f5; color: #294133; border: 1px solid #c6b78e; border-radius: 10px; box-shadow: 0 6px 20px #152b2433; }
+.v3-interaction[hidden] { display: none; }
+.v3-interaction label { display: block; font-size: 12px; font-weight: 650; margin-bottom: 7px; }
+.v3-interaction textarea { display: block; width: 100%; min-height: 52px; max-height: 120px; resize: vertical; padding: 9px; border: 1px solid #b9c4b5; border-radius: 6px; background: #fffdf6; color: #243b2e; font-family: inherit; font-size: 13px; line-height: 1.5; }
+.v3-interaction textarea:focus { outline: 2px solid #8da78c; }
+.v3-answer-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+.v3-answer-actions button { border: 1px solid #9bad97; border-radius: 6px; padding: 8px 12px; background: #f7f5ec; color: #3a5140; font: inherit; font-size: 11px; cursor: pointer; }
+.v3-answer-actions button.v3-answer-submit { background: #3c6049; color: #fff; border-color: #3c6049; }
+.v3-indian-court .v3-mobile-tools { display: none; }
+.v3-indian-court .v3-room-guide { top: 265px; }
+.v3-indian-court .v3-gavel-alert { top: 250px; }
+@media(max-width:680px) {
+  .v3-indian-court .v3-mobile-tools { display: inline-flex; font-size: 9px; padding: 5px 7px; }
+  .v3-indian-court .v3-room-bar { flex-wrap: nowrap; }
+  .v3-indian-court .v3-court-tabs { flex-wrap: nowrap; min-width: 0; }
+  .v3-indian-court .v3-court-tabs button { padding: 7px 5px; font-size: 10px; }
+  .v3-indian-court:not(.v3-tools-open) .v3-guide-button,
+  .v3-indian-court:not(.v3-tools-open) .v3-direction-controls { display: none; }
+  .v3-indian-court:not(.v3-tools-open) .v3-cam-btn { display: none; }
+  .v3-indian-court:not(.v3-tools-open) :is(#v3-cam-wide,#v3-cam-judge,#v3-cam-witness,#v3-cam-witness-other) { display: flex; }
+  .v3-indian-court .v3-room-context .v3-practice-tag { display: none; }
+  .v3-indian-court .v3-room-context strong { font-size: 9px; }
+  .v3-indian-court.v3-tools-open .v3-room-bar { flex-wrap: wrap; }
+  .v3-direction-controls { gap: 4px; }
+  .v3-quality-label { margin-left: 0; }
+  .v3-record, .v3-indian-court .v3-room-guide { top: 345px; max-height: 29%; }
+  .v3-indian-court .v3-gavel-alert { top: 330px; }
+}

@@ -4,6 +4,25 @@
    ============================================================ */
 
 const VirtualCourtSimulator = {
+  _courtType: 'SUPREME',
+  _avatarBuffers: new Map(),
+  _actorRigs: {},
+  _guided: true,
+  _autoCamera: true,
+  _quality: 'hd',
+  _timeline: [],
+  _timelineIndex: 0,
+  _interactions: {},
+  _awaiting: false,
+  _stageElapsed: 0,
+  _motionTime: 0,
+  _speechDone: false,
+  _speaking: false,
+  _courtSessions: {},
+  _sceneGeneration: 0,
+  _speechGeneration: 0,
+  _ready: false,
+  _voiceEnabled: true,
   _isPlaying: false,
   _isPaused: false,
   _currentStep: 0,
@@ -47,13 +66,13 @@ const VirtualCourtSimulator = {
 
   // Avatar Model Files
   AVATAR_FILES: {
-    DEFENSE: 'assets/Talking.fbx.glb',
-    PROSECUTION: 'assets/female_talking.glb',
-    JUDGE: 'assets/judge_talking.glb'
+    DEFENSE: '../user/assets/Talking.fbx.glb',
+    PROSECUTION: '../user/assets/female_talking.glb',
+    JUDGE: '../user/assets/judge_talking.glb'
   },
 
   // Dynamic Case & Debate State
-  _activeCaseTitle: 'Supreme Court Special Bench Hearing',
+  _activeCaseTitle: 'Courtroom Practice Hearing',
   _activeLanguage: 'auto',
   _script: [],
 
@@ -88,7 +107,8 @@ const VirtualCourtSimulator = {
       if (!line) continue;
 
       // Match speaker turn: (🏛️|🛡️|⚖️) followed by role name and speech
-      const turnMatch = line.match(/^[-*•]?\s*(🏛️|🛡️|⚖️)\s*(?:\*\*)?(.*?)(?:\*\*)?\s*:\s*(.*)$/);
+      const turnMatch = line.match(/^[-*•]?\s*(🏛️|🛡️|⚖️|👤)\s*(?:\*\*)?(.*?)(?:\*\*)?\s*:\s*(.*)$/)
+        || (() => { const witness = line.match(/^[-*•]?\s*(?:\*\*)?((?:Defense witness|Prosecution witness|Witness|गवाह|साक्षी|సాక్షి)[^:：]*?)(?:\*\*)?\s*[:：]\s*(.*)$/i); return witness ? [witness[0], '👤', witness[1], witness[2]] : null; })();
 
       if (turnMatch) {
         if (currentStep && currentStep.text.trim()) {
@@ -108,7 +128,10 @@ const VirtualCourtSimulator = {
         let rate = 0.92;
         let facing = { DEFENSE: 0.85, PROSECUTION: -0.85 };
 
-        if (emoji === '🛡️') {
+        if (emoji === '👤') {
+          actor = /prosecution|oppos|अभियोजन|विपक्ष|ప్రాసిక్యూషన్/i.test(role) ? 'WITNESS_PROSECUTION' : 'WITNESS_DEFENSE';
+          defaultName = role || 'Witness'; pitch = 1; rate = 0.95;
+        } else if (emoji === '🛡️') {
           actor = 'DEFENSE';
           defaultName = 'मेरा वकील (Defense Counsel)';
           pitch = 1.0;
@@ -272,7 +295,7 @@ const VirtualCourtSimulator = {
         const parsed = JSON.parse(cached);
         if (parsed && Array.isArray(parsed.script) && parsed.script.length > 0) {
           this._script = parsed.script.map(s => ({ ...s, _isDynamic: true }));
-          this._activeCaseTitle = parsed.title || 'Supreme Court Special Bench';
+          this._activeCaseTitle = parsed.title || 'Courtroom Practice Hearing';
           this._activeLanguage = parsed.lang || 'auto';
           return;
         }
@@ -305,8 +328,8 @@ const VirtualCourtSimulator = {
     return [
       {
         actor: 'JUDGE',
-        name: 'Hon\'ble Chief Justice (Presiding)',
-        text: 'Order, order in the Court. The Special Bench is now in session. Counsel for the Petitioner, proceed with your opening submissions.',
+        name: 'Hon\'ble Presiding Judge',
+        text: 'The court is now in session. Counsel for the Petitioner, proceed with your opening submissions.',
         pitch: 0.75, rate: 0.92, gavel: true,
         facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
       },
@@ -326,7 +349,7 @@ const VirtualCourtSimulator = {
       },
       {
         actor: 'JUDGE',
-        name: 'Hon\'ble Chief Justice (Presiding)',
+        name: 'Hon\'ble Presiding Judge',
         text: 'The Bench has noted the submissions. Procedural safeguards under the law are substantive rights. Both parties are directed to file their affidavits. The Court is adjourned.',
         pitch: 0.75, rate: 0.92, gavel: true,
         facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
@@ -351,6 +374,17 @@ const VirtualCourtSimulator = {
   _detectIndianLanguage(text, hintLang = 'auto') {
     const str = (text || '').trim();
     const h = (hintLang || this._activeLanguage || 'auto').toLowerCase();
+    const explicit = {
+      en:['en-IN','English (Indian)'],hi:['hi-IN','हिन्दी'],te:['te-IN','తెలుగు'],ta:['ta-IN','தமிழ்'],
+      kn:['kn-IN','ಕನ್ನಡ'],ml:['ml-IN','മലയാളം'],gu:['gu-IN','ગુજરાતી'],mr:['mr-IN','मराठी'],
+      bn:['bn-IN','বাংলা'],pa:['pa-IN','ਪੰਜਾਬੀ'],or:['or-IN','ଓଡ଼ିଆ'],as:['as-IN','অসমীয়া'],
+      ur:['ur-IN','اردو'],ne:['ne-NP','नेपाली'],sa:['sa-IN','संस्कृतम्']
+    };
+    const chosen=h.split('-')[0];
+    if(explicit[chosen]) {
+      const [code,name]=explicit[chosen];
+      return {code,shortCode:chosen,name,toneLabel:'Indian Tone',displayBadge:name+' (Indian Tone)'};
+    }
 
     // 1. Gujarati
     if (/[\u0A80-\u0AFF]/.test(str) || h === 'gu') {
@@ -406,7 +440,7 @@ const VirtualCourtSimulator = {
     }
 
     // 11. Latin Script: Hinglish vs Indian English
-    if (h === 'hi' || /\b(mera|meri|zamin|zameen|padosi|kabza|farzi|vakeel|shikayat|karna|hoga|hai|hain|nahi|diya|tha|the|thi)\b/i.test(str)) {
+    if (h === 'hi' || /\b(mera|meri|zamin|zameen|padosi|kabza|farzi|vakeel|shikayat|karna|hoga|hai|hain|nahi|diya|tha|thi)\b/i.test(str)) {
       return { code: 'hi-IN', shortCode: 'hi', name: 'Hinglish (हिन्दी/English)', toneLabel: 'Indian Tone', displayBadge: 'Hinglish (Indian Tone)' };
     }
 
@@ -434,162 +468,257 @@ const VirtualCourtSimulator = {
   },
 
   /* ==================== 1. UI RENDERING ==================== */
+  _configureCourt() {
+    if (!this._preferenceLoaded) {
+      try { const saved = sessionStorage.getItem('nyay_court_type'); if (IndianCourtroom.types[saved]) this._courtType = saved; } catch (_) {}
+      this._preferenceLoaded = true;
+    }
+    this._courtConfig = IndianCourtroom.layout(this._courtType);
+    this.CAMERAS = this._courtConfig.cameras;
+    this.SPEAKER_COORDS = this._courtConfig.actors;
+    const caseKey = JSON.stringify([this._activeCaseTitle, this._activeLanguage, this._script.map(s => [s.actor, s.text])]);
+    if (caseKey !== this._sessionCaseKey) { this._courtSessions = {}; this._interactions = {}; this._sessionCaseKey = caseKey; }
+  },
+
+  _saveCourtProgress() {
+    if (!this._isPlaying || this._playingCaseKey !== this._sessionCaseKey) return;
+    this._courtSessions[this._courtType] = { step: this._currentStep, timeline: this._timelineIndex, elapsed: this._stageElapsed, paused: this._isPaused, camera: this._cameraMode, autoCamera: this._autoCamera, interactions: this._interactions, plan: this._timeline };
+  },
+
+  selectCourt(type, enter = false) {
+    if (!IndianCourtroom.types[type]) return;
+    const mounted = document.getElementById('v3-wrapper');
+    if (mounted && type === this._courtType) return;
+    this.stopSimulation();
+    this._courtType = type; this._preferenceLoaded = true;
+    try { sessionStorage.setItem('nyay_court_type', type); } catch (_) {}
+    if (mounted) {
+      this._replaceRoomContents(mounted);
+      this.startSimulation();
+      document.querySelector('.v3-court-tabs [aria-pressed="true"]')?.focus();
+    } else if (enter) Router.navigate('/court/simulate');
+  },
+
+  _replaceRoomContents(mounted) {
+    const template = document.createElement('template'); template.innerHTML = this.render();
+    const next = template.content.firstElementChild;
+    mounted.replaceChildren(...next.childNodes); mounted.dataset.court = this._courtType;
+    mounted.classList.remove('v3-tools-open');
+  },
+
+  async toggleFullscreen() {
+    const room = document.getElementById('v3-wrapper'); if (!room) return;
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else if (room.classList.contains('v3-expanded')) room.classList.remove('v3-expanded');
+      else if (room.requestFullscreen) await room.requestFullscreen();
+      else room.classList.add('v3-expanded');
+    } catch (_) { room.classList.toggle('v3-expanded'); }
+    this._syncFullscreen();
+  },
+
+  _syncFullscreen() {
+    const room = document.getElementById('v3-wrapper');
+    const expanded = Boolean(document.fullscreenElement || room?.classList.contains('v3-expanded'));
+    const button = document.getElementById('v3-fullscreen-btn');
+    if (button) { button.setAttribute('aria-pressed', String(expanded)); button.title = expanded ? 'Exit fullscreen (Esc)' : 'Enter fullscreen'; button.querySelector('span').textContent = expanded ? 'fullscreen_exit' : 'fullscreen'; }
+    this._onWindowResize();
+  },
+
+  setQuality(value) {
+    if (!['auto','hd','ultra'].includes(value)) return;
+    this._quality = value; this._onWindowResize();
+  },
+
+  toggleAutoCamera() {
+    this._autoCamera = !this._autoCamera;
+    document.getElementById('v3-auto-camera')?.setAttribute('aria-pressed', String(this._autoCamera));
+    if (this._autoCamera) this._frameStage(this._timeline[this._timelineIndex]);
+  },
+
+  toggleMobileTools() {
+    const room=document.getElementById('v3-wrapper'),button=document.getElementById('v3-mobile-tools');
+    const open=room.classList.toggle('v3-tools-open');
+    button.setAttribute('aria-expanded',String(open));button.textContent=open?'Fewer controls':'More controls';
+  },
+
+  togglePractice() {
+    this._guided = !this._guided; this._courtSessions = {}; this.restartHearing();
+  },
+
+  toggleRecord() {
+    const panel = document.getElementById('v3-record'); panel.hidden = !panel.hidden;
+    if (!panel.hidden) document.getElementById('v3-room-guide').hidden = true;
+    document.getElementById('v3-record-btn').setAttribute('aria-expanded', String(!panel.hidden));
+  },
+
+  nextStage(direction = 1) {
+    if (!this._ready) return;
+    if (direction > 0 && (this._awaiting || this._activeStage?.kind === 'answer' && !this._speechDone)) return;
+    ++this._speechGeneration; window.speechSynthesis?.cancel(); clearTimeout(this._stepTimeout);
+    this._timelineIndex = Math.max(0, Math.min(this._timeline.length, this._timelineIndex + direction));
+    this._stageElapsed = 0; this._runStage(true);
+  },
+
+  _interactionWords() {
+    const code = this._detectIndianLanguage(this._script.map(s=>s.text).join(' '),this._activeLanguage).shortCode;
+    return CourtroomDirector.phrases(code) || CourtroomDirector.phrases('en');
+  },
+
+  saveInteractionDraft(value) {
+    const stage=this._activeStage, key=stage?.answerKey || stage?.questionKey;
+    if(!key)return;this._interactions[key] ||= {};this._interactions[key].draft=value;
+  },
+
+  submitWitnessAnswer() {
+    const stage=this._activeStage,input=document.getElementById('v3-witness-input');
+    if(stage?.kind!=='await-answer'||!input?.value.trim()||!input.reportValidity())return;
+    this._interactions[stage.answerKey]={...this._interactions[stage.answerKey],answer:input.value.trim(),draft:''};
+    this._isPaused=false;this._stageElapsed=0;this._runStage(false);
+  },
+
+  completeCaptionAnswer() {
+    if(!this._captionCompletion || !this._isPlaying)return;
+    this._captionCompletion=null;this._awaiting=false;
+    document.getElementById('v3-interaction').hidden=true;
+    this._isPaused=false;this._speechDone=true;this._speaking=false;
+    document.getElementById('v3-pause-text').textContent='Pause';
+    document.getElementById('v3-pause-icon').textContent='pause';
+    document.getElementById('v3-status-text').textContent='IN SESSION';
+  },
+
+  resolveFollowUp(ask) {
+    const stage=this._activeStage;
+    if(!stage||!['choice','edit-question'].includes(stage.kind))return;
+    if(!ask) {
+      const target=this._timeline.findIndex(entry=>entry.id===stage.exitId);
+      if(target<0)return;this._timelineIndex=target;
+    }else{
+      const input=document.getElementById('v3-witness-input');
+      if(!input?.value.trim()||!input.reportValidity())return;
+      const question=input.value.trim(),words=this._interactionWords();
+      this._interactions[stage.questionKey]={question,draft:''};
+      if(stage.repeat){
+        const key=stage.questionKey+':'+this._timelineIndex+':'+this._timeline.length;
+        this._interactions[key]={question};
+        const base={sourceIndex:stage.sourceIndex,positions:stage.positions,camera:stage.camera,duration:0};
+        const entries=[{...base,kind:'question',actor:stage.other,questionKey:key,text:question,lookAt:stage.witness},
+          {...base,kind:'await-answer',actor:stage.witness,answerKey:key,text:words.waiting,silent:true,lookAt:stage.other,side:stage.side},
+          {...stage,questionKey:key+':next'}];
+        this._timeline.splice(this._timelineIndex,1,...entries);
+      }else if(stage.kind==='edit-question'){
+        this._timeline.splice(this._timelineIndex+1,0,{...stage,kind:'question',text:question,silent:false,lookAt:stage.witness});
+        this._timelineIndex++;
+      }else this._timelineIndex++;
+    }
+    this._isPaused=false;this._stageElapsed=0;this._runStage(true);
+  },
+
+  raiseObjection() {
+    const stage=this._activeStage;
+    if(stage?.kind!=='await-answer')return;
+    const words=this._interactionWords(),asker=stage.lookAt,opponent=asker==='DEFENSE'?'PROSECUTION':'DEFENSE';
+    const judges=Object.keys(this.SPEAKER_COORDS).filter(k=>k.startsWith('JUDGE'));
+    const judge=judges[this._timelineIndex%judges.length];
+    const base={sourceIndex:stage.sourceIndex,positions:stage.positions,duration:0};
+    this._timeline.splice(this._timelineIndex,0,
+      {...base,kind:'practice',actor:opponent,text:words.objection,cue:'objection',camera:opponent,gesture:'objection',lookAt:judge},
+      {...base,kind:'practice',actor:judge,text:words.ruling,cue:'ruling',camera:'JUDGE'},
+      {...base,kind:'edit-question',actor:asker,text:words.questionLabel,questionKey:stage.answerKey,witness:stage.actor,camera:stage.camera,silent:true});
+    this._isPaused=false;this._stageElapsed=0;this._runStage(true);
+  },
+
+  _renderInteraction(stage) {
+    const panel=document.getElementById('v3-interaction');if(!panel)return;
+    const words=this._interactionWords(),answer=stage.kind==='await-answer';
+    this._awaiting=answer||stage.kind==='choice'||stage.kind==='edit-question';
+    panel.hidden=!this._awaiting;
+    document.querySelector('[aria-label="Next stage"]')?.toggleAttribute('disabled',this._awaiting || stage.kind==='answer'&&!this._speechDone);
+    if(!this._awaiting){panel.replaceChildren();return;}
+    const key=stage.answerKey||stage.questionKey,label=answer?words.answerLabel:words.questionLabel;
+    const draft=this._interactions[key]?.draft||'';
+    panel.innerHTML='<label for="v3-witness-input">'+Utils.escapeHtml(label)+'</label><textarea id="v3-witness-input" dir="auto" required maxlength="4000" rows="2" aria-label="'+Utils.escapeHtml(label)+'" oninput="VirtualCourtSimulator.saveInteractionDraft(this.value)">'+Utils.escapeHtml(draft)+'</textarea><div class="v3-answer-actions">'
+      +'<button class="v3-answer-submit" onclick="VirtualCourtSimulator.'+(answer?'submitWitnessAnswer()':'resolveFollowUp(true)')+'">'+Utils.escapeHtml(answer?words.submit:words.ask)+'</button>'
+      +(stage.kind==='choice'?'<button onclick="VirtualCourtSimulator.resolveFollowUp(false)">'+Utils.escapeHtml(words.done)+'</button>':'')
+      +(answer?'<button onclick="VirtualCourtSimulator.raiseObjection()">'+Utils.escapeHtml(words.object)+'</button>':'')+'</div>';
+  },
+
+  restartHearing() {
+    const mounted = document.getElementById('v3-wrapper');
+    if (!mounted) return;
+    this.stopSimulation();
+    delete this._courtSessions[this._courtType];
+    this._replaceRoomContents(mounted); this.startSimulation();
+  },
+
+  toggleVoice() {
+    this._voiceEnabled = !this._voiceEnabled;
+    const button = document.getElementById('v3-voice-btn');
+    if (button) { button.setAttribute('aria-pressed', String(this._voiceEnabled)); button.querySelector('span:last-child').textContent = this._voiceEnabled ? 'Voice on' : 'Voice off'; }
+    if (this._isPlaying && !this._isPaused && this._ready) {
+      clearTimeout(this._stepTimeout); this._resumeCurrentStep();
+    }
+  },
+
+  toggleRoomGuide() {
+    const guide = document.getElementById('v3-room-guide');
+    if (!guide) return;
+    guide.hidden = !guide.hidden;
+    if (!guide.hidden) document.getElementById('v3-record').hidden = true;
+    document.getElementById('v3-guide-btn').setAttribute('aria-expanded', String(!guide.hidden));
+  },
+
   renderLanding() {
-    this.loadActiveScript();
-    const hasActiveCase = this._script && this._script.length > 0 && this._script[0]._isDynamic;
-    const caseTitle = this._activeCaseTitle || 'Supreme Court Special Bench Hearing';
-    const totalTurns = (this._script && this._script.length) || 0;
-
-    return `
-      <div class="vc-hub-container" style="max-width:960px;margin:0 auto;padding:24px 20px;">
-        <div class="vc-hero-banner" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border-radius:16px;padding:36px;color:#fff;border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 25px rgba(0,0,0,0.3);">
-          <div class="vc-status-badge" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:20px;font-size:0.75rem;font-weight:700;color:#818cf8;text-transform:uppercase;margin-bottom:16px;">
-            <span class="material-symbols-rounded" style="font-size:16px">gavel</span>
-            V4 WebGL Engine — 3-Avatar Courtroom Simulator
-          </div>
-
-          <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:12px;color:#f8fafc;">3D Virtual Courtroom Simulator</h1>
-          <p style="font-size:0.95rem;color:#94a3b8;max-width:680px;line-height:1.6;margin-bottom:24px;">
-            Experience an immersive 3D courtroom hearing featuring real Supreme Court judge & advocate avatars, authentic gavel strikes, dynamic lawyer argument facing, and synchronized regional speech.
-          </p>
-
-          ${hasActiveCase ? `
-            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:14px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-              <div>
-                <div style="font-size:0.72rem;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-                  <span class="material-symbols-rounded" style="font-size:16px;color:#38bdf8">chat</span>
-                  सक्रिय केस विश्लेषण (Active Case from Chat)
-                </div>
-                <div style="font-size:1.15rem;font-weight:700;color:#fff;">${Utils.escapeHtml(caseTitle)}</div>
-                <div style="font-size:0.85rem;color:#cbd5e1;margin-top:4px;">🏛️ ${totalTurns} वास्तविक अदालती दलीलें (Judge, Defense & Prosecution Dialogue Exchanges) तैयार हैं</div>
-                <div style="font-size:0.75rem;font-weight:700;color:#34d399;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);padding:3px 12px;border-radius:12px;display:inline-flex;align-items:center;gap:6px;margin-top:8px;">
-                  <span class="material-symbols-rounded" style="font-size:15px;color:#10b981">translate</span>
-                  <span>भाषा (Language & Tone): ${this._detectIndianLanguage((this._script && this._script[0] && this._script[0].text) || '', this._activeLanguage).displayBadge}</span>
-                </div>
-              </div>
-              <button class="u-btn u-btn-primary u-btn-lg u-btn-pill" onclick="Router.navigate('/court/simulate')" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;font-weight:700;box-shadow:0 4px 14px rgba(13,148,136,0.35);">
-                <span class="material-symbols-rounded">play_arrow</span> Start 3D Court Debate
-              </button>
-            </div>
-          ` : `
-            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-              <div>
-                <div style="font-size:0.72rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">No Active Case Chat</div>
-                <div style="font-size:1rem;font-weight:600;color:#fff;">Ask Nyay Setu चैट में अपना मामला दर्ज करें</div>
-                <div style="font-size:0.82rem;color:#94a3b8;margin-top:4px;">AI आपकी समस्या के आधार पर 3-मिनट की वास्तविक अदालती बहस तैयार करेगा।</div>
-              </div>
-              <button class="u-btn u-btn-primary u-btn-pill" onclick="Router.navigate('/chat')" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;font-weight:700;">
-                <span class="material-symbols-rounded">chat</span> Go to Ask Nyay Setu
-              </button>
-            </div>
-          `}
-
-          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-            <button class="u-btn u-btn-secondary u-btn-pill" onclick="Router.navigate('/chat')" style="display:inline-flex;align-items:center;gap:6px;">
-              <span class="material-symbols-rounded">arrow_back</span> Return to Chat
-            </button>
-            ${!hasActiveCase ? `
-              <button class="u-btn u-btn-outline u-btn-pill" onclick="Router.navigate('/court/simulate')" style="display:inline-flex;align-items:center;gap:6px;border-color:rgba(255,255,255,0.25);color:#fff;">
-                <span class="material-symbols-rounded">play_arrow</span> View Demo Simulation
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      </div>
-    `;
+    this.loadActiveScript(); this._configureCourt();
+    return `<div class="vc-hub-container vc-indian-hub">
+      <div class="vc-court-intro"><span class="vc-eyebrow">NYAY SETU · COURTROOM PRACTICE</span>
+        <h1>Step inside the courtroom.</h1><p>Choose a setting, explore the room and rehearse your case with spoken dialogue.</p></div>
+      <div class="vc-court-cards">${Object.entries(IndianCourtroom.types).map(([id, c], i) => `
+        <button class="vc-court-card vc-court-${id.toLowerCase()}" onclick="VirtualCourtSimulator.selectCourt('${id}', true)">
+          <span class="vc-court-illustration" aria-hidden="true"><span class="vc-bench-crest">⚖</span><span class="vc-mini-judges">${c.judges.map(() => '<i></i>').join('')}</span><span class="vc-mini-bench"></span><span class="vc-mini-aisle"></span></span>
+          <span class="vc-card-number">0${i + 1} / ${c.label}</span><strong>${c.title}</strong><span>${c.description}</span><b>Enter courtroom <span aria-hidden="true">↗</span></b>
+        </button>`).join('')}</div>
+      <div class="vc-case-context"><div><span class="vc-eyebrow">${this._script[0]?._isDynamic ? 'YOUR ACTIVE CASE' : 'DEMONSTRATION HEARING'}</span><h2>${Utils.escapeHtml(this._activeCaseTitle)}</h2><p>${this._script.length} dialogue turns · Each court keeps its own playback position while this page stays open.</p></div><button class="u-btn u-btn-primary" onclick="Router.navigate('/chat')">Ask Nyay Setu</button></div>
+      <p class="vc-practice-note">Representative practice rooms. Actual court interiors, bench sizes and procedures vary. Changing the room changes the setting, not the legal content of your case.</p>
+    </div>`;
   },
 
   render() {
-    this.loadActiveScript();
-    const caseTitle = this._activeCaseTitle || 'Supreme Court Special Bench Hearing';
-
-    return `
-      <div class="v3-simulation-wrapper" id="v3-wrapper">
-        <div class="v3-loading-overlay" id="v3-loader">
-          <div class="v3-spinner"></div>
-          <div style="font-size:0.85rem;color:var(--u-text-tertiary);letter-spacing:1px;text-transform:uppercase;">Initializing 3D Courtroom...</div>
-        </div>
-
-        <!-- Gavel Strike Alert -->
-        <div class="v3-gavel-alert" id="v3-gavel-alert">
-          <span class="material-symbols-rounded">gavel</span>
-          <span>Order in the Court</span>
-        </div>
-
-        <!-- Three.js mounts here -->
-        <canvas class="v3-webgl-canvas" id="v3-canvas"></canvas>
-
-        <div class="v3-hud-overlay">
-          <div class="v3-hud-top">
-            <div class="v3-hud-controls">
-              <!-- Back to Chat Button -->
-              <button class="v3-control-btn" onclick="VirtualCourtSimulator.exitToChat()" title="Return to Ask Nyay Setu Chat" style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);">
-                <span class="material-symbols-rounded">arrow_back</span>
-                <span>Chat</span>
-              </button>
-
-              <div class="v3-camera-controls" id="v3-cams">
-                <button class="v3-cam-btn active" id="v3-cam-wide" onclick="VirtualCourtSimulator.setCamera('WIDE', true)" title="Wide Courtroom View (Default)">
-                  <span class="material-symbols-rounded">panorama</span> WIDE
-                </button>
-                <button class="v3-cam-btn" id="v3-cam-judge" onclick="VirtualCourtSimulator.setCamera('JUDGE', true)" title="Judge Bench Camera">
-                  <span class="material-symbols-rounded">gavel</span> JUDGE
-                </button>
-                <button class="v3-cam-btn" id="v3-cam-defense" onclick="VirtualCourtSimulator.setCamera('DEFENSE', true)" title="Defense Counsel Camera">
-                  <span class="material-symbols-rounded">person</span> DEFENSE
-                </button>
-                <button class="v3-cam-btn" id="v3-cam-pros" onclick="VirtualCourtSimulator.setCamera('PROSECUTION', true)" title="Prosecution Counsel Camera">
-                  <span class="material-symbols-rounded">person</span> PROS
-                </button>
-              </div>
-
-              <!-- Pause / Resume Button -->
-              <button class="v3-control-btn" id="v3-pause-btn" onclick="VirtualCourtSimulator.togglePause()" title="Pause / Resume Debate">
-                <span class="material-symbols-rounded" id="v3-pause-icon">pause</span>
-                <span id="v3-pause-text">PAUSE</span>
-              </button>
-            </div>
-
-            <!-- Case Title & Exchange Progress in HUD -->
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div class="v3-case-title-badge" id="v3-case-title" style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(15,23,42,0.75);border:1px solid rgba(255,255,255,0.2);border-radius:20px;font-size:0.76rem;font-weight:600;color:#f8fafc;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${Utils.escapeHtml(caseTitle)}">
-                <span class="material-symbols-rounded" style="font-size:15px;color:#f59e0b">balance</span>
-                <span id="v3-case-title-text">${Utils.escapeHtml(caseTitle)}</span>
-              </div>
-
-              <!-- Active Language & Indian Tone Badge -->
-              <div class="v3-lang-badge" id="v3-lang-badge" title="Active Courtroom Language & Tone">
-                <span class="material-symbols-rounded">translate</span>
-                <span id="v3-lang-badge-text">${this._detectIndianLanguage((this._script && this._script[0] && this._script[0].text) || '', this._activeLanguage).displayBadge}</span>
-              </div>
-
-              <span class="v3-exchange-badge" id="v3-exchange-badge" style="font-size:0.72rem;font-weight:700;color:#38bdf8;padding:3px 10px;background:rgba(56,189,248,0.15);border-radius:12px;border:1px solid rgba(56,189,248,0.35);">
-                Turn 1 / ${this._script.length || 1}
-              </span>
-              <div class="v3-hud-status recording" id="v3-status">
-                <span class="material-symbols-rounded" id="v3-status-icon">fiber_manual_record</span>
-                <span id="v3-status-text">IN SESSION</span>
-              </div>
-            </div>
+    this.loadActiveScript(); this._configureCourt();
+    const c = this._courtConfig, saved = this._courtSessions[this._courtType];
+    const cameraIds = { WITNESS_OTHER: 'witness-other', WIDE: 'wide', JUDGE: 'judge', DEFENSE: 'defense', PROSECUTION: 'pros', GALLERY: 'gallery', STAFF: 'staff', WITNESS: 'witness' };
+    return `<div class="v3-simulation-wrapper v3-indian-court" id="v3-wrapper" data-court="${this._courtType}">
+      <canvas class="v3-webgl-canvas" id="v3-canvas" aria-label="${c.title} three-dimensional practice courtroom"></canvas>
+      <div class="v3-loading-overlay" id="v3-loader" role="status"><div class="v3-spinner"></div><strong>Preparing ${c.title}</strong><span>Arranging the room and its participants…</span></div>
+      <div class="v3-gavel-alert" id="v3-gavel-alert"><span class="material-symbols-rounded">account_balance</span><span>Hearing in session</span></div>
+      <div class="v3-hud-overlay">
+        <div class="v3-hud-top">
+          <div class="v3-room-bar"><button class="v3-control-btn" onclick="VirtualCourtSimulator.exitToChat()" aria-label="Return to chat"><span class="material-symbols-rounded">arrow_back</span></button>
+            <div class="v3-court-tabs" role="group" aria-label="Choose courtroom">${Object.entries(IndianCourtroom.types).map(([id, court]) => `<button onclick="VirtualCourtSimulator.selectCourt('${id}')" aria-pressed="${id === this._courtType}">${court.title}</button>`).join('')}</div>
+            <button class="v3-control-btn" id="v3-fullscreen-btn" onclick="VirtualCourtSimulator.toggleFullscreen()" aria-label="Toggle fullscreen" aria-pressed="false" title="Enter fullscreen"><span class="material-symbols-rounded">fullscreen</span></button>
+            <button class="v3-control-btn v3-guide-button" id="v3-guide-btn" onclick="VirtualCourtSimulator.toggleRoomGuide()" aria-expanded="false" aria-controls="v3-room-guide"><span class="material-symbols-rounded">info</span><span>Room guide</span></button>
           </div>
-
-          <div class="v3-hud-bottom">
-            <div class="v3-subtitle-container" id="v3-subtitle">
-              <span class="v3-speaker-name" id="v3-speaker">
-                <span id="v3-speaker-text"></span>
-                <span class="v3-audio-wave">
-                  <span class="v3-audio-bar"></span>
-                  <span class="v3-audio-bar"></span>
-                  <span class="v3-audio-bar"></span>
-                  <span class="v3-audio-bar"></span>
-                </span>
-              </span>
-              <p class="v3-subtitle-text" id="v3-subtitle-text"></p>
-            </div>
+          <div class="v3-room-context"><div><span class="v3-practice-tag">PRACTICE ROOM</span><strong>${c.label}</strong></div><button class="v3-control-btn v3-mobile-tools" id="v3-mobile-tools" aria-expanded="false" onclick="VirtualCourtSimulator.toggleMobileTools()">More controls</button><span class="v3-hud-status paused" id="v3-status"><span class="material-symbols-rounded" id="v3-status-icon">pause_circle</span><span id="v3-status-text">READY</span></span></div>
+          <div class="v3-toolbar"><div class="v3-camera-controls" id="v3-cams" role="group" aria-label="Camera views">${Object.entries(c.cameras).map(([id, cam]) => `<button class="v3-cam-btn ${id === (saved?.camera || 'WIDE') ? 'active' : ''}" id="v3-cam-${cameraIds[id]}" onclick="VirtualCourtSimulator.setCamera('${id}', true)" aria-pressed="${id === (saved?.camera || 'WIDE')}">${cam.label}</button>`).join('')}</div>
+            <div class="v3-playback-controls"><button class="v3-control-btn" id="v3-pause-btn" disabled onclick="VirtualCourtSimulator.togglePause()"><span class="material-symbols-rounded" id="v3-pause-icon">play_arrow</span><span id="v3-pause-text">Begin hearing</span></button><button class="v3-control-btn" onclick="VirtualCourtSimulator.restartHearing()" title="Restart this court's hearing" aria-label="Restart hearing"><span class="material-symbols-rounded">replay</span></button><button class="v3-control-btn" id="v3-voice-btn" aria-pressed="${this._voiceEnabled}" onclick="VirtualCourtSimulator.toggleVoice()"><span class="material-symbols-rounded">volume_up</span><span>Voice ${this._voiceEnabled ? 'on' : 'off'}</span></button></div>
           </div>
+          <div class="v3-direction-controls">
+            <button class="v3-control-btn" id="v3-auto-camera" aria-pressed="${this._autoCamera}" onclick="VirtualCourtSimulator.toggleAutoCamera()">Auto camera</button>
+            <button class="v3-control-btn" id="v3-practice-btn" aria-pressed="${this._guided}" onclick="VirtualCourtSimulator.togglePractice()">Witness practice</button>
+            <button class="v3-control-btn" onclick="VirtualCourtSimulator.nextStage(-1)" aria-label="Previous stage"><span class="material-symbols-rounded">skip_previous</span></button>
+            <button class="v3-control-btn" onclick="VirtualCourtSimulator.nextStage(1)" aria-label="Next stage"><span class="material-symbols-rounded">skip_next</span></button>
+            <button class="v3-control-btn" id="v3-record-btn" onclick="VirtualCourtSimulator.toggleRecord()" aria-expanded="false" aria-controls="v3-record">Live record</button>
+            <label class="v3-quality-label">Quality <select id="v3-quality" onchange="VirtualCourtSimulator.setQuality(this.value)" aria-label="Render quality"><option value="auto" ${this._quality==='auto'?'selected':''}>Auto</option><option value="hd" ${this._quality==='hd'?'selected':''}>Full HD</option><option value="ultra" ${this._quality==='ultra'?'selected':''}>Ultra HD</option></select></label>
+          </div>
+        </div>
+        <aside class="v3-record" id="v3-record" hidden><span class="vc-eyebrow">LIVE COURT RECORD</span><h2 id="v3-record-speaker">Ready</h2><p id="v3-record-text" dir="auto"></p><small>Practice prompts are separate from case testimony.</small></aside>
+        <aside class="v3-room-guide" id="v3-room-guide" hidden><span class="vc-eyebrow">INSIDE THIS ROOM</span><h2>${c.title}</h2><p>${c.description}</p><ul>${c.features.map(f => '<li>' + f + '</li>').join('')}</ul><p class="v3-guide-note">An inspired practice layout. Bench size and interior details vary between real courts. Bench members take turns speaking. Witness stations and inserted procedure are practice aids; witness examination is not part of every appellate hearing.</p></aside>
+        <div class="v3-hud-bottom"><div class="v3-case-strip"><span class="v3-case-title-badge" id="v3-case-title" title="${Utils.escapeHtml(this._activeCaseTitle)}"><span id="v3-case-title-text">${Utils.escapeHtml(this._activeCaseTitle)}</span></span><span class="v3-lang-badge" id="v3-lang-badge"><span id="v3-lang-badge-text">${this._detectIndianLanguage(this._script[0]?.text || '', this._activeLanguage).displayBadge}</span></span><span id="v3-exchange-badge">Turn ${Math.min((saved?.step || 0) + 1, this._script.length)} / ${this._script.length}</span></div>
+          <div class="v3-subtitle-container active paused" id="v3-subtitle"><span class="v3-speaker-name" id="v3-speaker"><span id="v3-speaker-text">${c.title} · Ready when you are</span><span class="v3-audio-wave"><span class="v3-audio-bar"></span><span class="v3-audio-bar"></span><span class="v3-audio-bar"></span></span></span><p class="v3-subtitle-text" id="v3-subtitle-text">Explore the camera views, then select Begin hearing to start the dialogue.</p></div>
+          <div class="v3-interaction" id="v3-interaction" hidden></div><span id="v3-stage-label" class="v3-stage-label" role="status">Original case dialogue</span><span id="v3-voice-hint" class="v3-voice-hint" role="status"></span>
         </div>
       </div>
-    `;
+    </div>`;
   },
 
   exitToChat() {
@@ -599,47 +728,54 @@ const VirtualCourtSimulator = {
 
   /* ==================== 2. WEBGL INITIALIZATION ==================== */
   startSimulation() {
-    if (this._isPlaying) {
-      this.stopSimulation();
-    }
-    this.loadActiveScript();
-    this._isPlaying = true;
-    this._isPaused = false;
-    this._currentStep = 0;
-    this._cameraMode = 'WIDE';
-    this._stepTimeout = null;
-    this._mixers = {};
-    this._actions = {};
-    this._avatarModels = {};
-    this._targetRotations = {
-      JUDGE: 0,
-      DEFENSE: 0.35,
-      PROSECUTION: -0.35
-    };
-    this._speakerRings = {};
-
-    // Preload speech synthesis voices (required in Chrome)
-    if (window.speechSynthesis) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
-    }
-
-    setTimeout(() => {
+    if (this._isPlaying) this.stopSimulation();
+    this.loadActiveScript(); this._configureCourt();
+    const saved = this._courtSessions[this._courtType];
+    this._isPlaying = true; this._isPaused = true; this._ready = false;
+    this._playingCaseKey = this._sessionCaseKey;
+    this._autoCamera = saved?.autoCamera ?? this._autoCamera;
+    const language = this._detectIndianLanguage(this._script.map(s=>s.text).join(' '), this._activeLanguage).shortCode;
+    this._timeline = CourtroomDirector.plan(this._script, this._courtConfig, language, this._guided);
+    if(saved?.plan)this._timeline=saved.plan;
+    this._interactions=saved?.interactions||{};this._awaiting=false;
+    this._timelineIndex = saved?.timeline || 0; this._stageElapsed = saved?.elapsed || 0;
+    this._actorRigs = {}; this._motionTime = 0; this._speechDone = false; this._speaking = false;
+    this._currentStep = saved?.step || 0; this._cameraMode = saved?.camera || 'WIDE';
+    this._mixers = {}; this._actions = {}; this._avatarModels = {}; this._speakerRings = {};
+    this._targetRotations = { JUDGE: 0, DEFENSE: Math.PI - 0.22, PROSECUTION: Math.PI + 0.22 };
+    const generation = ++this._sceneGeneration;
+    window.speechSynthesis?.getVoices();
+    try {
+      if (!document.getElementById('v3-canvas')) { this.stopSimulation(); return; }
       this._initThreeJS();
-      this._buildEnvironment();
-      this._initAudio();
-
-      const loader = document.getElementById('v3-loader');
-      if (loader) loader.classList.add('hidden');
-
-      // Start render loop
+      const loading = this._buildEnvironment(generation);
+      this.setCamera(this._cameraMode);
+      this._camera.position.copy(this._cameraPos); this._currentLookAt.copy(this._cameraTarget);
       this._animate();
+      this._mountObserver = new MutationObserver(() => {
+        if (!document.getElementById('v3-wrapper')) this.stopSimulation();
+      });
+      this._mountObserver.observe(document.body, { childList: true, subtree: true });
+      loading.then(() => {
+        if (generation !== this._sceneGeneration || !this._isPlaying) return;
+        this._ready = true;
+        document.getElementById('v3-loader')?.classList.add('hidden');
+        document.getElementById('v3-loader')?.setAttribute('aria-hidden', 'true');
+        const button = document.getElementById('v3-pause-btn'); if (button) button.disabled = false;
+        this._runStage(true);
+        document.getElementById('v3-auto-camera')?.setAttribute('aria-pressed', String(this._autoCamera));
+        if (saved && !saved.paused && this._timelineIndex < this._timeline.length) this.togglePause();
+        this._syncFullscreen();
+      }).catch(error => this._showSceneError(error, generation));
+    } catch (error) { this._showSceneError(error, generation); }
+  },
 
-      // Start script after short delay for models to load
-      setTimeout(() => this._playNextStep(), 2500);
-    }, 400);
+  _showSceneError(error, generation) {
+    if (generation !== this._sceneGeneration) return;
+    console.error('Courtroom could not start:', error);
+    this.stopSimulation();
+    const loader = document.getElementById('v3-loader');
+    if (loader) loader.innerHTML = '<strong>The 3D room could not load.</strong><span>Check WebGL support and your connection, then try again.</span><button class="v3-control-btn" onclick="VirtualCourtSimulator.restartHearing()">Retry courtroom</button>';
   },
 
   _initThreeJS() {
@@ -650,7 +786,7 @@ const VirtualCourtSimulator = {
     this._scene = new THREE.Scene();
 
     const aspect = wrapper.clientWidth / wrapper.clientHeight;
-    this._camera = new THREE.PerspectiveCamera(40, aspect, 0.1, 500);
+    this._camera = new THREE.PerspectiveCamera(49, aspect, 0.1, 80);
 
     this._cameraPos = new THREE.Vector3(...this.CAMERAS.WIDE.pos);
     this._cameraTarget = new THREE.Vector3(...this.CAMERAS.WIDE.target);
@@ -664,7 +800,7 @@ const VirtualCourtSimulator = {
     this._renderer.shadowMap.enabled = true;
     this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this._renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this._renderer.toneMappingExposure = 0.92;
+    this._renderer.toneMappingExposure = 1.0;
     this._renderer.outputEncoding = THREE.sRGBEncoding;
 
     this._clock = new THREE.Clock();
@@ -672,473 +808,148 @@ const VirtualCourtSimulator = {
     // Window resize handler
     this._resizeHandler = this._onWindowResize.bind(this);
     window.addEventListener('resize', this._resizeHandler);
+    this._resizeObserver = new ResizeObserver(this._resizeHandler); this._resizeObserver.observe(wrapper);
+    this._fullscreenHandler = () => this._syncFullscreen();
+    this._escapeHandler = event => { if (event.key === 'Escape' && wrapper.classList.contains('v3-expanded')) { wrapper.classList.remove('v3-expanded'); this._syncFullscreen(); } };
+    document.addEventListener('fullscreenchange', this._fullscreenHandler); window.addEventListener('keydown', this._escapeHandler);
+    this._reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   },
 
   _onWindowResize() {
     const wrapper = document.getElementById('v3-wrapper');
-    if (!wrapper || !this._camera || !this._renderer) return;
+    if (!wrapper || !wrapper.clientWidth || !wrapper.clientHeight || !this._camera || !this._renderer) return;
     this._camera.aspect = wrapper.clientWidth / wrapper.clientHeight;
+    // Preserve a useful horizontal field of view on narrow portal panels and phones.
+    this._camera.fov = Math.min(115, 2 * Math.atan(Math.tan(49 * Math.PI / 360) * Math.max(1, 1.45 / this._camera.aspect)) * 180 / Math.PI);
     this._camera.updateProjectionMatrix();
+    const desired = this._quality === 'ultra' ? Math.min(3, 3840 / wrapper.clientWidth) : this._quality === 'hd' ? Math.min(2, Math.max(window.devicePixelRatio || 1, 1920 / wrapper.clientWidth)) : Math.min(window.devicePixelRatio || 1, 1.25);
+    this._renderer.setPixelRatio(Math.min(desired, Math.sqrt(8294400 / (wrapper.clientWidth * wrapper.clientHeight))));
     this._renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
   },
 
-  // Generates authentic rich polished mahogany/teak wood texture
-  _createWoodTexture(isDark = false) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-
-    // Base deep mahogany wood color
-    const baseColor = isDark ? '#2a1207' : '#3e1b0c';
-    ctx.fillStyle = baseColor;
-    ctx.fillRect(0, 0, 512, 512);
-
-    // Natural wood grain wavy lines
-    for (let y = 0; y < 512; y += 2) {
-      const alpha = 0.15 + Math.sin(y * 0.04 + Math.sin(y * 0.012) * 3) * 0.1;
-      ctx.fillStyle = (y % 4 === 0) ? `rgba(10, 4, 1, ${alpha})` : `rgba(88, 38, 16, ${alpha * 0.8})`;
-      ctx.fillRect(0, y, 512, 2);
-    }
-
-    // Wood vertical plank paneling seams
-    for (let x = 64; x < 512; x += 128) {
-      ctx.fillStyle = 'rgba(8, 3, 1, 0.45)';
-      ctx.fillRect(x, 0, 3, 512);
-      ctx.fillStyle = 'rgba(110, 52, 22, 0.25)';
-      ctx.fillRect(x + 3, 0, 1, 512);
-    }
-
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(3, 1);
-    return tex;
+  _buildEnvironment(generation) {
+    this._room = IndianCourtroom.build(this._scene, this._courtType, this._activeCaseTitle);
+    return Promise.all(Object.keys(this.SPEAKER_COORDS).map(key => this._loadAvatar(
+      this.AVATAR_FILES[key.startsWith('JUDGE') ? 'JUDGE' : key.includes('PROSECUTION') ? 'PROSECUTION' : 'DEFENSE'], key, generation
+    )));
   },
 
-  /* ==================== 3. SCENE CONSTRUCTION ==================== */
-  _buildEnvironment() {
-    // === DARK COURTROOM ATMOSPHERE ===
-    this._scene.background = new THREE.Color(0x060809);
-    this._scene.fog = new THREE.FogExp2(0x060809, 0.008);
-
-    // === BALANCED LIGHTING (Rich Wood Tones without Washout) ===
-
-    // 1. Warm ambient fill light
-    const ambient = new THREE.AmbientLight(0xffeedd, 0.22);
-    this._scene.add(ambient);
-
-    // 2. Hemisphere light (cool upper sky, warm hardwood reflections)
-    const hemi = new THREE.HemisphereLight(0x8faab4, 0x3d2b1f, 0.25);
-    hemi.position.set(0, 20, 0);
-    this._scene.add(hemi);
-
-    // 3. Overhead courtroom chandelier (focused warm directional)
-    const mainLight = new THREE.DirectionalLight(0xfff4e8, 0.7);
-    mainLight.position.set(0, 15, 6);
-    mainLight.castShadow = true;
-    mainLight.shadow.mapSize.width = 2048;
-    mainLight.shadow.mapSize.height = 2048;
-    mainLight.shadow.camera.near = 0.5;
-    mainLight.shadow.camera.far = 50;
-    mainLight.shadow.camera.left = -15;
-    mainLight.shadow.camera.right = 15;
-    mainLight.shadow.camera.top = 15;
-    mainLight.shadow.camera.bottom = -15;
-    this._scene.add(mainLight);
-
-    // 4. Active-speaker tracking spotlight
-    this._spotLightTarget = new THREE.Object3D();
-    this._spotLightTarget.position.set(0, 0, 0);
-    this._scene.add(this._spotLightTarget);
-
-    this._spotLight = new THREE.SpotLight(0xffedd0, 0.85, 35, Math.PI / 6, 0.5, 1.2);
-    this._spotLight.position.set(0, 12, 10);
-    this._spotLight.target = this._spotLightTarget;
-    this._spotLight.castShadow = true;
-    this._scene.add(this._spotLight);
-
-    // 5. Window accent light (subtle daylight from court windows)
-    const windowLight = new THREE.DirectionalLight(0x6699cc, 0.22);
-    windowLight.position.set(-10, 8, 0);
-    this._scene.add(windowLight);
-
-    // Create authentic wood textures
-    const darkWoodTex = this._createWoodTexture(true);
-    const warmWoodTex = this._createWoodTexture(false);
-
-    // === COURTROOM FLOOR ===
-    const floorGeo = new THREE.PlaneGeometry(40, 30);
-    const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x1a100a, // Dark polished courtroom parquet floor
-      roughness: 0.65,
-      metalness: 0.08
-    });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.05;
-    floor.receiveShadow = true;
-    this._scene.add(floor);
-
-    // === JUDGE'S BENCH (Rich Polished Mahogany & Teak Wood Desk) ===
-    // 1. Main Bench Base with Wood Texture
-    const benchGeo = new THREE.BoxGeometry(8.4, 2.0, 3.2);
-    const benchMat = new THREE.MeshStandardMaterial({
-      color: 0x4a2212, // Rich dark polished mahogany
-      map: darkWoodTex,
-      roughness: 0.38,
-      metalness: 0.08
-    });
-    const bench = new THREE.Mesh(benchGeo, benchMat);
-    bench.position.set(0, 1.0, -2);
-    bench.castShadow = true;
-    bench.receiveShadow = true;
-    this._scene.add(bench);
-
-    // 2. Bench Top Molding (Polished Teak Wood Counter Top)
-    const benchTopGeo = new THREE.BoxGeometry(8.8, 0.16, 3.4);
-    const benchTopMat = new THREE.MeshStandardMaterial({
-      color: 0x5a2d16, // Polished rich wood counter
-      map: warmWoodTex,
-      roughness: 0.3,
-      metalness: 0.1
-    });
-    const benchTop = new THREE.Mesh(benchTopGeo, benchTopMat);
-    benchTop.position.set(0, 2.05, -2);
-    benchTop.castShadow = true;
-    benchTop.receiveShadow = true;
-    this._scene.add(benchTop);
-
-    // 3. Front Carved Wood Panels with Insets and Golden Molding
-    const panelMat = new THREE.MeshStandardMaterial({
-      color: 0x623018, // Warm carved wood accent
-      map: warmWoodTex,
-      roughness: 0.42,
-      metalness: 0.05
-    });
-    const panelInnerMat = new THREE.MeshStandardMaterial({
-      color: 0x1c0c05, // Dark recessed wood inlay
-      roughness: 0.7
-    });
-
-    [-2.7, 0, 2.7].forEach((xOffset, i) => {
-      const w = i === 1 ? 2.6 : 2.2;
-      // Outer raised frame
-      const p = new THREE.Mesh(new THREE.BoxGeometry(w, 1.4, 0.1), panelMat);
-      p.position.set(xOffset, 1.1, -0.36);
-      this._scene.add(p);
-      // Inner recessed panel
-      const pInner = new THREE.Mesh(new THREE.BoxGeometry(w - 0.25, 1.15, 0.08), panelInnerMat);
-      pInner.position.set(xOffset, 1.1, -0.32);
-      this._scene.add(pInner);
-    });
-
-    // 4. Executive Leather Desk Blotter Pad (Dark Forest Green with Gold Border)
-    const blotter = new THREE.Mesh(
-      new THREE.BoxGeometry(3.2, 0.02, 1.4),
-      new THREE.MeshStandardMaterial({ color: 0x0f2b18, roughness: 0.75 })
-    );
-    blotter.position.set(0, 2.14, -1.2);
-    this._scene.add(blotter);
-
-    // 5. Wooden Gavel Sound Block & Gavel on Desk
-    const soundBlock = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.3, 0.34, 0.06, 24),
-      new THREE.MeshStandardMaterial({ color: 0x542914, roughness: 0.38, metalness: 0.1 })
-    );
-    soundBlock.position.set(1.4, 2.16, -0.95);
-    this._scene.add(soundBlock);
-
-    const gavelHead = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.07, 0.07, 0.26, 16),
-      new THREE.MeshStandardMaterial({ color: 0x5a2d16, roughness: 0.35 })
-    );
-    gavelHead.rotation.z = Math.PI / 2;
-    gavelHead.position.set(1.4, 2.22, -0.95);
-    this._scene.add(gavelHead);
-
-    const gavelHandle = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.025, 0.025, 0.45, 12),
-      new THREE.MeshStandardMaterial({ color: 0x482312, roughness: 0.4 })
-    );
-    gavelHandle.rotation.x = Math.PI / 2;
-    gavelHandle.position.set(1.4, 2.22, -0.72);
-    this._scene.add(gavelHandle);
-
-    // 6. Legal Case Briefs / Law Books on Desk
-    const book1 = new THREE.Mesh(
-      new THREE.BoxGeometry(0.65, 0.1, 0.9),
-      new THREE.MeshStandardMaterial({ color: 0x7f1d1d, roughness: 0.5 }) // Red legal volume
-    );
-    book1.position.set(-2.5, 2.18, -1.1);
-    this._scene.add(book1);
-
-    const book2 = new THREE.Mesh(
-      new THREE.BoxGeometry(0.6, 0.09, 0.85),
-      new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 }) // Blue legal volume
-    );
-    book2.position.set(-2.5, 2.27, -1.1);
-    this._scene.add(book2);
-
-    // 7. Judge's Executive High-Back Chair (Visible seated frame behind judge)
-    const chairBack = new THREE.Mesh(
-      new THREE.BoxGeometry(1.6, 2.4, 0.28),
-      new THREE.MeshStandardMaterial({ color: 0x140f0c, roughness: 0.55, metalness: 0.05 }) // Dark executive leather
-    );
-    chairBack.position.set(0, 2.1, -2.4);
-    chairBack.castShadow = true;
-    this._scene.add(chairBack);
-
-    const chairHeadrest = new THREE.Mesh(
-      new THREE.BoxGeometry(1.7, 0.5, 0.32),
-      new THREE.MeshStandardMaterial({ color: 0x18120e, roughness: 0.5 })
-    );
-    chairHeadrest.position.set(0, 3.2, -2.4);
-    this._scene.add(chairHeadrest);
-
-    const chairFrame = new THREE.Mesh(
-      new THREE.BoxGeometry(1.75, 2.6, 0.1),
-      new THREE.MeshStandardMaterial({ color: 0x482414, roughness: 0.4 }) // Mahogany wood frame
-    );
-    chairFrame.position.set(0, 2.2, -2.52);
-    this._scene.add(chairFrame);
-
-    // Ashoka Emblem (bronze gold medallion on court wall)
-    const emblemGeo = new THREE.CircleGeometry(0.85, 32);
-    const emblemMat = new THREE.MeshStandardMaterial({
-      color: 0xc49b38,
-      roughness: 0.35,
-      metalness: 0.75,
-      emissive: 0xc49b38,
-      emissiveIntensity: 0.04
-    });
-    const emblem = new THREE.Mesh(emblemGeo, emblemMat);
-    emblem.position.set(0, 5.2, -3.4);
-    this._scene.add(emblem);
-
-    // === ADVOCATE PODIUMS (Matching Dark Mahogany Wood) ===
-    const podiumGeo = new THREE.BoxGeometry(2.5, 1.2, 1.5);
-    const podiumMat = new THREE.MeshStandardMaterial({
-      color: 0x4a2212, // Matching rich dark mahogany
-      map: darkWoodTex,
-      roughness: 0.38,
-      metalness: 0.08
-    });
-    const podiumTopMat = new THREE.MeshStandardMaterial({
-      color: 0x5a2d16,
-      map: warmWoodTex,
-      roughness: 0.3
-    });
-
-    [-4, 4].forEach(xPos => {
-      const pod = new THREE.Mesh(podiumGeo, podiumMat.clone());
-      pod.position.set(xPos, 0.6, 1);
-      pod.castShadow = true;
-      pod.receiveShadow = true;
-      this._scene.add(pod);
-
-      // Angled document reading slope
-      const topSlope = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.06, 1.2), podiumTopMat.clone());
-      topSlope.position.set(xPos, 1.25, 0.95);
-      topSlope.rotation.x = -0.18; // Angled toward advocate
-      this._scene.add(topSlope);
-
-      // Legal papers sheet
-      const papers = new THREE.Mesh(
-        new THREE.BoxGeometry(0.8, 0.02, 0.6),
-        new THREE.MeshStandardMaterial({ color: 0xf4eedb, roughness: 0.8 })
-      );
-      papers.position.set(xPos - 0.3, 1.28, 0.95);
-      papers.rotation.x = -0.18;
-      this._scene.add(papers);
-
-      // Advocate microphone stand
-      const micBase = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.06, 0.08, 0.04, 16),
-        new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.2 })
-      );
-      micBase.position.set(xPos + 0.6, 1.28, 0.7);
-      this._scene.add(micBase);
-
-      const micStem = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.015, 0.015, 0.35, 8),
-        new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.9, roughness: 0.2 })
-      );
-      micStem.position.set(xPos + 0.6, 1.45, 0.75);
-      micStem.rotation.x = 0.25;
-      this._scene.add(micStem);
-    });
-
-    // === COURTROOM RAILING (Polished Mahogany Wood Bar) ===
-    const railGeo = new THREE.BoxGeometry(20, 0.12, 0.18);
-    const railMat = new THREE.MeshStandardMaterial({
-      color: 0x5a2d16, // Polished mahogany bar
-      map: warmWoodTex,
-      roughness: 0.32,
-      metalness: 0.08
-    });
-    const rail = new THREE.Mesh(railGeo, railMat);
-    rail.position.set(0, 1.1, 4);
-    this._scene.add(rail);
-
-    // Rail Posts
-    for (let x = -10; x <= 10; x += 2.5) {
-      const postGeo = new THREE.CylinderGeometry(0.065, 0.065, 1.1, 12);
-      const post = new THREE.Mesh(postGeo, railMat.clone());
-      post.position.set(x, 0.55, 4);
-      this._scene.add(post);
-    }
-
-    // === BACK WALL & WOOD WAINSCOTING ===
-    const wallGeo = new THREE.PlaneGeometry(40, 15);
-    const wallMat = new THREE.MeshStandardMaterial({
-      color: 0x140e0a,
-      roughness: 0.9,
-      metalness: 0
-    });
-    const backWall = new THREE.Mesh(wallGeo, wallMat);
-    backWall.position.set(0, 7, -3.5);
-    this._scene.add(backWall);
-
-    // Dark mahogany wood wainscot paneling on lower back wall
-    const wainscotGeo = new THREE.PlaneGeometry(40, 5);
-    const wainscotMat = new THREE.MeshStandardMaterial({
-      color: 0x3d1b0c,
-      map: darkWoodTex,
-      roughness: 0.45
-    });
-    const wainscot = new THREE.Mesh(wainscotGeo, wainscotMat);
-    wainscot.position.set(0, 2.5, -3.48);
-    this._scene.add(wainscot);
-
-    // === SIDE WALLS ===
-    const sideWallGeo = new THREE.PlaneGeometry(30, 15);
-    const leftWall = new THREE.Mesh(sideWallGeo, wallMat.clone());
-    leftWall.position.set(-20, 7, 0);
-    leftWall.rotation.y = Math.PI / 2;
-    this._scene.add(leftWall);
-
-    const rightWall = new THREE.Mesh(sideWallGeo, wallMat.clone());
-    rightWall.position.set(20, 7, 0);
-    rightWall.rotation.y = -Math.PI / 2;
-    this._scene.add(rightWall);
-
-    // === 3D NAMEPLATE LABELS (HTML labels via 3D positioned objects — glow indicators) ===
-    Object.keys(this.SPEAKER_COORDS).forEach(key => {
-      const coord = this.SPEAKER_COORDS[key];
-
-      // Glowing base ring for active speaker
-      const ringGeo = new THREE.RingGeometry(0.8, 0.95, 32);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: key === 'JUDGE' ? 0xd4a847 : 0x0d9488,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0
-      });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.position.set(coord.x, 0.02, coord.z);
-      ring.rotation.x = -Math.PI / 2;
-      this._scene.add(ring);
-      this._speakerRings[key] = ring;
-    });
-
-    // === LOAD 3 AVATARS ===
-    // Judge: rotY = 0 (Faces forward toward courtroom, lawyers, and audience)
-    this._loadAvatar(this.AVATAR_FILES.JUDGE, 'JUDGE', 2.5, 0, 0);
-    // Defense: rotY = 0.35 (Faces courtroom/judge, dynamically swivels to 0.85 for Judge and 1.42 for Opponent)
-    this._loadAvatar(this.AVATAR_FILES.DEFENSE, 'DEFENSE', 2.5, 0.35, 0);
-    // Prosecution: rotY = -0.35 (Faces courtroom/judge, dynamically swivels to -0.85 for Judge and -1.42 for Opponent)
-    this._loadAvatar(this.AVATAR_FILES.PROSECUTION, 'PROSECUTION', 2.5, -0.35, 0);
-  },
-
-  _loadAvatar(url, actorKey, scale, rotY, adjustY) {
-    if (!window.THREE || !window.THREE.GLTFLoader) {
-      console.error('GLTFLoader not available');
-      return;
-    }
-    const gltfLoader = new THREE.GLTFLoader();
-    gltfLoader.load(url, (gltf) => {
-      const model = gltf.scene;
+  _loadAvatar(url, actorKey, generation) {
+    return new Promise(resolve => {
       const coord = this.SPEAKER_COORDS[actorKey];
-      model.position.set(coord.x, coord.y + adjustY, coord.z);
-      model.scale.set(scale, scale, scale);
-      model.rotation.y = rotY;
-
-      // Store model reference for dynamic rotation swivel
-      this._avatarModels[actorKey] = model;
-
-      // Enable shadows AND apply realistic skin tones + black court dress
-      model.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-
-          if (child.material) {
-            const mat = child.material.clone();
-            const name = (child.name || '').toLowerCase();
-
-            if (name.includes('head')) {
-              // Natural warm human skin tone
-              mat.color = new THREE.Color(0xdca88c);
-              mat.roughness = 0.65;
-              mat.metalness = 0.0;
-            } else if (name.includes('eyeball') || name.includes('cornea')) {
-              // Natural white sclera with dark iris
-              mat.color = new THREE.Color(0xf2f2f2);
-              mat.roughness = 0.2;
-            } else if (name.includes('eyelash') || name.includes('hair')) {
-              // Dark brown/black hair and eyelashes
-              mat.color = new THREE.Color(0x1a1412);
-              mat.roughness = 0.85;
-            } else if (name.includes('teeth')) {
-              mat.color = new THREE.Color(0xeee9dd);
-            } else if (name.includes('body')) {
-              // Neck and hands
-              mat.color = new THREE.Color(0xdca88c);
-              mat.roughness = 0.65;
-            } else {
-              // Professional attire
-              if (actorKey === 'JUDGE') {
-                // Judge black judicial robe
-                mat.color = new THREE.Color(0x0e0e12);
-                mat.roughness = 0.82;
-                mat.metalness = 0.02;
-              } else {
-                // Advocate black coat & trousers
-                mat.color = new THREE.Color(0x131318);
-                mat.roughness = 0.78;
-                mat.metalness = 0.04;
-              }
-            }
-            child.material = mat;
-          }
+      const rotation = actorKey.startsWith('JUDGE') ? 0 : (this._targetRotations[actorKey] ?? Math.PI);
+      const current = () => this._sceneGeneration === generation && this._isPlaying;
+      let settled = false;
+      const fallback = () => {
+        if (settled) return; settled = true;
+        if (current()) {
+          const figure = IndianCourtroom.person(actorKey === 'DEFENSE' ? 1 : 2, true, true);
+          figure.position.set(coord.x, coord.y, coord.z); figure.rotation.y = rotation;
+          this._scene.add(figure); this._avatarModels[actorKey] = figure;
         }
-      });
-
-      // Per-avatar warm fill light (soft, non-overexposing)
-      const avatarLight = new THREE.PointLight(
-        actorKey === 'JUDGE' ? 0xffe8d0 : 0xffffff,
-        0.28, 10
-      );
-      avatarLight.position.set(coord.x, coord.y + 3.8, coord.z + 2.0);
-      this._scene.add(avatarLight);
-
-      this._scene.add(model);
-
-      // Set up animation
-      if (gltf.animations && gltf.animations.length > 0) {
-        const mixer = new THREE.AnimationMixer(model);
-        this._mixers[actorKey] = mixer;
-        const action = mixer.clipAction(gltf.animations[0]);
-        action.play();
-        action.paused = true; // Start paused until it's their turn to speak
-        this._actions[actorKey] = action;
-      }
-
-      console.log(`Avatar loaded: ${actorKey}`);
-    }, undefined, (error) => {
-      console.error(`Failed to load avatar ${actorKey}:`, error);
+        resolve();
+      };
+      // A failed or slow model must not block all controls indefinitely.
+      const timeout = setTimeout(fallback, 18000);
+      if (!THREE.GLTFLoader) { clearTimeout(timeout); fallback(); return; }
+      this._loadCourtModel(url, gltf => {
+        clearTimeout(timeout);
+        if (settled || !current()) { IndianCourtroom.dispose(gltf.scene); resolve(); return; }
+        settled = true;
+        const model = gltf.scene, wrapper = new THREE.Group();
+        model.updateMatrixWorld(true);
+        const bounds = new THREE.Box3().setFromObject(model), size = bounds.getSize(new THREE.Vector3());
+        const scale = 1.78 / Math.max(size.y, 0.001), centre = bounds.getCenter(new THREE.Vector3());
+        model.scale.multiplyScalar(scale);
+        model.position.set(-centre.x * scale, -bounds.min.y * scale, -centre.z * scale);
+        wrapper.add(model); wrapper.position.set(coord.x, coord.y, coord.z); wrapper.rotation.y = rotation;
+        model.traverse(child => {
+          if (!child.isMesh) return;
+          child.castShadow = true; child.receiveShadow = true;
+          const name = child.name.toLowerCase();
+          const skin = actorKey === 'DEFENSE' ? '#ac7956' : actorKey === 'PROSECUTION' ? '#b78763' : '#bb9373';
+          const tint = /head|body/.test(name) ? skin : /eyeball|cornea/.test(name) ? '#bdb6a7' : /teeth/.test(name) ? '#ddd4c0' : actorKey.startsWith('WITNESS') ? (actorKey.endsWith('DEFENSE') ? '#687b8b' : '#918277') : '#25272a';
+          const tintMaterial = original => {
+            const mat = original.clone(); mat.color.set(tint).convertSRGBToLinear(); mat.roughness = 0.83; mat.metalness = 0;
+            original.dispose(); return mat;
+          };
+          child.material = Array.isArray(child.material) ? child.material.map(tintMaterial) : tintMaterial(child.material);
+          if (name.includes('eyeball') && !Array.isArray(child.material)) {
+            const positions=child.geometry.getAttribute('position');child.geometry.computeBoundingBox();
+            const box=child.geometry.boundingBox,centre=box.getCenter(new THREE.Vector3());
+            const radius=(box.max.y-box.min.y)*.27,colors=new Float32Array(positions.count*3);
+            const sclera=new THREE.Color('#ddd8cd').convertSRGBToLinear(),iris=new THREE.Color('#564531').convertSRGBToLinear(),pupil=new THREE.Color('#171b1b').convertSRGBToLinear();
+            for(let i=0;i<positions.count;i++){
+              const distance=Math.hypot(positions.getX(i)-centre.x,positions.getY(i)-centre.y);
+              const front=positions.getZ(i)>centre.z;
+              const color=front&&distance<radius*.48?pupil:front&&distance<radius?iris:sclera;
+              colors.set([color.r,color.g,color.b],i*3);
+            }
+            child.geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
+            child.material.color.set(0xffffff);child.material.vertexColors=true;child.material.roughness=.4;
+          } else if(name.includes('cornea') && !Array.isArray(child.material)) {
+            child.material.transparent=true;child.material.opacity=.07;child.material.depthWrite=false;child.material.roughness=.1;
+          }
+        });
+        // White neck bands distinguish Indian court dress.
+        const white = new THREE.MeshStandardMaterial({ color: new THREE.Color('#f3eee1').convertSRGBToLinear(), roughness: 0.9 });
+        const bands = [];
+        for (const side of (actorKey.startsWith('WITNESS') ? [] : [-1, 1])) {
+          const band = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.14, 0.012), white);
+          band.position.set(side * 0.03, 1.43, 0.13); band.rotation.z = side * 0.07; wrapper.add(band); bands.push(band);
+        }
+        this._scene.add(wrapper); this._avatarModels[actorKey] = wrapper;
+        if (gltf.animations?.length) {
+          const mixer = new THREE.AnimationMixer(model); this._mixers[actorKey] = mixer;
+          const action = mixer.clipAction(gltf.animations[0]); action.play();
+          // Evaluate a neutral speaking pose before pausing, including the non-speaking bench members.
+          mixer.update(0.1); action.paused = true; this._actions[actorKey] = action;
+        }
+        wrapper.updateMatrixWorld(true);
+        // Attach simple groomed hair and neck bands to the rig, so they follow the speaking animation.
+        const bones = [];
+        model.traverse(o => { if (o.isBone) bones.push(o); });
+        const head = bones.find(o => o.name.startsWith('mixamorigHead') && !o.name.includes('Top') && this._isPrimaryJoint(o));
+        const chest = bones.find(o => o.name.startsWith('mixamorigSpine2') && this._isPrimaryJoint(o));
+        if (chest) bands.forEach(band => chest.attach(band));
+        if (head) {
+          const hair = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.46),
+            new THREE.MeshStandardMaterial({ color: new THREE.Color(actorKey.startsWith('JUDGE') ? '#65605a' : '#302820').convertSRGBToLinear(), roughness: 0.95 }));
+          hair.scale.set(0.085, 0.097, 0.098); hair.position.set(0, 1.685, -0.007); hair.castShadow = true;
+          wrapper.add(hair); wrapper.updateMatrixWorld(true); head.attach(hair);
+        }
+        this._actorRigs[actorKey] = bones.map(bone => ({ bone, rest: bone.quaternion.clone(), animate: this._isPrimaryJoint(bone) }));
+        resolve();
+      }, error => { clearTimeout(timeout); console.warn('Using fallback court participant:', actorKey, error.message); fallback(); });
     });
+  },
+
+  _loadCourtModel(url, onLoad, onError) {
+    const absolute = new URL(url, document.baseURI).href;
+    if (!this._avatarBuffers.has(absolute)) {
+      this._avatarBuffers.set(absolute, fetch(absolute).then(response => {
+        if (!response.ok) throw new Error('Character asset HTTP ' + response.status);
+        return response.arrayBuffer();
+      }).catch(error => { this._avatarBuffers.delete(absolute); throw error; }));
+    }
+    this._avatarBuffers.get(absolute).then(buffer => {
+      new THREE.GLTFLoader().parse(buffer, new URL('.', absolute).href, onLoad, onError);
+    }).catch(onError);
+  },
+
+  _isPrimaryJoint(bone) {
+    // The supplied GLBs nest several identically named skin-proxy joints. Rotating
+    // every proxy compounds the motion and separates the eyes/teeth from the face.
+    const semantic=o=>(o.userData?.originalName||o.name||'').replace(/_\d+$/,'');
+    for(let parent=bone.parent;parent;parent=parent.parent) {
+      if(parent.isBone&&semantic(parent)===semantic(bone))return false;
+    }
+    return true;
+  },
+
+  _facingAngle(actor, original) {
+    if (actor === 'DEFENSE') return original > 1 ? Math.PI / 2 : Math.PI - 0.22;
+    return original < -1 ? -Math.PI / 2 : Math.PI + 0.22;
   },
 
   /* ==================== 4. AUDIO ==================== */
@@ -1152,104 +963,27 @@ const VirtualCourtSimulator = {
   },
 
   _playGavelSound() {
-    if (!this._audioContext) return;
-    if (this._audioContext.state === 'suspended') {
-      this._audioContext.resume();
-    }
-
-    const now = this._audioContext.currentTime;
-
-    // Show visual gavel alert badge
-    const gavelAlert = document.getElementById('v3-gavel-alert');
-    if (gavelAlert) {
-      gavelAlert.classList.add('active');
-      setTimeout(() => gavelAlert.classList.remove('active'), 1800);
-    }
-
-    // Double strike: Strike 1 at t=0, Strike 2 at t=0.22s
-    [0, 0.22].forEach(delay => {
-      const osc = this._audioContext.createOscillator();
-      const gain = this._audioContext.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(160, now + delay);
-      osc.frequency.exponentialRampToValueAtTime(35, now + delay + 0.12);
-
-      gain.gain.setValueAtTime(0.65, now + delay);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.14);
-
-      osc.connect(gain);
-      gain.connect(this._audioContext.destination);
-
-      osc.start(now + delay);
-      osc.stop(now + delay + 0.15);
-    });
+    // Retain the dialogue cue API, using a discreet hearing notice instead of a cinematic hammer strike.
+    const alert = document.getElementById('v3-gavel-alert');
+    if (!alert) return;
+    clearTimeout(this._noticeTimeout); alert.classList.add('active');
+    this._noticeTimeout = setTimeout(() => alert.classList.remove('active'), 1600);
   },
 
   /* ==================== 5. ANIMATION LOOP ==================== */
   _animate() {
+    if (!this._isPlaying || !this._renderer) return;
     this._animationFrameId = requestAnimationFrame(this._animate.bind(this));
-    this._cameraDriftTime += 0.008;
-
-    // Update all avatar animation mixers
-    if (this._clock) {
-      const delta = this._clock.getDelta();
-      Object.values(this._mixers).forEach(mixer => mixer.update(delta));
-    }
-
-    // 1. Cinematic Camera Lerping
-    if (this._camera && this._cameraPos && this._cameraTarget) {
-      this._camera.position.lerp(this._cameraPos, 0.04);
-
-      // Subtle handheld broadcast camera drift
-      const driftX = Math.sin(this._cameraDriftTime * 0.7) * 0.08;
-      const driftY = Math.cos(this._cameraDriftTime * 0.9) * 0.05;
-
-      this._currentLookAt.lerp(this._cameraTarget, 0.05);
-      const lookTarget = this._currentLookAt.clone().add(new THREE.Vector3(driftX, driftY, 0));
-      this._camera.lookAt(lookTarget);
-    }
-
-    // 2. Spotlight tracks active speaker
-    if (this._spotLightTarget && this._activeSpeakerId && this.SPEAKER_COORDS[this._activeSpeakerId]) {
-      const targetCoord = this.SPEAKER_COORDS[this._activeSpeakerId];
-      this._spotLightTarget.position.lerp(
-        new THREE.Vector3(targetCoord.x, targetCoord.y + 1, targetCoord.z), 0.06
-      );
-    }
-
-    // 3. Pulsing floor rings for active speaker
-    Object.keys(this._speakerRings).forEach(id => {
-      const ring = this._speakerRings[id];
-      if (id === this._activeSpeakerId) {
-        ring.material.opacity = 0.5 + Math.sin(this._cameraDriftTime * 6) * 0.3;
-        const s = 1.0 + Math.sin(this._cameraDriftTime * 4) * 0.15;
-        ring.scale.set(s, s, 1);
-      } else {
-        ring.material.opacity = Math.max(0, ring.material.opacity - 0.03);
-      }
-    });
-
-    // 4. Smoothly swivel lawyers toward dynamic targets (Judge vs Opponent)
-    if (this._avatarModels.DEFENSE) {
-      this._avatarModels.DEFENSE.rotation.y = THREE.MathUtils.lerp(
-        this._avatarModels.DEFENSE.rotation.y,
-        this._targetRotations.DEFENSE,
-        0.045
-      );
-    }
-    if (this._avatarModels.PROSECUTION) {
-      this._avatarModels.PROSECUTION.rotation.y = THREE.MathUtils.lerp(
-        this._avatarModels.PROSECUTION.rotation.y,
-        this._targetRotations.PROSECUTION,
-        0.045
-      );
-    }
-
-    // Render
-    if (this._renderer && this._scene && this._camera) {
-      this._renderer.render(this._scene, this._camera);
-    }
+    const delta = Math.min(this._clock.getDelta(), 0.05);
+    Object.values(this._actorRigs).forEach(rig => rig.forEach(({bone,rest}) => bone.quaternion.copy(rest)));
+    Object.values(this._mixers).forEach(mixer => mixer.update(this._isPaused ? 0 : delta));
+    if (this._ready && !this._isPaused) { this._motionTime += delta; this._stageElapsed += delta; }
+    this._updateStageMotion();
+    const blend = this._reducedMotion ? 1 : 1 - Math.exp(-delta * 4);
+    this._camera.position.lerp(this._cameraPos, blend);
+    this._currentLookAt.lerp(this._cameraTarget, blend); this._camera.lookAt(this._currentLookAt);
+    if (!this._reducedMotion && !this._isPaused) this._room?.fans.forEach(fan => { fan.rotation.y += delta * 2.3; });
+    this._renderer.render(this._scene, this._camera);
   },
 
   /* ==================== 6. ORCHESTRATION & CONTROLS ==================== */
@@ -1258,29 +992,34 @@ const VirtualCourtSimulator = {
     if (!preset) return;
 
     if (isUserAction) {
-      this._cameraMode = presetId;
+      this._cameraMode = presetId; this._autoCamera = false;
+      document.getElementById('v3-auto-camera')?.setAttribute('aria-pressed', 'false');
     }
 
+    this._cameraMode = presetId;
+    if (!this._cameraPos || !this._cameraTarget) return;
     this._cameraPos.set(...preset.pos);
     this._cameraTarget.set(...preset.target);
 
     // Update UI active buttons
-    document.querySelectorAll('.v3-cam-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.v3-cam-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
     const btnMap = {
       WIDE: 'v3-cam-wide',
       JUDGE: 'v3-cam-judge',
       DEFENSE: 'v3-cam-defense',
-      PROSECUTION: 'v3-cam-pros'
+      PROSECUTION: 'v3-cam-pros', GALLERY: 'v3-cam-gallery', STAFF: 'v3-cam-staff', WITNESS: 'v3-cam-witness', WITNESS_OTHER: 'v3-cam-witness-other'
     };
     const targetBtnId = btnMap[presetId];
     if (targetBtnId) {
       const el = document.getElementById(targetBtnId);
-      if (el) el.classList.add('active');
+      if (el) { el.classList.add('active'); el.setAttribute('aria-pressed', 'true'); }
     }
   },
 
   togglePause() {
-    if (!this._isPlaying) return;
+    if (!this._isPlaying || !this._ready || this._timelineIndex >= this._timeline.length) return;
+    ++this._speechGeneration;
+    this._cancelStreamAudio();
     this._isPaused = !this._isPaused;
 
     const pauseBtn = document.getElementById('v3-pause-btn');
@@ -1342,122 +1081,121 @@ const VirtualCourtSimulator = {
     }
   },
 
-  _resumeCurrentStep() {
-    if (!this._isPlaying || this._isPaused) return;
-    if (this._currentStep >= this._script.length) {
-      this._endSimulation();
-      return;
+  _resumeCurrentStep() { this._runStage(false); },
+  _playNextStep() { this._runStage(true); },
+
+  _frameStage(stage) {
+    if (!stage || !this._autoCamera) return;
+    const id = this.CAMERAS[stage.camera] ? stage.camera : 'WIDE';
+    this.setCamera(id);
+    if (stage.actor.startsWith('JUDGE') && id === 'JUDGE') {
+      const p = this.SPEAKER_COORDS[stage.actor];
+      this._cameraTarget.set(p.x, p.y + 1.45, p.z);
+      this._cameraPos.set(p.x * .65, 2.45, this._courtConfig.benchZ + 4.7);
     }
+  },
 
-    const step = this._script[this._currentStep];
-    this._activeSpeakerId = step.actor;
-
-    // Dynamic lawyer facing for current step
-    if (step.facing) {
-      if (step.facing.DEFENSE !== undefined) this._targetRotations.DEFENSE = step.facing.DEFENSE;
-      if (step.facing.PROSECUTION !== undefined) this._targetRotations.PROSECUTION = step.facing.PROSECUTION;
-    }
-
-    if (this._actions[step.actor]) {
-      this._actions[step.actor].paused = false;
-    }
-
-    const subContainer = document.getElementById('v3-subtitle');
-    const speakerTextEl = document.getElementById('v3-speaker-text');
-    const textEl = document.getElementById('v3-subtitle-text');
-
-    if (speakerTextEl) speakerTextEl.innerText = step.name;
-    if (textEl) textEl.innerHTML = this._highlightLegalPointsInText(step.text);
-    if (subContainer) subContainer.classList.add('active');
-
-    this._speakText(step.text, step.pitch, step.rate, () => {
-      if (this._isPaused) return;
-      if (subContainer) subContainer.classList.remove('active');
-      this._activeSpeakerId = null;
-
-      Object.values(this._actions).forEach(action => { action.paused = true; });
-
-      this._currentStep++;
-      this._stepTimeout = setTimeout(() => this._playNextStep(), 1200);
+  _runStage(restorePositions = false) {
+    if (!this._ready) return;
+    ++this._speechGeneration; this._speaking = false;
+    this._captionCompletion=null;
+    this._cancelStreamAudio();
+    window.speechSynthesis?.cancel(); clearTimeout(this._stepTimeout);
+    if (this._timelineIndex >= this._timeline.length) { this._endSimulation(); return; }
+    const original = this._timeline[this._timelineIndex];
+    const stage = original.kind==='await-answer'&&this._interactions[original.answerKey]?.answer
+      ? {...original,kind:'answer',text:this._interactions[original.answerKey].answer,silent:false}
+      : original.kind==='question' ? {...original,text:this._interactions[original.questionKey]?.question||original.text,silent:false} : original;
+    this._activeStage = stage; this._speechDone = Boolean(stage.silent);
+    this._renderInteraction(stage);
+    this._currentStep = Math.max(0, stage.sourceIndex);
+    this._activeSpeakerId = stage.silent ? null : stage.actor;
+    if (restorePositions) Object.entries(stage.positions).forEach(([key, pos]) => {
+      const model = this._avatarModels[key]; if(model) model.position.set(...pos);
+    });
+    if (!this._isPaused || this._timelineIndex > 0) this._frameStage(stage);
+    const judgeNumber = Object.keys(this.SPEAKER_COORDS).filter(k=>k.startsWith('JUDGE')).indexOf(stage.actor) + 1;
+    const language = this._detectIndianLanguage(stage.text, this._activeLanguage);
+    const role = stage.actor.startsWith('JUDGE') ? (language.shortCode === 'hi' ? 'न्यायाधीश' : language.shortCode === 'te' ? 'న్యాయమూర్తి' : 'Judge') + ' ' + judgeNumber : stage.actor.startsWith('WITNESS') ? (language.shortCode === 'hi' ? 'गवाह' : language.shortCode === 'te' ? 'సాక్షి' : 'Witness') : stage.actor === 'DEFENSE' ? 'Your counsel' : 'Opposing counsel';
+    const speaker = stage.kind === 'dialogue' && !stage.actor.startsWith('JUDGE') ? (stage.name || role) : role;
+    document.getElementById('v3-speaker-text').textContent = speaker;
+    const text = document.getElementById('v3-subtitle-text'); text.innerHTML = this._highlightLegalPointsInText(stage.text); text.dir = 'auto';
+    document.getElementById('v3-subtitle').classList.add('active');
+    document.getElementById('v3-subtitle').classList.toggle('paused', this._isPaused || stage.silent);
+    document.getElementById('v3-stage-label').textContent = (stage.kind === 'dialogue' ? 'CASE DIALOGUE' : ['answer','question'].includes(stage.kind) ? 'PRACTICE Q & A' : 'PRACTICE DIRECTION') + ' · ' + (this._timelineIndex + 1) + ' / ' + this._timeline.length;
+    document.getElementById('v3-exchange-badge').textContent = 'Case turn ' + (this._currentStep + 1) + ' / ' + this._script.length;
+    document.getElementById('v3-lang-badge-text').textContent = language.displayBadge;
+    document.getElementById('v3-record-speaker').textContent = speaker;
+    this._recordCharacters = typeof Intl.Segmenter === 'function' ? [...new Intl.Segmenter(language.code,{granularity:'grapheme'}).segment(stage.text)].map(x=>x.segment) : Array.from(stage.text);
+    Object.entries(this._actions).forEach(([actor,action])=>{action.paused = this._isPaused || stage.silent || actor !== stage.actor;});
+    const pause = document.getElementById('v3-pause-btn'); pause.disabled = false;
+    document.getElementById('v3-pause-text').textContent = this._isPaused ? (this._timelineIndex ? 'Resume' : 'Begin hearing') : 'Pause';
+    document.getElementById('v3-status-text').textContent = this._isPaused ? 'PAUSED' : 'IN SESSION';
+    document.getElementById('v3-pause-icon').textContent=this._isPaused?'play_arrow':'pause';
+    document.getElementById('v3-status').classList.toggle('paused',this._isPaused);
+    document.getElementById('v3-status').classList.toggle('recording',!this._isPaused);
+    if (this._isPaused || stage.silent) return;
+    this._speaking = true;
+    const generation = this._sceneGeneration, index = this._timelineIndex;
+    this._speakText(stage.text, stage.pitch || 1, stage.rate || 1, ()=>{
+      if(generation!==this._sceneGeneration || index!==this._timelineIndex)return;
+      this._speechDone = true; this._speaking = false;
+      Object.values(this._actions).forEach(action=>{action.paused=true;});
     });
   },
 
-  _playNextStep() {
-    if (!this._isPlaying || this._isPaused) return;
-    if (this._currentStep >= this._script.length) {
-      this._endSimulation();
-      return;
+  _updateStageMotion() {
+    const stage = this._activeStage;
+    if (!this._ready || !stage) return;
+    const moving = new Set(Object.keys(stage.paths || {})), t = this._motionTime;
+    for (const [actor, path] of Object.entries(stage.paths || {})) {
+      const model=this._avatarModels[actor]; if(!model)continue;
+      const result=CourtroomDirector.pointOnPath(path, this._reducedMotion ? 1 : this._stageElapsed / Math.max(stage.duration,.01));
+      model.position.set(...result.point); model.rotation.y=result.angle;
+      if(!this._reducedMotion && this._stageElapsed<stage.duration) model.position.y += Math.abs(Math.sin(t*6))*0.018;
     }
-
-    const step = this._script[this._currentStep];
-    this._activeSpeakerId = step.actor;
-
-    // Update Turn Badge in HUD
-    const exchangeBadge = document.getElementById('v3-exchange-badge');
-    if (exchangeBadge) {
-      exchangeBadge.style.display = 'inline-block';
-      exchangeBadge.innerText = `Turn ${this._currentStep + 1} / ${this._script.length}`;
-    }
-
-    // Update Case Title in HUD
-    const titleEl = document.getElementById('v3-case-title-text');
-    if (titleEl && this._activeCaseTitle) {
-      titleEl.innerText = this._activeCaseTitle;
-    }
-
-    // Update Active Language & Indian Tone Badge in HUD
-    const langBadgeText = document.getElementById('v3-lang-badge-text');
-    if (langBadgeText) {
-      const stepLangInfo = this._detectIndianLanguage(step.text, this._activeLanguage);
-      langBadgeText.innerText = stepLangInfo.displayBadge;
-    }
-
-    // 1. Dynamic Lawyer Orientation based on who is being addressed
-    if (step.facing) {
-      if (step.facing.DEFENSE !== undefined) {
-        this._targetRotations.DEFENSE = step.facing.DEFENSE;
+    for (const [actor,model] of Object.entries(this._avatarModels)) {
+      const rig=this._actorRigs[actor] || [], walk=moving.has(actor) && this._stageElapsed<stage.duration && !this._reducedMotion;
+      const talking=this._speaking && actor===stage.actor;
+      const witnessFocus=stage.actor.startsWith('WITNESS')?stage.actor:stage.lookAt?.startsWith('WITNESS')?stage.lookAt:null;
+      const lookActor=actor===stage.actor && stage.lookAt ? stage.lookAt : actor.startsWith('WITNESS') ? stage.actor : actor==='DEFENSE'||actor==='PROSECUTION' ? (witnessFocus||'JUDGE') : stage.actor;
+      const target=this._avatarModels[lookActor];
+      if(!moving.has(actor) && !actor.startsWith('JUDGE') && target && target!==model) {
+        const desired=Math.atan2(target.position.x-model.position.x,target.position.z-model.position.z);
+        const d=desired-model.rotation.y; model.rotation.y+=Math.atan2(Math.sin(d),Math.cos(d))*.08;
       }
-      if (step.facing.PROSECUTION !== undefined) {
-        this._targetRotations.PROSECUTION = step.facing.PROSECUTION;
-      }
+      rig.forEach(({bone,animate})=>{
+        if(!animate)return;
+        const name=bone.name;
+        if(walk) {
+          const sign=/Left/.test(name)?1:-1;
+          if(/UpLeg/.test(name)) bone.rotateX(Math.sin(t*6)*.36*sign);
+          else if(/(Left|Right)Leg/.test(name)) bone.rotateX(Math.max(0,-Math.sin(t*6)*sign)*.5);
+          else if(/(Left|Right)Arm/.test(name)) bone.rotateX(-Math.sin(t*6)*.18*sign);
+        }
+        if(/Head/.test(name) && !/Top/.test(name) && !this._reducedMotion) {
+          bone.rotateX(Math.sin(t*(talking?3.1:.8))*(talking?.035:.008));
+          if(target && target!==model) {
+            const a=Math.atan2(target.position.x-model.position.x,target.position.z-model.position.z)-model.rotation.y;
+            bone.rotateY(THREE.MathUtils.clamp(Math.atan2(Math.sin(a),Math.cos(a)),-.24,.24));
+          }
+        }
+        if(stage.gesture==='objection' && actor===stage.actor && /RightArm/.test(name)) bone.rotateX(-.4);
+      });
     }
-
-    // 2. Play Gavel Strike if indicated
-    if (step.gavel) {
-      this._playGavelSound();
+    const active=this._avatarModels[stage.actor];
+    if(!this._reducedMotion) {
+      IndianCourtroom.animateParticipants(this._room.participants,t,active?.position,this._speaking,false);
+      IndianCourtroom.updateParticipantBatches(this._room);
     }
-
-    // 3. Show Subtitles & Audio Wave with Legal Highlighting
-    const subContainer = document.getElementById('v3-subtitle');
-    const speakerTextEl = document.getElementById('v3-speaker-text');
-    const textEl = document.getElementById('v3-subtitle-text');
-
-    if (speakerTextEl) speakerTextEl.innerText = step.name;
-    if (textEl) textEl.innerHTML = this._highlightLegalPointsInText(step.text);
-    if (subContainer) subContainer.classList.add('active');
-
-    // 4. Sync Avatar Animation — only active speaker animates
-    Object.keys(this._actions).forEach(actor => {
-      const action = this._actions[actor];
-      if (actor === step.actor) {
-        action.paused = false;
-      } else {
-        action.paused = true;
-      }
-    });
-
-    // 5. Speak text via Web Speech API with clean spoken text
-    this._speakText(step.text, step.pitch, step.rate, () => {
-      if (this._isPaused) return; // Do not advance if user paused while speaking
-      if (subContainer) subContainer.classList.remove('active');
-      this._activeSpeakerId = null;
-
-      // Pause all avatars
-      Object.values(this._actions).forEach(action => { action.paused = true; });
-
-      this._currentStep++;
-      this._stepTimeout = setTimeout(() => this._playNextStep(), 1200);
-    });
+    const record=document.getElementById('v3-record-text');
+    if(record && !document.getElementById('v3-record').hidden) {
+      const count=this._speechDone ? this._recordCharacters?.length : Math.ceil(this._stageElapsed*15);
+      record.textContent=(this._recordCharacters||[]).slice(0,count).join('');
+    }
+    if(!this._isPaused && !this._awaiting && this._speechDone && this._stageElapsed >= Math.max(stage.duration, .65)) {
+      this._timelineIndex++; this._stageElapsed=0; this._runStage(true);
+    }
   },
 
   // Highlighting of statutory sections, precedents, and critical arguments in subtitles
@@ -1495,7 +1233,8 @@ const VirtualCourtSimulator = {
 
   _findVoice(actorKey, langCode = 'hi-IN') {
     if (!window.speechSynthesis) return null;
-    const voices = window.speechSynthesis.getVoices();
+    const allVoices = window.speechSynthesis.getVoices();
+    const voices = allVoices.filter(voice => voice.lang?.toLowerCase().split('-')[0] === langCode.toLowerCase().split('-')[0]);
     if (!voices || voices.length === 0) return null;
 
     const shortLang = (langCode || 'hi').split('-')[0].toLowerCase();
@@ -1539,7 +1278,7 @@ const VirtualCourtSimulator = {
       return female || voices[voices.length - 1];
     }
 
-    if (actorKey === 'JUDGE') {
+    if (actorKey.startsWith('JUDGE')) {
       // MALE VOICE 1: Senior Presiding Male (Deep baritone, authoritative)
       let judgeVoice = langExactVoices.find(v => isMale(v) && isIndianVoice(v));
       if (!judgeVoice) judgeVoice = langExactVoices.find(isMale);
@@ -1575,6 +1314,7 @@ const VirtualCourtSimulator = {
 
   // Dynamic Cadence & Tone Modulation for Statutory Sections & Critical Arguments
   _analyzeSegmentTone(text, actorKey) {
+    if(actorKey?.startsWith('JUDGE')) actorKey = 'JUDGE';
     const isSection = /(?:धारा|दफा|Section|Sec\.?)\s*\d+[\w\s\(\)]*|Order\s*\d+\s*Rule\s*\d+|ऑर्डर\s*\d+\s*रूल\s*\d+|आदेश\s*\d+\s*नियम\s*\d+|Article\s*\d+|अनुच्छेद\s*\d+|IPC|आईपीसी|CrPC|सीआरपीसी|CPC|सीपीसी|BNS|BNSS|NDPS|NI Act/i.test(text);
     const isPrecedent = /Unbroken Chain of Circumstances|Due process of law|Civil Appeal[^\,\.\n]*|Supreme Court|High Court|साक्ष्यों की अटूट श्रृंखला|कानून की उचित प्रक्रिया|Interim Injunction|Stay Order|अस्थाई निषेधाज्ञा|Prima facie/i.test(text);
     const isCritical = /निर्ममता से हत्या|शव को छुपाया|हल्की धारा|अपराध स्वीकार|forged agreement|farzi agreement|illegal kabza|balpurvak kabza|Mandatory requirement|mandatory statutory safeguard|Fatal defect|Order, order/i.test(text);
@@ -1643,12 +1383,34 @@ const VirtualCourtSimulator = {
   },
 
   _speakText(text, defaultPitch, defaultRate, onEnd) {
-    if (!window.speechSynthesis) {
-      this._stepTimeout = setTimeout(onEnd, 3500);
+    const generation = this._sceneGeneration, speech = ++this._speechGeneration;
+    const current = () => this._isPlaying && !this._isPaused && generation === this._sceneGeneration && speech === this._speechGeneration;
+    const finish = onEnd; onEnd = () => { if (current()) finish(); };
+    this._cancelStreamAudio();
+    window.speechSynthesis?.cancel();
+    if (!this._voiceEnabled) {
+      this._stepTimeout = setTimeout(onEnd, Math.max(3500, Math.min(14000, text.length * 48)));
       return;
     }
-
-    window.speechSynthesis.cancel();
+    const language = this._getSpeechLanguageCode(text);
+    if (!window.speechSynthesis || !this._findVoice(this._activeSpeakerId, language)) {
+      // Only built-in public prompts may use the external speech proxy. Never send case text.
+      const fixedPrompt = this._activeStage?.kind === 'practice'
+        && Object.values(CourtroomDirector.cues).some(values => values.includes(text));
+      if (fixedPrompt) { this._speakPracticePrompt(text, language, current, onEnd); return; }
+      const hint=document.getElementById('v3-voice-hint');
+      if(hint)hint.textContent='A matching browser voice is needed for this case language. Case text stays in the browser; captions continue.';
+      if(this._activeSpeakerId?.startsWith('WITNESS')) {
+        this._captionCompletion=onEnd;this._awaiting=true;this._speaking=false;
+        Object.values(this._actions).forEach(action=>{action.paused=true;});
+        const panel=document.getElementById('v3-interaction');panel.hidden=false;
+        panel.innerHTML='<div class="v3-answer-actions"><button class="v3-answer-submit" onclick="VirtualCourtSimulator.completeCaptionAnswer()">'+Utils.escapeHtml(this._interactionWords().complete)+'</button></div>';
+        document.querySelector('[aria-label="Next stage"]')?.setAttribute('disabled','');
+        return;
+      }
+      this._stepTimeout=setTimeout(onEnd,Math.max(3500,Math.min(14000,text.length*48)));
+      return;
+    }
 
     // Clean spoken text: strip bracketed stage directions like *[Scrutinizing file]*
     const cleanedText = this._cleanTextForVoice(text);
@@ -1668,7 +1430,7 @@ const VirtualCourtSimulator = {
     const totalSegs = segments.length;
 
     const speakNextSegment = () => {
-      if (!this._isPlaying || this._isPaused) return;
+      if (!current()) return;
       if (segIndex >= totalSegs) {
         onEnd();
         return;
@@ -1676,8 +1438,8 @@ const VirtualCourtSimulator = {
 
       const seg = segments[segIndex];
       const utterance = new SpeechSynthesisUtterance(seg.text);
-      utterance.pitch = seg.pitch;
-      utterance.rate = seg.rate;
+      utterance.pitch = seg.pitch + (this._activeSpeakerId === 'JUDGE_0' ? .08 : this._activeSpeakerId === 'JUDGE_1' ? .14 : 0);
+      utterance.rate = seg.rate * (this._courtConfig?.voiceRate || 1);
       utterance.volume = 1.0;
 
       const lang = this._getSpeechLanguageCode(seg.text);
@@ -1690,6 +1452,7 @@ const VirtualCourtSimulator = {
       }
 
       utterance.onend = () => {
+        if (!current()) return;
         segIndex++;
         if (segIndex < totalSegs) {
           // Dramatic courtroom micro-pause before an important statutory section or precedent
@@ -1701,13 +1464,10 @@ const VirtualCourtSimulator = {
       };
 
       utterance.onerror = (e) => {
-        console.warn('Speech synthesis notice:', e);
-        segIndex++;
-        if (segIndex < totalSegs) {
-          speakNextSegment();
-        } else {
-          onEnd();
-        }
+        if (!current()) return;
+        const hint = document.getElementById('v3-voice-hint');
+        if (hint) hint.textContent = 'Speech is unavailable in this browser. Captions will continue; use Pause to read at your pace.';
+        this._stepTimeout = setTimeout(onEnd, Math.max(3500, Math.min(14000, text.length * 48)));
       };
 
       window.speechSynthesis.speak(utterance);
@@ -1716,7 +1476,49 @@ const VirtualCourtSimulator = {
     speakNextSegment();
   },
 
+  _cancelStreamAudio() {
+    this._audioAbort?.abort(); this._audioAbort = null;
+    clearTimeout(this._audioTimeout);
+    if (this._streamAudio) { this._streamAudio.onended=null; this._streamAudio.onerror=null; this._streamAudio.pause(); this._streamAudio.src=''; this._streamAudio=null; }
+    if (this._audioObjectUrl) { URL.revokeObjectURL(this._audioObjectUrl); this._audioObjectUrl=null; }
+  },
+
+  async _speakPracticePrompt(text, language, current, onEnd) {
+    // Defence in depth: callers cannot use this method to send arbitrary testimony to the proxy.
+    const locale = language.split('-')[0];
+    if (!CourtroomDirector.cues[locale]?.includes(text)) return;
+    try {
+      const controller=new AbortController(); this._audioAbort=controller;
+      this._audioTimeout=setTimeout(()=>controller.abort(),12000);
+      const host=window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
+        ? 'http://'+window.location.hostname+':5000' : window.location.origin;
+      const response=await fetch(host+'/api/ai/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,language:locale}),signal:controller.signal});
+      clearTimeout(this._audioTimeout);
+      if(!response.ok||!response.headers.get('content-type')?.includes('audio/'))throw new Error('Practice speech unavailable');
+      const blob=await response.blob(); if(!current())return;
+      const url=URL.createObjectURL(blob); this._audioObjectUrl=url;
+      const audio=new Audio(url); this._streamAudio=audio;
+      audio.playbackRate = this._activeSpeakerId?.startsWith('JUDGE') ? 0.96 : 1;
+      await new Promise((resolve,reject)=>{
+        const timeout=setTimeout(()=>reject(new Error('Audio timeout')),45000);
+        controller.signal.addEventListener('abort',()=>{clearTimeout(timeout);reject(new Error('Audio cancelled'));},{once:true});
+        audio.onended=()=>{clearTimeout(timeout);resolve();}; audio.onerror=()=>{clearTimeout(timeout);reject(new Error('Audio failed'));};
+        audio.play().catch(error=>{clearTimeout(timeout);reject(error);});
+      });
+      URL.revokeObjectURL(url); if(this._audioObjectUrl===url)this._audioObjectUrl=null;
+      if(current())onEnd();
+    }catch(error){
+      if(!current())return;
+      this._cancelStreamAudio();
+      const hint=document.getElementById('v3-voice-hint'); if(hint)hint.textContent='Practice audio is unavailable. Captions continue; check the AI speech service.';
+      this._stepTimeout=setTimeout(onEnd,Math.max(3500,Math.min(14000,text.length*48)));
+    }
+  },
+
   _endSimulation() {
+    this._isPaused = true; this._activeSpeakerId = null; this._activeStage = null; this._speaking = false;
+    const pause = document.getElementById('v3-pause-btn'); if (pause) pause.disabled = true;
+    document.getElementById('v3-subtitle')?.classList.add('paused');
     this.setCamera('WIDE');
     this._playGavelSound();
 
@@ -1737,46 +1539,35 @@ const VirtualCourtSimulator = {
     const speakerTextEl = document.getElementById('v3-speaker-text');
     const textEl = document.getElementById('v3-subtitle-text');
 
-    if (speakerTextEl) speakerTextEl.innerText = '⚖️ सुनवाई समाप्त (Hearing Concluded)';
-    if (textEl) {
-      textEl.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;width:100%;">
-          <span>माननीय पीठ द्वारा अंतरिम निर्देश दर्ज किए गए हैं।</span>
-          <button class="u-btn u-btn-primary u-btn-sm u-btn-pill" onclick="VirtualCourtSimulator.exitToChat()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;font-weight:700;">
-            <span class="material-symbols-rounded" style="font-size:16px">chat</span>
-            वापस चैट पर जाएं (Return to Chat)
-          </button>
-        </div>
-      `;
-    }
+    const last = this._script[this._script.length - 1];
+    if (speakerTextEl) speakerTextEl.textContent = last?.name || 'Hearing completed';
+    if (textEl) textEl.innerHTML = this._highlightLegalPointsInText(last?.text || '');
+    document.getElementById('v3-stage-label').textContent = 'PRACTICE COMPLETED · Restart to rehearse again';
     if (subContainer) subContainer.classList.add('active');
   },
 
   stopSimulation() {
-    this._isPlaying = false;
-    this._isPaused = false;
-    if (this._stepTimeout) {
-      clearTimeout(this._stepTimeout);
-      this._stepTimeout = null;
-    }
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    if (this._animationFrameId) {
-      cancelAnimationFrame(this._animationFrameId);
-      this._animationFrameId = null;
-    }
-    if (this._resizeHandler) {
-      window.removeEventListener('resize', this._resizeHandler);
-      this._resizeHandler = null;
-    }
-    if (this._renderer) {
-      this._renderer.dispose();
-      this._renderer = null;
-    }
-    this._mixers = {};
-    this._actions = {};
-    this._avatarModels = {};
-    this._speakerRings = {};
+    this._saveCourtProgress();
+    this._isPlaying = false; this._isPaused = false; this._ready = false;
+    ++this._sceneGeneration; ++this._speechGeneration; this._speaking = false; this._activeStage = null;
+    this._captionCompletion=null;
+    this._cancelStreamAudio();
+    clearTimeout(this._stepTimeout); clearTimeout(this._noticeTimeout);
+    this._stepTimeout = null;
+    window.speechSynthesis?.cancel();
+    if (this._animationFrameId) cancelAnimationFrame(this._animationFrameId);
+    this._animationFrameId = null;
+    if (this._resizeHandler) window.removeEventListener('resize', this._resizeHandler);
+    document.removeEventListener('fullscreenchange', this._fullscreenHandler); window.removeEventListener('keydown', this._escapeHandler);
+    this._resizeObserver?.disconnect(); this._mountObserver?.disconnect();
+    this._resizeObserver = this._mountObserver = null;
+    Object.values(this._mixers).forEach(mixer => { mixer.stopAllAction(); mixer.uncacheRoot(mixer.getRoot()); });
+    IndianCourtroom.dispose(this._scene);
+    this._renderer?.dispose(); this._renderer?.forceContextLoss();
+    this._scene = this._renderer = this._room = null; this._actorRigs = {};
+    this._cameraPos = this._cameraTarget = null;
+    this._mixers = {}; this._actions = {}; this._avatarModels = {}; this._speakerRings = {};
   }
+
+
 };
