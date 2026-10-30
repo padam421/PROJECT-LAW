@@ -69,3 +69,26 @@ confirmed to return the expected authentication/input-validation responses.
 
 Restart both the backend and AI service after applying server changes. Existing
 launch scripts and dependencies remain applicable; no new package is required.
+
+## Lawyer response language
+
+Chat and rehearsal now detect the latest human message/submission independently
+of saved language preferences, earlier answers and English source documents.
+Hinglish stays in Latin script. Both generation and legal review receive the same
+language instruction, including section headings, opposition, bench questions and
+coaching. Source quotations and citation identifiers remain unchanged.
+
+For an attachment-only message, use the last typed user message's language, or
+the extracted document if there is no typed history. The UI's generic upload
+label is not sent as an English language sample. Empty hearing openings use the
+last counsel submission, then the research session's saved human language sample,
+then its factual record for older sessions. The lawyer language selector has been
+replaced by an automatic-language note; existing saved overrides are ignored.
+
+Regression checks: 127 JavaScript tests and 113 Python tests pass, including
+language switches, mixed-script queries, stale preferences, document-only input,
+empty hearing openings, and language instructions in both generation and review.
+The citizen assistant's language implementation is unchanged.
+Live synthetic checks also returned Hinglish chat (`hi-Latn`), Hindi chat (`hi`),
+and English rehearsal (`en`) despite conflicting saved language values. These
+sampled model responses verify the language flow, not legal correctness.

@@ -46,7 +46,7 @@ const AdvocateChatBot = {
   render() {
     const t = AssistantThreads.active();
     return Components.AppLayout('<div class="adv-workspace"><aside class="adv-sidebar" id="adv-sidebar">' + this.sidebar() + '</aside><main class="adv-chat"><header class="adv-chat-header"><div class="adv-chat-heading"><button id="adv-conversations-toggle" type="button" aria-controls="adv-sidebar" aria-expanded="true" title="Show or hide case conversations" onclick="AdvocateChatBot.toggleConversations()"><span class="material-symbols-rounded" aria-hidden="true">view_sidebar</span><span>Chats</span></button><div><span class="adv-eyebrow">NDPS RESEARCH</span><h1>Case research & strategy</h1></div></div><button onclick="Router.navigate(\'/court\')">Hearing practice ↗</button></header><div id="chat-messages" class="adv-messages" aria-live="polite">' +
-      (t.messages.length ? t.messages.map(m => this._renderMessage(m)).join('') : this._emptyChat()) + '</div><div id="adv-files" class="adv-file-chips"></div><form class="adv-composer" onsubmit="event.preventDefault();AdvocateChatBot.sendMessage()"><label class="adv-sr-only" for="chat-input">Case facts or follow-up question</label><textarea id="chat-input" rows="2" maxlength="60000" placeholder="Describe your NDPS case in detail, or ask a follow-up…" onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey)){event.preventDefault();AdvocateChatBot.sendMessage()}"></textarea><div class="adv-compose-tools"><input hidden multiple type="file" id="chat-file-input" accept=".pdf,.docx,.txt,.csv" onchange="AdvocateChatBot.handleFileAttach(event)"><button type="button" onclick="document.getElementById(\'chat-file-input\').click()">＋ Add case papers</button><label>Answer language <select id="chat-lang-select"><option value="auto">Auto</option><option value="en">English</option><option value="hi">हिन्दी</option><option value="mr">मराठी</option><option value="gu">ગુજરાતી</option><option value="ta">தமிழ்</option><option value="te">తెలుగు</option><option value="bn">বাংলা</option><option value="kn">ಕನ್ನಡ</option><option value="ml">മലയാളം</option><option value="pa">ਪੰਜਾਬੀ</option><option value="ur">اردو</option></select></label><button type="submit" class="adv-primary" id="chat-send-btn">Analyse case ↑</button></div><small>PDF / DOCX / TXT / CSV · up to 10 MB each · scanned documents need OCR · Ctrl + Enter to send</small></form></main></div>', 'ai-assistant', 'Advocate Research');
+      (t.messages.length ? t.messages.map(m => this._renderMessage(m)).join('') : this._emptyChat()) + '</div><div id="adv-files" class="adv-file-chips"></div><form class="adv-composer" onsubmit="event.preventDefault();AdvocateChatBot.sendMessage()"><label class="adv-sr-only" for="chat-input">Case facts or follow-up question</label><textarea id="chat-input" rows="2" maxlength="60000" placeholder="Describe your NDPS case in detail, or ask a follow-up…" onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey)){event.preventDefault();AdvocateChatBot.sendMessage()}"></textarea><div class="adv-compose-tools"><input hidden multiple type="file" id="chat-file-input" accept=".pdf,.docx,.txt,.csv" onchange="AdvocateChatBot.handleFileAttach(event)"><button type="button" onclick="document.getElementById(\'chat-file-input\').click()">＋ Add case papers</button><span class="adv-language-note">Replies match your input language</span><button type="submit" class="adv-primary" id="chat-send-btn">Analyse case ↑</button></div><small>PDF / DOCX / TXT / CSV · up to 10 MB each · scanned documents need OCR · Ctrl + Enter to send</small></form></main></div>', 'ai-assistant', 'Advocate Research');
   },
   onEnter() {
     this.closeMobileConversations();
@@ -61,7 +61,6 @@ const AdvocateChatBot = {
     panel.innerHTML = t.messages.length ? t.messages.map(m => this._renderMessage(m)).join('') : this._emptyChat();
     if (this.pending.has(t.id)) panel.insertAdjacentHTML('beforeend', '<div class="adv-progress" role="status">Reading the case record, researching sources and checking the analysis…</div>');
     document.getElementById('adv-sidebar').innerHTML = this.sidebar();
-    document.getElementById('chat-lang-select').value = t.language || 'auto';
     document.getElementById('chat-send-btn').disabled = this.pending.has(t.id) || !!this.uploads.get(t.id);
     this.renderFiles();
     if (changedThread || addedMessage) {
@@ -100,16 +99,17 @@ const AdvocateChatBot = {
     const files = this.files.filter(f => f.threadId === t.id), text = retryMessage?.text || input?.value?.trim() || (files.length ? 'Analyse the attached NDPS case papers in detail.' : '');
     if (!text) return;
     const context = retryMessage?.caseContext || files.map(f => 'DOCUMENT: ' + f.name + '\n' + f.text + (f.warnings?.length ? '\nEXTRACTION GAPS: ' + f.warnings.join(' ') : '')).join('\n\n');
-    const lang = document.getElementById('chat-lang-select')?.value || t.language || 'auto';
-    const history = t.messages.filter(m => !m.error).map(m => ({sender: m.sender, text: m.text, caseContext: m.caseContext}));
+    const lang = 'auto';
+    const documentOnly = retryMessage ? !!retryMessage.documentOnly : !input?.value?.trim() && files.length > 0;
+    const history = t.messages.filter(m => !m.error).map(m => ({sender: m.sender, text: m.text, caseContext: m.caseContext, documentOnly: !!m.documentOnly}));
     if (!retryMessage) {
-      AssistantThreads.append(t.id, {id: AssistantThreads.id('msg'), sender: 'user', text, caseContext: context,
+      AssistantThreads.append(t.id, {id: AssistantThreads.id('msg'), sender: 'user', text, caseContext: context, documentOnly,
         attachments: files.map(f => ({name: f.name, characters: f.characters, warnings: f.warnings})), time: new Date().toISOString()});
       this.files = this.files.filter(f => f.threadId !== t.id); if (input) input.value = '';
     }
     AssistantThreads.change(t.id, t => { t.language = lang; }); this.pending.add(t.id); this.refresh();
     try {
-      const result = await AssistantThreads.api('chat', {message: text, caseContext: context, chatHistory: history, language: lang, retry: !!retryMessage});
+      const result = await AssistantThreads.api('chat', {message: documentOnly ? '' : text, caseContext: context, chatHistory: history, language: lang, retry: !!retryMessage});
       if (AssistantThreads.owner() !== owner) return;
       AssistantThreads.append(t.id, {id: AssistantThreads.id('msg'), sender: 'ai', text: result.message, sources: result.sources, sections: result.sections,
         validation: result.validation, lang: result.detected_language?.detected_language_code || lang, time: new Date().toISOString()});

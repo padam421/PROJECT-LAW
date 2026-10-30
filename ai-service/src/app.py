@@ -168,7 +168,7 @@ def court():
 def advocate_chat():
     data = request.get_json(silent=True)
     if (not isinstance(data, dict) or not isinstance(data.get('message'), str)
-            or not data['message'].strip() or len(data['message']) > 60000
+            or (not data['message'].strip() and not str(data.get('caseContext') or '').strip()) or len(data['message']) > 60000
             or not isinstance(data.get('language', 'auto'), str)
             or data.get('caseContext') is not None and not isinstance(data['caseContext'], str)):
         return jsonify(ok=False, error='Provide a case brief or follow-up as text (up to 60,000 characters).'), 400

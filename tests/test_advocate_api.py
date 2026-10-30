@@ -41,6 +41,13 @@ class AdvocateApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('disputed bag ownership', response.json['document']['text'])
 
+    def test_document_only_chat_does_not_require_an_english_placeholder(self):
+        with patch('advocate_engine.answer', return_value=('उत्तर', {'sources': [], 'sections': [], 'validation': {}})) as generate:
+            response = self.client.post('/api/ai/advocate/chat', json={'message': '', 'caseContext': 'हिंदी NDPS दस्तावेज'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(generate.call_args.args[1], '')
+        self.assertEqual(self.client.post('/api/ai/advocate/chat', json={'message': '', 'caseContext': ''}).status_code, 400)
+
     def test_upload_limit_is_larger_only_for_document_route(self):
         response = self.client.post('/api/ai/advocate/documents', data={'file':(io.BytesIO(b'x' * (2 * 1024 * 1024 + 10)), 'large.txt')})
         self.assertEqual(response.status_code, 400)  # Extraction text limit, not Flask's 2 MB rejection.

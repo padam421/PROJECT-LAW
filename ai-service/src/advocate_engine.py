@@ -8,7 +8,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from conversation_engine import LANGUAGES, SAFETY, language_info, parse_json
+from conversation_engine import LANGUAGES, SAFETY, parse_json
 from court_review import LEGAL_REFERENCE, LEGAL_CONCLUSION
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,6 +16,66 @@ NDPS = re.compile(r'\b(ndps|narcotic|psychotropic|contraband|heroin|ganja|charas
 STAGES = {'bail', 'charge', 'cross', 'final'}
 CHECKS = ('facts_match', 'legal_support', 'no_invented_authorities', 'date_applicability', 'opposition_addressed')
 REPORT_PARTS = ('facts', 'issues', 'provisions', 'precedents', 'strategy', 'opposition', 'evidence', 'next_steps')
+
+
+def input_language(engine, message, fallback=''):
+    """Lawyer responses follow this turn, never a saved language preference or AI text."""
+    sample = str(message or '').strip() or str(fallback or '').strip()
+    sample = sample[:8000] + ('\n' + sample[-2000:] if len(sample) > 8000 else '')
+    info = dict(engine.detect_and_translate_query(sample, preferred_lang='auto'))
+    code = str(info.get('detected_language_code', 'en')).lower().split('-')[0]
+    # Keep distinct scripts dependable even if the detection service falls back to English.
+    scripts = {'gu': r'[\u0a80-\u0aff]', 'pa': r'[\u0a00-\u0a7f]',
+               'ta': r'[\u0b80-\u0bff]', 'te': r'[\u0c00-\u0c7f]',
+               'kn': r'[\u0c80-\u0cff]', 'ml': r'[\u0d00-\u0d7f]',
+               'or': r'[\u0b00-\u0b7f]', 'ur': r'[\u0600-\u06ff]',
+               'hi': r'[\u0900-\u097f]', 'bn': r'[\u0980-\u09ff]'}
+    counts = {lang: len(re.findall(pattern, sample)) for lang, pattern in scripts.items()}
+    script = max(counts, key=counts.get)
+    native = counts[script] > 0
+    latin_letters = len(re.findall(r'[A-Za-z]', sample))
+    if native and (code not in LANGUAGES or counts[script] >= latin_letters * .5):
+        compatible = {'hi': {'hi', 'mr', 'ne', 'sa'}, 'bn': {'bn', 'as'}, 'ur': {'ur', 'ar', 'fa'}}.get(script, {script})
+        if code not in compatible:
+            code = script
+    hindi_words = set(re.findall(r'\b(?:mujhe|mera|mere|meri|kya|kaise|kyun|kyunki|nahi|nahin|hain|hai|hoon|hun|batao|bataiye|samjhao|chahiye|liye|isme|iska|uska|karna|karu|hoga|hogi|tha|thi|theek)\b', sample.lower()))
+    hinglish = not native and (code == 'hi' or code in ('en', 'auto') and len(hindi_words) >= 2)
+    name = 'Hinglish (Hindi in Latin script, with natural English legal terms)' if hinglish else LANGUAGES.get(code, 'the same language as the language_reference')
+    if hinglish:
+        code = 'hi-Latn'
+    elif not native and code in LANGUAGES and code != 'en':
+        name += ' in Latin script'
+    if code not in LANGUAGES and code != 'hi-Latn':
+        code = 'auto'
+    info.update(detected_language_code=code, language_name=name, language_reference=sample)
+    return info
+
+
+def response_language_rule(info):
+    return ('\nLANGUAGE: Match language_reference, the latest human input, including its script and natural '
+            'code-switching. Write ALL section titles, analysis, opposing arguments, bench questions, feedback '
+            'and follow-up questions in ' + info['language_name'] + '. Older messages, source documents and '
+            'saved preferences must not override it. Keep citation IDs, source quotations and proper case names '
+            'unchanged. Hinglish stays in Latin letters; do not convert it to Devanagari or English-only prose.\n')
+
+
+WITHHELD_NOTICES = {
+    'Hindi': 'इस हिस्से का अपुष्ट निष्कर्ष हटा दिया गया है। संबंधित मूल दस्तावेज़ और पूरे स्रोत की जाँच करें।',
+    'Hinglish': 'Is hisse ka ek nateeja sources se verify nahi hua, isliye use hata diya gaya hai. Sambandhit original documents aur poore source ko check karein.',
+    'Marathi': 'या भागातील अपुष्ट निष्कर्ष वगळला आहे. संबंधित मूळ कागदपत्रे आणि संपूर्ण स्रोत तपासा.',
+    'Gujarati': 'આ ભાગનો અપ્રમાણિત નિષ્કર્ષ દૂર કર્યો છે. સંબંધિત મૂળ દસ્તાવેજો અને સંપૂર્ણ સ્રોત તપાસો.',
+    'Tamil': 'இந்தப் பகுதியில் உறுதிப்படுத்தப்படாத முடிவு நீக்கப்பட்டது. தொடர்புடைய அசல் ஆவணங்களையும் முழு ஆதாரத்தையும் சரிபார்க்கவும்.',
+    'Telugu': 'ఈ భాగంలోని నిర్ధారించని నిర్ధారణను తొలగించాము. సంబంధిత అసలు పత్రాలను, పూర్తి ఆధారాన్ని పరిశీలించండి.',
+    'Bengali': 'এই অংশের অযাচাইকৃত সিদ্ধান্ত বাদ দেওয়া হয়েছে। সংশ্লিষ্ট মূল নথি ও সম্পূর্ণ উৎস যাচাই করুন।',
+    'Kannada': 'ಈ ಭಾಗದ ದೃಢಪಡಿಸದ ತೀರ್ಮಾನವನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ. ಸಂಬಂಧಿತ ಮೂಲ ದಾಖಲೆಗಳು ಮತ್ತು ಸಂಪೂರ್ಣ ಮೂಲವನ್ನು ಪರಿಶೀಲಿಸಿ.',
+    'Malayalam': 'ഈ ഭാഗത്തിലെ സ്ഥിരീകരിക്കാത്ത നിഗമനം നീക്കി. ബന്ധപ്പെട്ട യഥാർത്ഥ രേഖകളും പൂർണ്ണ സ്രോതസ്സും പരിശോധിക്കുക.',
+    'Punjabi': 'ਇਸ ਹਿੱਸੇ ਦਾ ਅਪੁਸ਼ਟ ਨਤੀਜਾ ਹਟਾ ਦਿੱਤਾ ਗਿਆ ਹੈ। ਸੰਬੰਧਿਤ ਅਸਲ ਦਸਤਾਵੇਜ਼ਾਂ ਅਤੇ ਪੂਰੇ ਸਰੋਤ ਦੀ ਜਾਂਚ ਕਰੋ।',
+    'Urdu': 'اس حصے کا غیر مصدقہ نتیجہ ہٹا دیا گیا ہے۔ متعلقہ اصل دستاویزات اور مکمل ماخذ کی جانچ کریں۔',
+    'Odia': 'ଏହି ଅଂଶର ଅଯାଞ୍ଚିତ ନିଷ୍କର୍ଷ ହଟାଯାଇଛି। ସମ୍ପୃକ୍ତ ମୂଳ ଦଲିଲ ଓ ସମ୍ପୂର୍ଣ୍ଣ ଉତ୍ସ ଯାଞ୍ଚ କରନ୍ତୁ।',
+    'Assamese': 'এই অংশৰ অপ্ৰমাণিত সিদ্ধান্ত আঁতৰোৱা হৈছে। সংশ্লিষ্ট মূল নথি আৰু সম্পূৰ্ণ উৎস পৰীক্ষা কৰক।',
+    'Nepali': 'यस भागको अपुष्ट निष्कर्ष हटाइएको छ। सम्बन्धित मूल कागजात र पूर्ण स्रोत जाँच गर्नुहोस्।',
+    'Sanskrit': 'अस्य भागस्य अप्रमाणितः निष्कर्षः निष्कासितः। सम्बद्धानि मूलपत्राणि सम्पूर्णं स्रोतश्च परीक्ष्यन्ताम्।',
+}
 
 
 def clean(text):
@@ -349,9 +409,10 @@ def retain_supported_analysis(result, sources, payload, language):
             else:
                 kept.append(paragraph)
         if removed:
-            text = ('इस हिस्से का एक निष्कर्ष उपलब्ध स्रोतों और तथ्यों से पुष्ट नहीं हो सका, इसलिए उसे हटाया गया है। '
-                    'संबंधित मूल रिकॉर्ड, घटना की तारीख और पूरे स्रोत की जाँच के बाद ही उस बिंदु पर निष्कर्ष निकालें।'
-                    if language == 'Hindi' else 'A proposition in this part could not be supported and has been withheld. ' + tasks.get(section['key'], tasks['next_steps']))
+            text = ('A proposition in this part could not be supported and has been withheld. ' + tasks.get(section['key'], tasks['next_steps'])
+                    if language == 'English' else WITHHELD_NOTICES.get('Hinglish' if language.startswith('Hinglish') else language))
+            if not text:
+                return None  # Never inject an English fallback into another language's report.
             kept.append({'text':text, 'kind':'analysis', 'citations':[]})
             result['limited_analysis'] = True
         section['paragraphs'] = kept
@@ -432,7 +493,10 @@ Keep at least the original useful depth. Set both paragraph flags true ONLY afte
 
 def answer(engine, query, case_context=None, language='auto', chat_history=None, retry=False):
     payload, facts = case_record(query, case_context, chat_history)
-    info = language_info(engine, facts[-22000:], language, [])
+    earlier_input = next((str(m.get('text', '')) for m in reversed(chat_history or [])
+                          if m.get('sender') == 'user' and not m.get('documentOnly') and str(m.get('text', '')).strip()), '')
+    info = input_language(engine, query, earlier_input or case_context or '')
+    payload['language_reference'] = info['language_reference']
     sources = evidence(engine, facts, info)
     full = not chat_history or bool(case_context) or bool(re.search(r'full|complete|detailed|analyse|analyze|पूरा|विस्तार', query, re.I)) or len(query) > 300
     instructions = """This workspace supports NDPS matters only. For an unrelated matter explain that scope and ask
@@ -455,7 +519,7 @@ Do not write simulated courtroom dialogue inside research chat. Retry improves a
 """
     in_scope = bool(NDPS.search(facts) or NDPS.search(info.get('english_translation', '')))
     payload.update(retry=bool(retry), ndps_scope=in_scope, full_analysis=bool(full and in_scope))
-    result = generate(engine, payload, sources, info['language_name'], instructions, full=bool(full and in_scope))
+    result = generate(engine, payload, sources, info['language_name'], instructions + response_language_rule(info), full=bool(full and in_scope))
     message, cited = render(result, sources)
     info.update(sources=cited, sections=result['sections'], validation={'reviewed': True,
         'scope': 'Source quotations and independent model review; amendment currency and subsequent case treatment are not confirmed.',
@@ -477,7 +541,9 @@ def rehearse(engine, data):
         raise ValueError('Invalid hearing transcript.')
     if len(json.dumps(data, ensure_ascii=False)) > 300000:
         raise ValueError('This hearing is too large for one review. Start a new round; the transcript is retained.')
-    info = language_info(engine, record['facts'][-22000:], data.get('language', 'auto'), [])
+    earlier_input = next((str(t.get('text', '')) for t in reversed(transcript)
+                          if t.get('actor') == 'COUNSEL' and str(t.get('text', '')).strip()), '')
+    info = input_language(engine, data.get('submission', ''), earlier_input or record.get('languageSample') or record['facts'])
     sources = evidence(engine, record['facts'], info)
     instructions = """Run an ADVOCATE rehearsal, not a citizen witness demonstration. The human is counsel.
 Return sections keyed opponent, bench, coaching, next_step. Opening: frame issues, likely opposition and
@@ -495,7 +561,8 @@ The opposition_addressed check must include the strongest adverse point, not a s
     result = generate(engine, {'case_record': record, 'stage': stage, 'counsel_side': side,
         'active_round': data.get('round', 1),
         'completed_transcript': transcript, 'latest_submission': data.get('submission', ''),
-        'practice_only': True}, sources, info['language_name'], instructions)
+        'language_reference': info['language_reference'],
+        'practice_only': True}, sources, info['language_name'], instructions + response_language_rule(info))
     if not {'opponent', 'bench', 'coaching', 'next_step'}.issubset({s['key'] for s in result['sections']}):
         raise ValueError('The rehearsal turn is incomplete. Retry this saved submission.')
     message, cited = render(result, sources)

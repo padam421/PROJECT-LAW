@@ -57,3 +57,22 @@ test('generated content and source URLs are escaped and arbitrary links are not 
  const f=fixture();assert.equal(f.run('AdvocateChatBot.markdown("<script>bad()</script>")').includes('<script>'),false);
  const html=f.run('AdvocateChatBot.sources([{id:"S1",title:"<img onerror=x>",url:"javascript:bad()",text:"<script>"}])');assert.doesNotMatch(html,/href=|<img|<script>/);
 });
+
+test('lawyer chat ignores a saved language override and document-only requests carry no synthetic English input',async()=>{
+ const f=fixture();f.run("AssistantThreads.create();AssistantThreads.change(AssistantThreads.active().id,t=>{t.language='gu'})");
+ f.elements.set('chat-input',{value:'Mujhe agla step batao'});const bodies=[];
+ f.context.fetch=async(u,o)=>{bodies.push(JSON.parse(o.body));return {ok:true,json:async()=>({ok:true,message:'Response',sources:[]})}};
+ await f.run('AdvocateChatBot.sendMessage()');assert.equal(bodies[0].language,'auto');assert.equal(bodies[0].message,'Mujhe agla step batao');
+ f.run("AdvocateChatBot.files=[{id:'file1',threadId:AssistantThreads.active().id,name:'case.txt',text:'हिंदी NDPS दस्तावेज',characters:20}]");
+ await f.run('AdvocateChatBot.sendMessage()');assert.equal(bodies[1].message,'');assert.match(bodies[1].caseContext,/हिंदी/);
+ assert.equal(f.run('AssistantThreads.active().messages.at(-2).documentOnly'),true);
+ assert.doesNotMatch(f.run('AdvocateChatBot.render()'),/chat-lang-select/);
+});
+
+test('lawyer rehearsal preserves the human language sample and ignores stale session language',async()=>{
+ const f=fixture();f.run("AssistantThreads.create();AssistantThreads.append(AssistantThreads.active().id,{id:'u',sender:'user',text:'Mujhe case samjhao'});AssistantThreads.append(AssistantThreads.active().id,{id:'a',sender:'ai',text:'English research'});AdvocateRehearsal.launch('a');AdvocateRehearsal.update(s=>{s.language='gu'})");
+ assert.equal(f.run('AdvocateRehearsal.session().record.languageSample'),'Mujhe case samjhao');
+ f.elements.set('adv-submission',{value:'What evidence supports this objection?'});let body;
+ f.context.fetch=async(u,o)=>{body=JSON.parse(o.body);return {ok:true,json:async()=>({ok:true,message:'Response',sections:[],sources:[]})}};
+ await f.run('AdvocateRehearsal.submit()');assert.equal(body.language,'auto');assert.equal(body.submission,'What evidence supports this objection?');
+});

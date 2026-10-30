@@ -89,6 +89,7 @@ body:has(.adv-focus-layout){overflow:hidden}
 .adv-research-layout .adv-composer textarea{min-height:76px;max-height:140px;font-size:15px;line-height:1.7;padding:12px 16px;border-radius:13px;background:#fafcf9;border-color:#b8cbc2;resize:vertical}
 .adv-research-layout .adv-composer textarea:focus{background:#fff;outline:2px solid #82b3a4;outline-offset:1px}
 .adv-research-layout .adv-compose-tools{margin-top:9px;gap:8px}
+.adv-language-note{font-size:11px;color:#617574;line-height:1.5}
 .adv-research-layout .adv-compose-tools button{font-size:13px;padding:9px 12px}
 .adv-research-layout .adv-composer>small{margin-top:6px;font-size:10px}
 .adv-research-layout #adv-files{flex-shrink:0;max-height:90px;overflow-y:auto}

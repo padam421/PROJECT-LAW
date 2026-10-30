@@ -17,7 +17,7 @@ const AdvocateRehearsal = {
     if (index < 0) return;
     const through = t.messages.slice(0, index + 1), facts = through.filter(m => m.sender === 'user').map(m => m.text + (m.caseContext ? '\n' + m.caseContext : '')).join('\n\n');
     const session = {id: AssistantThreads.id('hearing'), kind: 'advocate-rehearsal', title: t.title, messageId,
-      record: {facts, research: t.messages[index].text}, summary: facts, stage: 'bail', side: 'defense', language: t.language || 'auto',
+      record: {facts, research: t.messages[index].text, languageSample: [...through].reverse().find(m => m.sender === 'user' && !m.documentOnly)?.text || facts}, summary: facts, stage: 'bail', side: 'defense', language: 'auto',
       transcript: [], round: 1, draft: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()};
     AssistantThreads.change(t.id, t => { t.courtSessions ||= {}; t.courtSessions[session.id] = session; });
     this.context = {owner: AssistantThreads.owner(), threadId: t.id, sessionId: session.id}; this.remember(); Router.navigate('/court/simulate');
@@ -67,7 +67,7 @@ const AdvocateRehearsal = {
     this.pending.add(s.id); if (input && !retry) input.value = ''; this.refresh();
     const patch = edit => { if (AssistantThreads.owner() === c.owner) AssistantThreads.changeCourt(c.threadId, t => { const target = t.courtSessions[c.sessionId]; if (target) { edit(target); target.updatedAt = new Date().toISOString(); } }); };
     try {
-      const result = await AssistantThreads.api('rehearsal', {record:s.record, stage:s.stage, side:s.side, round:s.round || 1, language:s.language, transcript, submission});
+      const result = await AssistantThreads.api('rehearsal', {record:s.record, stage:s.stage, side:s.side, round:s.round || 1, language:'auto', transcript, submission});
       patch(s => { s.transcript.push({actor:'PRACTICE', text:result.message, sections:result.sections, sources:result.sources, stage:s.stage, side:s.side, round:s.round || 1, time:new Date().toISOString()}); s.error = ''; });
     } catch (error) { patch(s => { s.error = error.message; }); }
     finally { this.pending.delete(s.id); if (this.context?.sessionId === c.sessionId && AssistantThreads.owner() === c.owner) this.refresh(); }
