@@ -1,8 +1,8 @@
 /* ============================================================
    Nyay Setu ADVOCATE — COURT PREPARATION & SIMULATOR
-   court_page.js — Hearing Prep, Virtual Court 3D Simulator,
+   court_page.js — Advocate research-linked counsel rehearsal,
    Hearing Day Hub, Post-Hearing Outcomes
-   Identical 3D WebGL Simulator Engine from User Portal
+   Separate from the citizen courtroom demonstration
    ============================================================ */
 
 const AdvocateCourtPage = {
@@ -13,25 +13,13 @@ const AdvocateCourtPage = {
   },
 
   renderPrep(caseId) {
-    const content = typeof VirtualCourtSimulator !== 'undefined'
-      ? VirtualCourtSimulator.renderLanding()
-      : '<div style="padding:40px;text-align:center">Loading Virtual Court Simulator...</div>';
-    return Components.AppLayout(content, 'court', 'Court Preparation');
+    AssistantThreads.hydrate();
+    return Components.AppLayout(AdvocateRehearsal.library(), 'court', 'Advocate Hearing Lab');
   },
 
   /* ==================== 2. VIRTUAL COURTROOM SIMULATOR ==================== */
   renderSimulator() {
-    const content = typeof VirtualCourtSimulator !== 'undefined'
-      ? VirtualCourtSimulator.render()
-      : '<div style="padding:40px;text-align:center">Loading Courtroom Simulation...</div>';
-
-    setTimeout(() => {
-      if (typeof VirtualCourtSimulator !== 'undefined') {
-        VirtualCourtSimulator.startSimulation();
-      }
-    }, 350);
-
-    return Components.AppLayout(content, 'court', 'Court Simulator');
+    return Components.AppLayout(AdvocateRehearsal.render(), 'court', 'Counsel Rehearsal');
   },
 
   /* ==================== 3. HEARING DAY SCREEN ==================== */

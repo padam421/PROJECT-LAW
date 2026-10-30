@@ -119,8 +119,8 @@ test('case titles are escaped, witness parsing works, and English is not mistake
   const html=sim.render();assert.ok(!html.includes('<img src=x'));assert.ok(html.includes('&lt;img'));assert.ok(html.includes('Toggle fullscreen'));
 });
 
-test('both portal entrypoints load the room and director before the simulator',()=>{
-  const {sim}=setup();for(const portal of ['user','lawyer']){
+test('citizen entrypoint retains its room and director before the simulator',()=>{
+  const {sim}=setup();for(const portal of ['user']){
     const html=fs.readFileSync(path.join(root,'frontend',portal,'index.html'),'utf8');
     assert.ok(html.indexOf('indian_courtroom.js')<html.indexOf('court_simulator.js'));assert.ok(html.indexOf('courtroom_director.js')<html.indexOf('court_simulator.js'));
     for(const asset of Object.values(sim.AVATAR_FILES))assert.ok(fs.existsSync(path.resolve(root,'frontend',portal,asset)));

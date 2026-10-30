@@ -12,11 +12,19 @@ import sys
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
-from flask import Flask, request, jsonify
+from flask import Flask, Request, request, jsonify
 from flask_cors import CORS
 from rag_engine import get_rag_engine
 
+class CaseRequest(Request):
+    @property
+    def max_content_length(self):
+        return 11 * 1024 * 1024 if self.path == '/api/ai/advocate/documents' else super().max_content_length
+
+
 app = Flask(__name__)
+app.request_class = CaseRequest
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 print("🚀 Starting Nyay Setu AI Service...")
@@ -37,14 +45,15 @@ def health():
         "service": "Nyay Setu Supreme Court AI RAG Engine",
         "total_vectors": engine.total_vectors,
         "collections": counts,
-        "gemini_model": "gemini-3.5-flash-lite"
+        "gemini_model": "gemini-3.1-flash-lite (with configured fallbacks)",
+        "assistant_mode": "contextual-advice-and-incremental-court"
     })
 
 @app.route('/api/ai/chat', methods=['POST'])
 def chat():
     """
     RAG Chat endpoint for both User and Advocate portals.
-    Zero-hallucination, strictly grounded in Supreme Court precedents.
+    Contextual advice with retrieved excerpts and a separate consistency review.
     """
     data = request.get_json() or {}
     message = data.get('message', '').strip()
@@ -65,7 +74,8 @@ def chat():
             user_role=user_role,
             case_context=case_context,
             language=language,
-            chat_history=chat_history
+            chat_history=chat_history,
+            retry=bool(data.get('retry'))
         )
         if isinstance(result, tuple):
             response_text, lang_info = result
@@ -75,7 +85,10 @@ def chat():
         return jsonify({
             'ok': True,
             'message': response_text,
-            'detected_language': lang_info
+            'detected_language': lang_info,
+            'visual': lang_info.get('visual'),
+            'sources': lang_info.get('sources', []),
+            'validation': lang_info.get('validation', {})
         })
     except Exception as e:
         print(f"Chat error: {e}")
@@ -88,10 +101,15 @@ def chat():
 def court():
     """
     Virtual Courtroom Simulator endpoint.
-    Generates 3-4 scenarios and multi-agent arguments (Judge, Advocate, Opponent).
+    Generates the next short courtroom turn from the actual case and completed transcript.
     """
-    data = request.get_json() or {}
-    case_summary = data.get('summary') or data.get('message', '').strip()
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'ok': False, 'error': 'Send a courtroom request as a JSON object.'}), 400
+    case_summary = data.get('summary') or data.get('message') or ''
+    if not isinstance(case_summary, str):
+        return jsonify({'ok': False, 'error': 'Case summary must be text.'}), 400
+    case_summary = case_summary.strip()
     category = data.get('category', None)
     language = data.get('language', 'auto')
 
@@ -101,12 +119,28 @@ def court():
             'error': 'Case summary is required to simulate courtroom proceedings.'
         }), 400
 
+    history = data.get('history') or data.get('chatHistory') or []
+    if (not isinstance(history, list) or any(not isinstance(turn, dict) for turn in history) or
+        not isinstance(language, str) or not isinstance(data.get('input', ''), str) or
+        not isinstance(data.get('action', 'opening'), str) or
+        data.get('courtType', 'DISTRICT') not in ('SUPREME', 'HIGH', 'DISTRICT') or
+        data.get('examination') is not None and not isinstance(data['examination'], dict)):
+        return jsonify({'ok': False, 'error': 'The courtroom request has invalid history, language, setting or witness context.'}), 400
+
     try:
         result = engine.simulate_courtroom(
             case_summary=case_summary,
             category=category,
-            language=language
+            language=language,
+            chat_history=history,
+            court_type=data.get('courtType', 'DISTRICT'),
+            action=data.get('action', 'opening'),
+            user_input=str(data.get('input') or ''),
+            role=data.get('role', 'user'),
+            examination=data.get('examination')
         )
+        if isinstance(result, dict):
+            return jsonify({'ok': True, **result})
         if isinstance(result, tuple):
             simulation_text, lang_info = result
         else:
@@ -117,12 +151,70 @@ def court():
             'simulation': simulation_text,
             'detected_language': lang_info
         })
+    except ValueError as e:
+        return jsonify({'ok': False, 'error': str(e)}), 400
     except Exception as e:
-        print(f"Court simulation error: {e}")
-        return jsonify({
-            'ok': False,
-            'error': str(e)
-        }), 500
+        # Provider exception messages may contain a URL and credential. Log only the type.
+        print(f"Court simulation error: {type(e).__name__}")
+        retry_after = getattr(e, 'retry_after', 0)
+        response = jsonify({'ok': False,
+            'error': str(e) if isinstance(e, RuntimeError) else 'The courtroom response could not be prepared. Your hearing is saved; retry this turn.',
+            'retryable': getattr(e, 'retryable', True), 'retry_after': retry_after})
+        if retry_after:
+            response.headers['Retry-After'] = str(retry_after)
+        return response, getattr(e, 'status_code', 500)
+
+@app.route('/api/ai/advocate/chat', methods=['POST'])
+def advocate_chat():
+    data = request.get_json(silent=True)
+    if (not isinstance(data, dict) or not isinstance(data.get('message'), str)
+            or not data['message'].strip() or len(data['message']) > 60000
+            or not isinstance(data.get('language', 'auto'), str)
+            or data.get('caseContext') is not None and not isinstance(data['caseContext'], str)):
+        return jsonify(ok=False, error='Provide a case brief or follow-up as text (up to 60,000 characters).'), 400
+    try:
+        from advocate_engine import answer
+        message, info = answer(engine, data['message'].strip(), data.get('caseContext'),
+                               data.get('language', 'auto'), data.get('chatHistory'), bool(data.get('retry')))
+        return jsonify(ok=True, message=message, sources=info['sources'], sections=info['sections'],
+                       validation=info['validation'], detected_language=info, mode='advocate-ndps')
+    except ValueError as error:
+        return jsonify(ok=False, error=str(error)), 400
+    except Exception as error:
+        print('Advocate research error:', type(error).__name__)
+        return jsonify(ok=False, error='Advocate research is temporarily unavailable. Your case brief is retained; retry this turn.'), 503
+
+
+@app.route('/api/ai/advocate/rehearsal', methods=['POST'])
+def advocate_rehearsal():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or not isinstance(data.get('submission', ''), str) or not isinstance(data.get('language', 'auto'), str):
+        return jsonify(ok=False, error='Provide a valid hearing request.'), 400
+    try:
+        from advocate_engine import rehearse
+        return jsonify(ok=True, **rehearse(engine, data))
+    except ValueError as error:
+        return jsonify(ok=False, error=str(error)), 400
+    except Exception as error:
+        print('Advocate rehearsal error:', type(error).__name__)
+        return jsonify(ok=False, error='The hearing turn is unavailable. Your submission is retained; retry.'), 503
+
+
+@app.route('/api/ai/advocate/documents', methods=['POST'])
+def advocate_documents():
+    file = request.files.get('file')
+    if not file:
+        return jsonify(ok=False, error='Choose a document to extract.'), 400
+    try:
+        from advocate_documents import extract, MAX_BYTES
+        raw = file.read(MAX_BYTES + 1)
+        file.close()
+        return jsonify(ok=True, document=extract(file.filename or '', raw))
+    except ValueError as error:
+        return jsonify(ok=False, error=str(error)), 400
+    except Exception:
+        return jsonify(ok=False, error='This document could not be read. Provide an unlocked PDF, DOCX or UTF-8 text copy.'), 400
+
 
 @app.route('/api/ai/tts', methods=['GET', 'POST'])
 def tts():

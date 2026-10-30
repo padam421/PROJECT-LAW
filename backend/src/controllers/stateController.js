@@ -11,6 +11,8 @@ exports.getWorkspace = (req, res) => {
     workspace: ws,
     lawyer: {
       id: req.user.id,
+      demoMode: req.user.demoMode === true,
+      registrationStage: req.user.registrationStage,
       fullName: req.user.fullName,
       professionalName: req.user.professionalName,
       email: req.user.email,

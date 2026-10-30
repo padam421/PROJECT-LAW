@@ -36,8 +36,8 @@
     <link rel="stylesheet" href="css/splash.css" />
     <link rel="stylesheet" href="css/auth.css" />
     <link rel="stylesheet" href="css/otp.css" />
-    <link rel="stylesheet" href="css/register.css" />
-    <link rel="stylesheet" href="css/verification.css" />
+    <link rel="stylesheet" href="css/register.css?v=4.1" />
+    <link rel="stylesheet" href="css/verification.css?v=4.2" />
     <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="stylesheet" href="css/clients.css" />
     <link rel="stylesheet" href="css/consultation.css" />
@@ -52,6 +52,8 @@
     <link rel="stylesheet" href="../user/css/chat.css" />
     <link rel="stylesheet" href="../user/css/court.css?v=14.0" />
     <link rel="stylesheet" href="css/user_theme_bridge.css" />
+    <link rel="stylesheet" href="../shared/css/assistant.css?v=1.2" />
+    <link rel="stylesheet" href="css/advocate_workspace.css?v=1.3" />
   </head>
   <body>
     <!-- Root SPA Application Container -->
@@ -63,47 +65,43 @@
     <!-- Modal Container -->
     <div id="modal-container"></div>
 
-    <!-- Three.js Library & Loaders for 3D Court Simulator -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-
     <!-- Shared JavaScript Foundations -->
-    <script src="../shared/js/utils.js?v=4.0"></script>
-    <script src="../shared/js/store.js?v=4.0"></script>
-    <script src="../shared/js/auth.js?v=4.0"></script>
+    <script src="../shared/js/utils.js?v=4.1"></script>
+    <script src="../shared/js/store.js?v=4.2"></script>
+    <script src="../shared/js/auth.js?v=4.2"></script>
     <script src="../shared/js/router.js?v=4.0"></script>
 
     <!-- Lawyer Core Modules -->
-    <script src="js/components.js?v=4.0"></script>
-    <script src="js/api_client.js?v=4.0"></script>
+    <script src="js/components.js?v=4.4"></script>
+    <script src="js/api_client.js?v=4.2"></script>
     <script src="js/case_analysis.js?v=4.0"></script>
 
     <!-- Lawyer Feature Page Modules -->
     <script src="js/splash.js?v=4.0"></script>
     <script src="js/auth_page.js?v=4.0"></script>
-    <script src="js/otp_page.js?v=4.0"></script>
-    <script src="js/register_page.js?v=4.0"></script>
-    <script src="js/verification_page.js?v=4.0"></script>
-    <script src="js/dashboard.js?v=4.0"></script>
+    <script src="js/otp_page.js?v=4.2"></script>
+    <script src="js/register_page.js?v=4.2"></script>
+    <script src="js/verification_page.js?v=4.2"></script>
+    <script src="js/dashboard.js?v=4.2"></script>
     <script src="js/clients_page.js?v=4.0"></script>
     <script src="js/consultation_page.js?v=4.0"></script>
     <script src="js/chat_page.js?v=4.0"></script>
     <script src="js/cases_page.js?v=4.0"></script>
     <script src="js/payments_page.js?v=4.0"></script>
     <script src="js/reviews_page.js?v=4.0"></script>
-    <script src="js/profile_page.js?v=4.0"></script>
-    <script src="../shared/js/indian_courtroom.js?v=14.0"></script>
-    <script src="../shared/js/courtroom_director.js?v=14.0"></script>
-    <script src="../user/js/court_simulator.js?v=14.0"></script>
-    <script src="js/court_page.js?v=4.0"></script>
-    <script src="../user/js/chat_tts.js?v=4.2"></script>
-    <script src="js/chat_bot.js?v=4.2"></script>
+    <script src="js/profile_page.js?v=4.2"></script>
+    <script src="js/court_page.js?v=5.0"></script>
+    <script src="js/advocate_chat.js?v=1.1"></script>
     <script src="js/settings_page.js?v=4.0"></script>
 
     <!-- Demo Data Seeder (remove for production) -->
-    <script src="js/mockData.js?v=4.0"></script>
+    <script src="js/mockData.js?v=4.2"></script>
+
+    <script src="../shared/js/assistant_threads.js?v=1.4"></script>
+    <script src="js/advocate_storage.js?v=1.0"></script>
+    <script src="js/advocate_rehearsal.js?v=1.1"></script>
 
     <!-- App Bootstrap Entry -->
-    <script src="js/app.js?v=4.0"></script>
+    <script src="js/app.js?v=5.0"></script>
   </body>
 </html>

@@ -20,11 +20,12 @@ const fs = require('fs');
 const path = require('path');
 const db = require('../config/dbConfig');
 const config = require('../config/envConfig');
-const { sha256Short } = require('../utils/helpers');
+const { sha256Short, validateBarNumber } = require('../utils/helpers');
 const authService = require('./authService');
 
 /* ---------------- Bar Council stage ---------------- */
 function lookupBarCouncil(lawyer, barNumber, stateCouncil) {
+  if (lawyer.demoMode) return { outcome: 'demo_not_verified', reason: 'Sample registration details accepted for practice only. No professional eligibility was verified.' };
   const data = db.get();
   const bar = String(barNumber || '').trim().toUpperCase();
 
@@ -38,7 +39,7 @@ function lookupBarCouncil(lawyer, barNumber, stateCouncil) {
     registrationNumber: bar,
     stateCouncil: stateCouncil || lawyer.stateBarCouncil,
     checks: {
-      formatValid: /^[A-Z]{2}\/[A-Za-z0-9]+\/\d{4}$/.test(bar),
+      formatValid: validateBarNumber(bar),
       nameOnRecord: null,
       stateMatch: null,
       activeStanding: null,
@@ -59,6 +60,12 @@ function lookupBarCouncil(lawyer, barNumber, stateCouncil) {
     result.outcome = 'information_mismatch';
     result.reason = 'This registration number is already associated with another advocate profile on Nyay Setu. Routed for investigation.';
     applyStageResult(data, lawyer, 'barCouncil', 'information_mismatch', result);
+    return result;
+  }
+
+  if (bar !== String(lawyer.barCouncil || '').trim().toUpperCase()) {
+    result.outcome = 'information_mismatch';
+    result.reason = 'This number does not match your submitted advocate profile. Use your registered number, or update your professional profile first.';
     return result;
   }
 
@@ -173,6 +180,24 @@ function isDuplicateUpload(lawyerId, checksum) {
 /* ---------------- Identity / liveness stage ---------------- */
 function submitIdentityCheck(lawyer, { selfieCaptured, idDocSubmitted }) {
   const data = db.get();
+  if (lawyer.demoMode) {
+    let record = data.verificationRecords.find(v => v.lawyerId === lawyer.id);
+    if (!record) {
+      record = { id: db.uid('ver'), lawyerId: lawyer.id, overallStatus: 'demo_not_verified', fraudStatus: 'not_assessed',
+        stages: { barCouncil: {status:'demo_not_verified'},documents:{status:'optional',docsSubmitted:0},identity:{status:'not_started'},duplicate:{status:'not_assessed'},manualReview:{status:'not_required'} } };
+      data.verificationRecords.push(record);
+    }
+    record.stages.identity = { status: 'demo_not_verified', selfieCaptured: false, idDocSubmitted: false, submittedAt: new Date().toISOString(), method: 'Demo only; no identity verification' };
+    db.save();
+    return record.stages.identity;
+  }
+  const documents = data.documents.filter(doc => doc.lawyerId === lawyer.id);
+  const required = ['bar_enrollment', 'cop', 'llb_degree', 'govt_id', 'identity_selfie'];
+  if (required.some(category => !documents.some(doc => doc.category === category))) {
+    const error = new Error('Upload all four required credentials and a selfie before submitting identity confirmation.');
+    error.status = 400;
+    throw error;
+  }
   const verRecord = data.verificationRecords.find(v => v.lawyerId === lawyer.id) ||
     (() => {
       const rec = { id: db.uid('ver'), lawyerId: lawyer.id, stages: { barCouncil: { status: 'pending' }, documents: { status: 'pending', docsSubmitted: 0 }, identity: { status: 'not_started' }, duplicate: { status: 'clear' }, manualReview: { status: 'not_required' } }, overallStatus: 'pending', fraudStatus: 'low_risk', createdAt: new Date().toISOString() };
@@ -182,9 +207,11 @@ function submitIdentityCheck(lawyer, { selfieCaptured, idDocSubmitted }) {
 
   verRecord.stages.identity = {
     status: 'manual_verification_required', // honest: no biometric provider attached
-    method: 'Government ID + guided selfie capture (in-browser)',
-    selfieCaptured: !!selfieCaptured,
-    idDocSubmitted: !!idDocSubmitted,
+    method: 'Uploaded government ID and selfie for manual review',
+    selfieCaptured: true,
+    idDocSubmitted: true,
+    selfieDocumentId: documents.filter(doc => doc.category === 'identity_selfie').at(-1).id,
+    idDocumentId: documents.find(doc => doc.category === 'govt_id').id,
     livenessProvider: 'none_connected',
     submittedAt: new Date().toISOString()
   };
@@ -199,6 +226,7 @@ function getVerificationSummary(lawyer) {
   const record = data.verificationRecords.find(v => v.lawyerId === lawyer.id) || null;
 
   const summary = {
+    demoMode: lawyer.demoMode === true,
     lawyerStatus: lawyer.verificationStatus,       // pending | verified | rejected ...
     verificationId: lawyer.verificationId,
     verificationDate: lawyer.verificationDate,
@@ -208,7 +236,8 @@ function getVerificationSummary(lawyer) {
       overall: record.overallStatus,
       fraudStatus: record.fraudStatus,
       stages: {
-        barCouncil: { status: record.stages.barCouncil.status, checkedAt: record.stages.barCouncil.checkedAt },
+        barCouncil: { status: record.stages.barCouncil.status, checkedAt: record.stages.barCouncil.checkedAt,
+          registrationNumber: record.stages.barCouncil.detail?.registrationNumber || lawyer.barCouncil || '' },
         documents: { status: record.stages.documents.status, docsSubmitted: record.stages.documents.docsSubmitted || 0 },
         identity: { status: record.stages.identity.status, submittedAt: record.stages.identity.submittedAt || null },
         duplicate: { status: record.stages.duplicate.status },
@@ -246,6 +275,7 @@ function adminDecide(reviewer, { lawyerId, decision, reason }) {
   const data = db.get();
   const lawyer = data.users.find(u => u.id === lawyerId && u.role === 'lawyer');
   if (!lawyer) return { ok: false, code: 404, error: 'Advocate not found' };
+  if (lawyer.demoMode) return { ok: false, code: 400, error: 'Demo profiles cannot receive a professional verification badge.' };
 
   const record = data.verificationRecords.find(v => v.lawyerId === lawyerId);
   if (record) {

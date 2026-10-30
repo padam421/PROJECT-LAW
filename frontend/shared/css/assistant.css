@@ -1,0 +1,58 @@
+/* Shared assistant improvements, scoped to existing chat/court components. */
+.nyay-answer { line-height:1.75; overflow-wrap:anywhere; }
+.nyay-answer p { margin:0 0 14px; }
+.nyay-answer h3 { margin:20px 0 10px; font-size:1.04em; line-height:1.5; color:inherit; }
+.nyay-answer :is(ul,ol) { padding-inline-start:24px; margin:8px 0 18px; }
+.nyay-answer li { padding-inline-start:3px; margin:7px 0; }
+.nyay-answer code { padding:2px 5px; border-radius:4px; background:#1c34480a; font-size:.9em; }
+.nyay-thread-toolbar { padding:6px 8px 12px; display:flex; flex-direction:column; gap:7px; }
+.nyay-thread-toolbar button { align-self:flex-start; }
+.nyay-thread-toolbar span { font-size:10px; color:#75847f; }
+.nyay-thread-row { display:flex; gap:3px; align-items:center; border:1px solid transparent; border-radius:12px; margin-bottom:6px; padding:5px; }
+.nyay-thread-row.active { background:white; border-color:#dce5e1; box-shadow:0 2px 6px #18312c05; }
+.nyay-thread-open { display:flex; flex-direction:column; gap:7px; flex:1; min-width:0; padding:10px; text-align:start; border:0; background:transparent; color:inherit; cursor:pointer; }
+.nyay-thread-open :is(strong,span,small) { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
+.nyay-thread-open strong { font-size:13px; font-weight:650; }
+.nyay-thread-open span { font-size:11px; color:#75817b; }
+.nyay-thread-open small { font-size:9px; color:#86938c; }
+.nyay-thread-export { border:0; background:transparent; padding:5px; cursor:pointer; color:#648075; }
+.nyay-visual { padding:18px; margin:18px 0; border:1px solid #d3e3dc; border-radius:12px; background:#f4f8f5; }
+.nyay-visual figcaption { font-size:14px; font-weight:700; margin-bottom:14px; color:#254b3d; }
+.nyay-visual ol { list-style:none; padding:0; margin:0; display:grid; gap:10px; counter-reset:flow; }
+.nyay-visual li { position:relative; background:white; border:1px solid #d6e2db; border-radius:8px; padding:12px 14px 12px 43px; counter-increment:flow; }
+.nyay-visual li::before { content:counter(flow); position:absolute; left:12px; top:12px; font-size:11px; color:#397359; background:#e4f1e8; width:21px; height:21px; display:grid; place-items:center; border-radius:50%; }
+.nyay-visual li:not(:last-child)::after { content:'↓'; position:absolute; bottom:-13px; left:calc(50% - 4px); color:#719e87; z-index:1; }
+.nyay-visual li p { font-size:12px; line-height:1.6; margin:5px 0 0; color:#5c7166; }
+.nyay-sources { margin:18px 0 8px; font-size:12px; border-top:1px solid #dde4df; padding-top:12px; }
+.nyay-sources summary { cursor:pointer; color:#416b5b; font-weight:600; }
+.nyay-sources article { padding:12px 0; }
+.nyay-sources blockquote { margin:8px 0; padding:8px 12px; border-left:2px solid #bbd1c4; color:#6b7770; max-height:180px; overflow:auto; white-space:pre-wrap; font-size:11px; }
+.u-chat-input-wrap { align-items:flex-end; flex-wrap:wrap; }
+.u-chat-toolbar { max-width:100%; }
+.u-chat-text-input { min-width:180px; flex:1; }
+.u-chat-layout .u-msg-actions { flex-wrap:wrap; }
+.u-chat-layout .u-chat-list { flex:0 0 290px; min-width:0; }
+.nyay-saved-courts { max-width:1180px; margin:0 auto 26px; padding:20px; color:#284638; }
+.nyay-saved-heading { display:flex; gap:20px; align-items:flex-start; justify-content:space-between; margin-bottom:18px; }
+.nyay-saved-heading h2 { margin:7px 0; font-size:24px; font-weight:650; letter-spacing:-.5px; }
+.nyay-saved-heading p,.nyay-saved-empty { margin:0; font-size:13px; line-height:1.6; color:#6b7b70; }
+.nyay-saved-heading>span { white-space:nowrap; font-size:11px; border:1px solid #d4e1d7; border-radius:20px; padding:7px 12px; }
+.nyay-saved-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr)); gap:14px; }
+.nyay-saved-card { border:1px solid #d7e2d9; background:#fffefa; border-radius:12px; padding:18px; }
+.nyay-saved-card h3 { font-size:16px; margin:0 0 8px; line-height:1.5; overflow-wrap:anywhere; }
+.nyay-saved-card p { font-size:12px; color:#6b7a70; line-height:1.6; }
+.nyay-saved-card details { margin:12px 0; font-size:12px; }
+.nyay-saved-card summary { color:#4c705b; cursor:pointer; }
+.nyay-saved-card details p { max-height:180px; overflow:auto; white-space:pre-wrap; }
+.nyay-saved-retained { font-size:10px; color:#68795f; padding:4px 8px; background:#edf3e8; border-radius:5px; display:inline-block; }
+.nyay-saved-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.nyay-saved-actions button { border:1px solid #3c6650; color:white; background:#3c6650; padding:9px 12px; border-radius:7px; font:inherit; font-size:11px; cursor:pointer; }
+.nyay-saved-actions .nyay-saved-delete { border-color:#decfca; color:#9a5547; background:transparent; }
+@media(max-width:768px) {
+  .u-chat-layout .u-chat-list { flex:0 0 auto; max-height:170px; }
+  .u-chat-layout .u-chat-list-items { display:flex; gap:8px; overflow-x:auto; }
+  .nyay-thread-toolbar { min-width:100px; }
+  .nyay-thread-row { flex:0 0 200px; }
+  .u-chat-toolbar { flex-basis:100%; }
+  .u-chat-text-input { min-width:0; }
+}

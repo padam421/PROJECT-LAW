@@ -68,6 +68,7 @@ const CourtroomDirector = {
     };
     const witnessBlock = (side, sourceIndex, testimony) => {
       if (!q) return;
+      const blockStart = entries.length, witnessId = side + ':' + sourceIndex;
       const sign = side === 'DEFENSE' ? -1 : 1, other = side === 'DEFENSE' ? 'PROSECUTION' : 'DEFENSE';
       const witness = 'WITNESS_' + side, box = config.witnesses[side];
       const home = config.actors[side], otherHome = config.actors[other], witnessHome = config.actors[witness];
@@ -82,8 +83,8 @@ const CourtroomDirector = {
       practice(nextJudge(), 'call', { sourceIndex, camera });
       movement(witness, [[sign * 0.5, 0, 3.8], [sign * 0.5, 0, 1.6], [entry[0], 0, 1.6], entry, [box.x, 0, box.z]], 'call', sourceIndex, camera);
       movement(side, [[home.x, 0, 1.6], [entry[0], 0, 1.6], [entry[0], 0, counselSpot[2]], counselSpot], 'move', sourceIndex, camera);
-      practice(side, 'question', { sourceIndex, camera, lookAt: witness });
-      if (testimony) add({ ...testimony, actor: witness, kind: 'dialogue', sourceIndex, camera, lookAt: side });
+      practice(side, 'question', { sourceIndex, camera, lookAt: witness, questionKey: mainKey });
+      if (testimony) add({ ...testimony, actor: witness, kind: 'dialogue', sourceIndex, camera, lookAt: side, answerKey: mainKey });
       else add({ kind: 'await-answer', actor: witness, sourceIndex, text: q.waiting, cue: 'waiting', answerKey: mainKey, side, silent: true, camera, lookAt: side });
       movement(side, [[entry[0], 0, counselSpot[2]], [entry[0], 0, 1.6], [home.x, 0, 1.6], [home.x, home.y, home.z]], 'return', sourceIndex, camera);
       add({ kind: 'choice', actor: nextJudge(), sourceIndex, text: q.followUp, cue: 'followUp', questionKey: crossKey, exitId: releaseId, witness, side, silent: true, camera, other });
@@ -97,6 +98,12 @@ const CourtroomDirector = {
       entries[entries.length - 1].id = returnId;
       practice(nextJudge(), 'release', { id: releaseId, sourceIndex, camera: 'WIDE' });
       movement(witness, [entry, [entry[0], 0, 1.6], [sign * 0.5, 0, 1.6], [sign * 0.5, 0, 3.8], [witnessHome.x, 0, witnessHome.z]], 'return', sourceIndex, 'WIDE');
+      let examinationStage = 'direct';
+      for (const stage of entries.slice(blockStart)) {
+        if (stage.kind === 'choice') examinationStage = 'cross';
+        Object.assign(stage, { witnessId, witness, witnessName:testimony?.name||'', side, examinationStage,
+          questioningSide: examinationStage === 'direct' ? side : other });
+      }
     };
     const explicitSides = new Set(script.filter(s => s.actor.startsWith('WITNESS_')).map(s => s.actor.replace('WITNESS_', '')));
     script.forEach((source, index) => {

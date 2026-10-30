@@ -33,6 +33,7 @@ const RegisterPage = {
   },
   _fieldErrors: {},
   _submitting: false,
+  _draftOwner: null,
 
   /* ---------------- Route entry ---------------- */
   onEnter() {
@@ -56,6 +57,7 @@ const RegisterPage = {
   },
 
   render() {
+    this._defaults ||= JSON.parse(JSON.stringify(this._data));
     const phase = this.currentPhase();
     if (phase === 'done') {
       setTimeout(() => Router.navigate('/dashboard'), 0);
@@ -64,7 +66,7 @@ const RegisterPage = {
       </div></div>`;
     }
     if (phase === 'awaiting_otp') return this.renderAwaitingOtp();
-    if (phase === 'profile') return this.renderProfileForm();
+    if (phase === 'profile') { this.restoreDraft(); return this.renderProfileForm(); }
     return this.renderCredentials();
   },
 
@@ -108,7 +110,7 @@ const RegisterPage = {
 
   fieldError(id) {
     const msg = this._fieldErrors[id];
-    return msg ? `<span class="form-error-text"><span class="material-symbols-rounded icon-sm">error</span> ${msg}</span>` : '';
+    return msg ? `<span class="form-error-text" data-registration-error="${id}"><span class="material-symbols-rounded icon-sm">error</span> ${Utils.escapeHtml(msg)}</span>` : '';
   },
 
   /* ============================================================
@@ -121,6 +123,11 @@ const RegisterPage = {
         <p class="register-subtitle">Create your account with email &amp; password — we'll verify your email with a secure 6-digit code</p>`,
       body: `
         ${this.stepper(1)}
+        <div class="doc-comparison-banner">
+          <span class="material-symbols-rounded">science</span>
+          <div><strong>Hackathon demo — sample data is welcome.</strong><br>No real lawyer, email code, Bar certificate or selfie needed. This creates an unverified demo profile.</div>
+          <button type="button" class="btn btn-accent" id="start-lawyer-demo" onclick="RegisterPage.startDemo()">Start Demo — No OTP</button>
+        </div>
         <form id="register-form" onsubmit="RegisterPage.handleCredentialsSubmit(event); return false;" novalidate>
           <div class="form-grid">
             <div class="form-group form-grid-full">
@@ -162,6 +169,7 @@ const RegisterPage = {
             <span><strong>Your credentials are protected:</strong> passwords are hashed with bcrypt and never stored in plain text. The next step confirms you own this email address.</span>
           </div>
 
+          <div id="credentials-feedback" class="register-feedback" role="alert" hidden></div>
           <div class="register-nav">
             <button type="button" class="btn btn-ghost" onclick="Router.navigate('/login')">
               Already registered? Sign in
@@ -176,6 +184,7 @@ const RegisterPage = {
 
   async handleCredentialsSubmit(e) {
     e.preventDefault();
+    if (this._submitting) return;
     this._fieldErrors = {};
 
     const email = document.getElementById('reg-email').value.trim().toLowerCase();
@@ -189,38 +198,32 @@ const RegisterPage = {
     if (password !== confirm) this._fieldErrors.confirmPassword = 'Passwords do not match';
 
     if (Object.keys(this._fieldErrors).length) {
-      Utils.showToast('Please correct the highlighted fields.', 'warning');
-      Router.transitionPage('/register');
+      this.showCredentialsFeedback('Please correct the highlighted fields.', this._fieldErrors);
       return;
     }
 
+    this.showCredentialsFeedback('', {});
     this._submitting = true;
-    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const submitBtn = document.querySelector('#register-form button[type="submit"]');
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="loading-spinner" style="width:20px;height:20px;border-width:2px;display:inline-block"></span> Sending code...';
     }
 
-    const result = await AuthManager.registerInitiate(email, password, 'lawyer');
-
-    this._submitting = false;
-
-    if (result.success) {
-      Utils.showToast('Verification code sent — check your inbox.', 'success');
-      Router.navigate('/otp');
-    } else {
-      this._fieldErrors = result.fieldErrors || {};
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Continue → Email Verification';
-      }
-      Router.transitionPage('/register');
-      if (Object.keys(this._fieldErrors).length) {
-        Utils.showToast(result.error || 'Please review the highlighted fields.', 'error');
+    try {
+      const result = await AuthManager.registerInitiate(email, password, 'lawyer');
+      if (result.success) {
+        Utils.showToast('Verification code sent — check your inbox.', 'success');
+        Router.navigate('/otp');
       } else {
-        const mins = result.retryAfterMs ? Math.ceil(result.retryAfterMs / 60000) : null;
-        Utils.showToast(mins ? `${result.error} Try again in ~${mins} min.` : (result.error || 'Registration failed.'), 'error');
+        this._fieldErrors = result.fieldErrors || {};
+        this.showCredentialsFeedback(result.error || 'Registration could not be started. Please retry.', this._fieldErrors);
       }
+    } catch (_error) {
+      this.showCredentialsFeedback('Registration could not be started. Please retry.', {});
+    } finally {
+      this._submitting = false;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Continue → Email Verification'; }
     }
   },
 
@@ -251,24 +254,26 @@ const RegisterPage = {
      ============================================================ */
   renderProfileForm() {
     const d = this._data;
+    const demo = AuthManager.getSession()?.demoMode === true;
     const states = ['Delhi', 'Maharashtra', 'Karnataka', 'Uttar Pradesh', 'Tamil Nadu', 'Telangana', 'Gujarat', 'West Bengal', 'Rajasthan', 'Kerala', 'Punjab', 'Haryana', 'Madhya Pradesh', 'Bihar', 'Odisha', 'Assam', 'Andhra Pradesh', 'Jharkhand', 'Chhattisgarh', 'Uttarakhand', 'Himachal Pradesh', 'Goa'];
     const specializationsList = ['Criminal Law', 'Civil Law', 'Cyber Law', 'Corporate Law', 'Family & Matrimonial', 'Constitutional Law', 'Taxation Law', 'Consumer Disputes', 'Arbitration & Mediation'];
     const courtsList = ['Supreme Court of India', 'High Court of Delhi', 'District & Sessions Court', 'NCLT / NCLAT', 'Consumer Disputes Redressal Commission', 'Debt Recovery Tribunal (DRT)', 'Family Court', 'Sessions Court'];
     const languagesList = ['English', 'Hindi', 'Telugu', 'Tamil', 'Punjabi', 'Bengali', 'Marathi', 'Gujarati', 'Kannada', 'Malayalam', 'Odia', 'Urdu'];
     const councils = ['Bar Council of Delhi', 'Bar Council of Maharashtra & Goa', 'Bar Council of Karnataka', 'Bar Council of Uttar Pradesh', 'Bar Council of Tamil Nadu & Puducherry', 'Bar Council of Telangana', 'Bar Council of Gujarat', 'Bar Council of West Bengal', 'Bar Council of Rajasthan', 'Bar Council of Kerala', 'Bar Council of Punjab & Haryana', 'Bar Council of Madhya Pradesh', 'Bar Council of Bihar', 'Bar Council of Odisha', 'Bar Council of Andhra Pradesh', 'Bar Council of Assam', 'Bar Council of Jharkhand', 'Bar Council of Chhattisgarh', 'Bar Council of Uttarakhand', 'Bar Council of Himachal Pradesh'];
 
-    return this.shell({
+    const html = this.shell({
       header: `
-        <h2 class="register-title">Complete Your Advocate Profile</h2>
-        <p class="register-subtitle">Email verified ✓ — add your professional credentials for Bar Council verification</p>`,
+        <h2 class="register-title">${demo ? 'Demo Advocate Profile' : 'Complete Your Advocate Profile'}</h2>
+        <p class="register-subtitle">${demo ? 'All professional fields are optional. Use sample or random details; this is not a professionally verified account.' : 'Email verified ✓ — add your professional credentials for Bar Council verification'}</p>`,
       body: `
         ${this.stepper(2)}
         <div class="doc-comparison-banner">
-          <span class="material-symbols-rounded">verified_user</span>
-          <span><strong>Official Document Match:</strong> the legal name, enrollment number and dates entered here will be compared with your Bar Council certificate and government ID during verification.</span>
+          <span class="material-symbols-rounded">${demo ? 'science' : 'verified_user'}</span>
+          <span>${demo ? '<strong>Demo mode:</strong> no credentials or documents are required. Sample details will not earn a Verified Advocate badge.' : '<strong>Official Document Match:</strong> the legal name, enrollment number and dates entered here will be compared with your Bar Council certificate and government ID during verification.'}</span>
         </div>
+        <button type="button" class="btn btn-secondary mb-3" ${demo ? '' : 'id="start-lawyer-demo"'} onclick="${demo ? 'RegisterPage.fillSampleProfile()' : 'RegisterPage.startDemo()'}">${demo ? 'Fill Sample Details (optional)' : 'Use Demo Mode Instead'}</button>
 
-        <form id="register-form" onsubmit="RegisterPage.handleProfileSubmit(event)" novalidate>
+        <form id="register-form" onsubmit="RegisterPage.handleProfileSubmit(event); return false;" oninput="RegisterPage.cacheDraft()" onchange="RegisterPage.cacheDraft()" novalidate>
           <!-- Personal details -->
           <h4 class="card-title mt-4 mb-3 d-flex items-center gap-2">
             <span class="material-symbols-rounded text-accent">person</span> Personal Details
@@ -385,11 +390,7 @@ const RegisterPage = {
             <div class="form-group">
               <label class="form-label" for="reg-practicetype">Current Practice Type <span class="required">*</span></label>
               <select id="reg-practicetype" class="form-select" required>
-                <option>Independent Advocate & Litigation Counsel</option>
-                <option>Law Firm Partner / Senior Associate</option>
-                <option>Designated Senior Advocate</option>
-                <option>Corporate Legal Consultant</option>
-                <option>Legal Aid / Public Prosecutor</option>
+                ${['Independent Advocate & Litigation Counsel', 'Law Firm Partner / Senior Associate', 'Designated Senior Advocate', 'Corporate Legal Consultant', 'Legal Aid / Public Prosecutor'].map(type => `<option ${d.practiceType === type ? 'selected' : ''}>${Utils.escapeHtml(type)}</option>`).join('')}
               </select>
             </div>
 
@@ -429,6 +430,7 @@ const RegisterPage = {
             </div>
           </div>
 
+          <div id="register-feedback" class="register-feedback" role="alert" hidden></div>
           <div class="register-nav">
             <a class="btn btn-ghost" href="#/logout-note" onclick="RegisterPage.signOutInstead(event)" style="cursor:pointer">
               Cancel registration
@@ -439,9 +441,50 @@ const RegisterPage = {
           </div>
         </form>`
     });
+    return demo ? html.replace(/<span class="required">\*<\/span>/g, '').replace(/\srequired(?=[\s>])/g, '').replace('(select at least one)', '(optional in demo)') : html;
   },
 
   /* ---------------- Interactions ---------------- */
+  async startDemo() {
+    if (this._submitting) return;
+    const hasProfile = !!document.getElementById('reg-fullname');
+    if (hasProfile) this.collectProfileFields();
+    const draft = hasProfile ? { ...this._data } : null;
+    this._submitting = true;
+    const button = document.getElementById('start-lawyer-demo');
+    const buttonLabel = button?.textContent;
+    const showError = message => {
+      if (hasProfile) this.showProfileFeedback(message, {});
+      else if (document.getElementById('credentials-feedback')) this.showCredentialsFeedback(message, {});
+      else if (typeof VerificationPage !== 'undefined') VerificationPage.fail(new Error(message));
+      else Utils.showToast(message, 'error');
+    };
+    if (button) { button.disabled = true; button.textContent = 'Starting demo…'; }
+    try {
+      const result = await AuthManager.startLawyerDemo();
+      if (!result.success) {
+        showError(result.error);
+        return;
+      }
+      this._data = JSON.parse(JSON.stringify({ ...(this._defaults || this._data), ...(draft || {}) }));
+      this._draftOwner = AuthManager.getSession().id;
+      this._fieldErrors = {};
+      Router.navigate('/register');
+    } catch (_error) {
+      showError('The demo could not be opened. Please retry.');
+    } finally {
+      this._submitting = false;
+      if (button) { button.disabled = false; button.textContent = buttonLabel; }
+    }
+  },
+
+  fillSampleProfile() {
+    Object.assign(this._data, { fullName: 'Demo Advocate', professionalName: 'Adv. Demo', city: 'Demo City',
+      barCouncil: 'DEMO/001', qualification: 'Sample LLB', university: 'Sample Law College',
+      courts: ['District & Sessions Court'], languages: ['English', 'Hindi'], yearsOfPractice: 0 });
+    try { sessionStorage.setItem(this.draftKey(), JSON.stringify(this._data)); } catch {}
+    Router.transitionPage('/register');
+  },
   toggleChip(chipEl, group) {
     chipEl.classList.toggle('selected');
     const selectedText = chipEl.textContent.trim();
@@ -449,6 +492,26 @@ const RegisterPage = {
     const idx = list.indexOf(selectedText);
     if (idx >= 0) list.splice(idx, 1); else list.push(selectedText);
     chipEl.setAttribute('aria-pressed', String(idx < 0));
+    this.cacheDraft();
+  },
+
+  draftKey() { return 'nyay_advocate_profile_' + encodeURIComponent(AuthManager.getSession()?.id || 'signed-out'); },
+  restoreDraft() {
+    const owner = AuthManager.getSession()?.id;
+    if (!owner || owner === this._draftOwner) return;
+    this._draftOwner = owner;
+    this._data = JSON.parse(JSON.stringify(this._defaults));
+    this._fieldErrors = {};
+    try {
+      const draft = JSON.parse(sessionStorage.getItem(this.draftKey()) || '{}');
+      for (const key of Object.keys(this._data)) if (key in draft && key !== 'profilePhotoData') this._data[key] = draft[key];
+    } catch { /* Keep a clean form if a cached draft is unreadable. */ }
+  },
+  cacheDraft() {
+    if (!document.getElementById('reg-fullname')) return;
+    this.collectProfileFields();
+    const { profilePhotoData, ...draft } = this._data;
+    try { sessionStorage.setItem(this.draftKey(), JSON.stringify(draft)); } catch { /* Form remains editable. */ }
   },
 
   handlePhotoUpload(e) {
@@ -460,6 +523,7 @@ const RegisterPage = {
       return;
     }
     const reader = new FileReader();
+    this.collectProfileFields();
     reader.onload = (event) => {
       this._data.profilePhotoData = event.target.result;
       Router.transitionPage('/register');
@@ -481,12 +545,12 @@ const RegisterPage = {
 
   collectProfileFields() {
     const d = this._data;
-    d.fullName = document.getElementById('reg-fullname').value;
+    d.fullName = document.getElementById('reg-fullname').value.trim();
     d.professionalName = document.getElementById('reg-profname').value.trim();
     d.dob = document.getElementById('reg-dob').value;
     d.gender = document.getElementById('reg-gender').value;
     d.phone = document.getElementById('reg-phone').value.replace(/\D/g, '');
-    d.address = document.getElementById('reg-address').value;
+    d.address = document.getElementById('reg-address').value.trim();
     d.city = document.getElementById('reg-city').value.trim();
     d.state = document.getElementById('reg-state').value;
     d.barCouncil = document.getElementById('reg-barcouncil').value.toUpperCase().trim();
@@ -500,6 +564,7 @@ const RegisterPage = {
   },
 
   validateProfile() {
+    if (AuthManager.getSession()?.demoMode === true) return {};
     const d = this._data;
     const errors = {};
     if (!d.fullName || d.fullName.trim().length < 3) errors.fullName = 'Enter your full legal name';
@@ -530,42 +595,96 @@ const RegisterPage = {
 
   async handleProfileSubmit(e) {
     e.preventDefault();
-    this._fieldErrors = {};
-    this.collectProfileFields();
-    this._fieldErrors = this.validateProfile();
-
-    if (Object.keys(this._fieldErrors).length) {
-      Utils.showToast('Please correct the highlighted fields.', 'warning');
-      Router.transitionPage('/register');
-      window.scrollTo({ top: 0 });
-      return;
-    }
-
+    if (this._submitting) return;
+    const form = document.getElementById('register-form');
+    const submitBtn = form.querySelector('button[type="submit"]');
     this._submitting = true;
-    Router.transitionPage('/register');
+    try {
+      this.showProfileFeedback('', {});
+      this.collectProfileFields();
+      this.cacheDraft();
+      this._fieldErrors = this.validateProfile();
+      if (Object.keys(this._fieldErrors).length) {
+        this.showProfileFeedback('Please correct the highlighted fields before submitting.', this._fieldErrors);
+        return;
+      }
 
-    const result = await AuthManager.registerComplete({ ...this._data });
+      form.setAttribute('aria-busy', 'true');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving registration…';
+      const result = await AuthManager.registerComplete({ ...this._data });
 
-    this._submitting = false;
-
-    if (result.success) {
-      AuthManager._pendingRegistrant = null;
-      Utils.showToast('Registration received — starting credential verification.', 'success');
-      VerificationPage.reset();
-      Router.navigate('/verification');
-    } else if (result.underInvestigation) {
-      Utils.showModal(`
+      if (result.success) {
+        sessionStorage.removeItem(this.draftKey());
+        AuthManager._pendingRegistrant = null;
+        Utils.showToast('Registration received — starting credential verification.', 'success');
+        VerificationPage.reset();
+        Router.navigate('/verification');
+      } else if (result.underInvestigation) {
+        Utils.showModal(`
         <p>This Bar Council registration is already linked to another verified advocate profile on Nyay Setu.</p>
         <p>Your submission has been routed to our investigation desk. Until it is resolved you cannot continue with this application.</p>
         <p>If you believe this is an error, contact <strong>verification@nyaysetu.in</strong> with proof of identity.</p>
-      `, {
-        title: 'Duplicate Registration Detected',
-        actions: [{ text: 'Back to Home', class: 'btn btn-primary', onclick: 'Utils.hideModal(); Router.navigate("/splash");' }]
-      });
-    } else {
-      this._fieldErrors = result.fieldErrors || {};
-      Utils.showToast(result.error || 'Registration failed. Please review your details.', 'error');
-      Router.transitionPage('/register');
+        `, {
+          title: 'Duplicate Registration Detected',
+          actions: [{ text: 'Back to Home', class: 'btn btn-primary', onclick: 'Utils.hideModal(); Router.navigate("/splash");' }]
+        });
+      } else {
+        this._fieldErrors = result.fieldErrors || {};
+        this.showProfileFeedback(result.error || 'Registration failed. Please review your details.', this._fieldErrors);
+      }
+    } catch (_error) {
+      this.showProfileFeedback('Registration could not be submitted. Your details are retained. Please try again.', {});
+    } finally {
+      this._submitting = false;
+      form.removeAttribute('aria-busy');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Registration';
+    }
+  },
+
+  showProfileFeedback(message, errors) {
+    const ids = {fullName:'reg-fullname',dob:'reg-dob',gender:'reg-gender',phone:'reg-phone',address:'reg-address',
+      city:'reg-city',state:'reg-state',barCouncil:'reg-barcouncil',stateBarCouncil:'reg-statebar',
+      enrollmentDate:'reg-enrolldate',yearsOfPractice:'reg-experience',qualification:'reg-qualification',
+      university:'reg-university',practiceType:'reg-practicetype',primarySpecialization:'reg-primaryspec',courts:'chips-courts'};
+    this.showFieldFeedback('register-feedback', ids, message, errors);
+  },
+
+  showCredentialsFeedback(message, errors) {
+    this.showFieldFeedback('credentials-feedback', {email:'reg-email',password:'reg-password',confirmPassword:'reg-confirm-password'}, message, errors);
+  },
+
+  showFieldFeedback(feedbackId, ids, message, errors) {
+    const form = document.getElementById('register-form');
+    form.querySelectorAll('[data-registration-error]').forEach(el => el.remove());
+    form.querySelectorAll('[aria-invalid="true"]').forEach(el => {
+      el.removeAttribute('aria-invalid');
+      el.classList.remove('input-error');
+      el.removeAttribute('aria-describedby');
+    });
+    const feedback = document.getElementById(feedbackId);
+    feedback.textContent = message;
+    feedback.hidden = !message;
+    let first;
+    for (const [key, text] of Object.entries(errors)) {
+      const field = document.getElementById(ids[key]);
+      if (!field) continue;
+      const error = document.createElement('span');
+      error.className = 'form-error-text';
+      error.dataset.registrationError = key;
+      error.id = 'registration-error-' + key;
+      error.textContent = text;
+      field.closest('.form-group').appendChild(error);
+      field.setAttribute('aria-invalid', 'true');
+      field.setAttribute('aria-describedby', error.id);
+      field.classList.add('input-error');
+      first ||= field.querySelector('button') || field;
+    }
+    if (message) {
+      const target = first || feedback;
+      if (first) first.focus({ preventScroll: true });
+      target.scrollIntoView({ block: 'center', behavior: 'auto' });
     }
   }
 };

@@ -7,12 +7,7 @@ const UserChatBot = {
 
   render() {
     let conversations = UserStore.get('conversations') || [];
-    // Clean stale synthetic/demo messages if present from old local sessions
     const aiConv = conversations.find(c => c.type === 'ai');
-    if (aiConv && aiConv.messages && aiConv.messages.some(m => m.text && (m.text.includes('shhhh') || m.text.includes('relates directly to property')))) {
-      aiConv.messages = [];
-      UserStore.set('conversations', conversations);
-    }
     const activeConv = aiConv || { id: 'conv_ai', type: 'ai', name: 'Nyay Setu AI', messages: [] };
 
     const content = `

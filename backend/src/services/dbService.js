@@ -128,7 +128,7 @@ const DbService = {
           else data.users.push(userObj);
           db.save();
 
-          return userObj;
+          return idx >= 0 ? data.users[idx] : userObj;
         }
       } catch (err) {
         console.error('[dbService] findUserByEmail MySQL error:', err.message);
@@ -174,7 +174,8 @@ const DbService = {
             userObj.phoneNormalized = (userObj.phone || '').replace(/\D/g, '');
           }
 
-          return userObj;
+          const cached = (db.get().users || []).find(item => item.id === userObj.id);
+          return cached ? { ...cached, ...userObj } : userObj;
         }
       } catch (err) {
         console.error('[dbService] findUserById MySQL error:', err.message);

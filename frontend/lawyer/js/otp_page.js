@@ -15,6 +15,7 @@ const OTPPage = {
   _deadline: 0,
   _resendAt: 0,
   _submitting: false,
+  _locked: false,
 
   /* ---------------- Render ---------------- */
   render() {
@@ -73,6 +74,7 @@ const OTPPage = {
       return;
     }
     this._submitting = false;
+    this._locked = false;
     this.clearAlert();
 
     // Server-authoritative expiry (grace: fall back to a fresh 5 minutes)
@@ -90,7 +92,7 @@ const OTPPage = {
   challengeExpiryMs() {
     const c = AuthManager._pendingOTPChallenge || {};
     const t = c.expiresAt ? new Date(c.expiresAt).getTime() : 0;
-    return t > Date.now() ? t : Date.now() + 5 * 60 * 1000;
+    return Number.isFinite(t) && t > 0 ? t : Date.now() + 5 * 60 * 1000;
   },
 
   challengeResendMs() {
@@ -147,14 +149,14 @@ const OTPPage = {
       const minutes = parseInt(remaining / 60, 10);
       const seconds = remaining % 60;
       el.textContent = `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-      if (remaining <= 0) {
+      if (remaining <= 0 || this._locked) {
         clearInterval(this._timerInterval);
-        el.textContent = 'Expired';
-        this.showAlert('This code has expired. Tap “Resend Code” to receive a fresh one.', 'warning');
+        el.textContent = this._locked ? 'Locked' : 'Expired';
+        this.showAlert(this._locked ? 'This code is locked. Request a fresh code when resend is available.' : 'This code has expired. Tap “Resend Code” to receive a fresh one.', 'warning');
         const inputs = document.querySelectorAll('.otp-input');
         inputs.forEach(i => { i.disabled = true; i.classList.remove('filled'); });
         const btn = document.getElementById('btn-verify-otp');
-        if (btn) { btn.disabled = true; btn.innerHTML = 'Code Expired'; }
+        if (btn) { btn.disabled = true; btn.textContent = this._locked ? 'Code Locked' : 'Code Expired'; }
         const resend = document.getElementById('btn-resend-otp');
         if (resend) resend.focus();
       }
@@ -221,6 +223,10 @@ const OTPPage = {
 
   async handleVerify() {
     if (this._submitting) return;
+    if (this._locked || this._deadline <= Date.now()) {
+      this.showAlert('This code is no longer available. Request a fresh code.', 'warning');
+      return;
+    }
     const code = this.readCode();
 
     if (code.length < 6) {
@@ -258,6 +264,7 @@ const OTPPage = {
     });
 
     if (res.locked || res.expired) {
+      this._locked = !!res.locked;
       this.showAlert(res.error, 'error');
       Utils.showToast(res.error, 'error');
       this.setBusy(false);
@@ -286,6 +293,7 @@ const OTPPage = {
     const res = await AuthManager.resendOTP();
 
     if (res.success) {
+      this._locked = false;
       this.clearAlert();
       Utils.showToast('A fresh 6-digit code is on its way to your inbox.', 'success');
       this._deadline = res.expiresAt ? new Date(res.expiresAt).getTime() : Date.now() + 5 * 60 * 1000;

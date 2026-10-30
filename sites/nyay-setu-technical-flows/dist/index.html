@@ -1,0 +1,3134 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>nyay-setu-technical-flows.html</title>
+<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;max-width:736px;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
+
+</head>
+<body>
+<iframe id="codex-visualization" sandbox="allow-scripts" scrolling="no" referrerpolicy="no-referrer" title="nyay-setu-technical-flows.html" data-srcdoc="&lt;!doctype html&gt;
+&lt;html lang=&quot;en-US&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+&lt;meta name=&quot;referrer&quot; content=&quot;no-referrer&quot;&gt;
+&lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://persistent.oaistatic.com/plugins/visualize/ https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'&quot;&gt;
+&lt;title&gt;nyay-setu-technical-flows.html&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script type=&quot;application/json&quot; id=&quot;codex-visualization-widget-state&quot;&gt;__CODEX_VISUALIZATION_WIDGET_STATE__&lt;/script&gt;
+&lt;script&gt;(() =&gt; {
+  const root = document.documentElement;
+  const mediaQuery = globalThis.matchMedia(&quot;(prefers-color-scheme: dark)&quot;);
+  const apply = Reflect.apply;
+  const isArray = Array.isArray;
+  const hasOwn = Object.hasOwn;
+  const parentWindow = globalThis.parent;
+  const stringify = JSON.stringify;
+  const parse = JSON.parse;
+  const encode = TextEncoder.prototype.encode.bind(new TextEncoder());
+  const initialStateElement = document.getElementById(
+    &quot;codex-visualization-widget-state&quot;,
+  );
+  const initialGlobals = parse(initialStateElement?.textContent ?? &quot;{}&quot;);
+  initialStateElement?.remove();
+  /** @type {Record&lt;string, unknown&gt; | null} */
+  let state = initialGlobals.widgetState ?? null;
+  const statePersistence = initialGlobals.statePersistence ?? &quot;none&quot;;
+  let nextStateRequestId = 0;
+  /** @type {Map&lt;number, { resolve: () =&gt; void; reject: (error: Error) =&gt; void; timeout: ReturnType&lt;typeof globalThis.setTimeout&gt;; serializedState: string }&gt;} */
+  const pendingStateWrites = new Map();
+  const persistenceError = () =&gt;
+    Object.assign(
+      new Error(&quot;The host could not persist the widget state update&quot;),
+      {
+        code: -32000,
+        data: { code: &quot;widget_state_persistence_failed&quot;, retryable: false },
+      },
+    );
+  /**
+   * @param {object} prototype
+   * @param {string} property
+   */
+  const getPrototypeGetter = (prototype, property) =&gt; {
+    // oxlint-disable-next-line typescript/unbound-method -- invoked through captured Reflect.apply
+    const getter = Object.getOwnPropertyDescriptor(prototype, property)?.get;
+    if (getter == null) {
+      throw new Error(`Missing ${property} getter`);
+    }
+    return getter;
+  };
+  const getMessageData = getPrototypeGetter(MessageEvent.prototype, &quot;data&quot;);
+  const getMessagePorts = getPrototypeGetter(MessageEvent.prototype, &quot;ports&quot;);
+  const getMessageSource = getPrototypeGetter(MessageEvent.prototype, &quot;source&quot;);
+  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
+  const addHostMessageListener = MessagePort.prototype.addEventListener;
+  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
+  const postHostMessage = MessagePort.prototype.postMessage;
+  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
+  const startHostPort = MessagePort.prototype.start;
+  // oxlint-disable-next-line typescript/unbound-method -- captured before the untrusted fragment runs
+  const stopMessagePropagation = Event.prototype.stopImmediatePropagation;
+  /** @type {MessagePort | null} */
+  let hostPort = null;
+  const postToHost = (type, payload) =&gt; {
+    if (hostPort != null) {
+      apply(postHostMessage, hostPort, [{ type, ...payload }]);
+    }
+  };
+  const openExternal = ({ href }) =&gt; {
+    if (globalThis.navigator.userActivation?.isActive === true) {
+      postToHost(&quot;open-external&quot;, { href });
+    }
+  };
+  const sendFollowUpMessage = ({ context, prompt, title }) =&gt; {
+    if (globalThis.navigator.userActivation?.isActive === true) {
+      postToHost(&quot;follow-up&quot;, { context, prompt, title });
+    }
+    return Promise.resolve();
+  };
+  /**
+   * @param {Record&lt;string, unknown&gt; | ((previous: Record&lt;string, unknown&gt; | null) =&gt; Record&lt;string, unknown&gt;)} next
+   * @returns {Promise&lt;void&gt;}
+   */
+  const setWidgetState = async (next) =&gt; {
+    const nextState = typeof next === &quot;function&quot; ? next(state) : next;
+    if (
+      nextState == null ||
+      typeof nextState !== &quot;object&quot; ||
+      isArray(nextState)
+    ) {
+      throw new TypeError(&quot;Widget state must be a JSON object&quot;);
+    }
+    const inputState = stringify(
+      nextState,
+      (_key, /** @type {unknown} */ value) =&gt; {
+        if (
+          typeof value === &quot;undefined&quot; ||
+          typeof value === &quot;function&quot; ||
+          typeof value === &quot;symbol&quot; ||
+          (typeof value === &quot;number&quot; &amp;&amp; !Number.isFinite(value))
+        ) {
+          throw new TypeError(&quot;Widget state must be a JSON object&quot;);
+        }
+        return value;
+      },
+    );
+    const parsedState = parse(inputState);
+    if (
+      parsedState == null ||
+      typeof parsedState !== &quot;object&quot; ||
+      isArray(parsedState)
+    ) {
+      throw new TypeError(&quot;Widget state must be a JSON object&quot;);
+    }
+    const storedState = {
+      modelContent: null,
+      privateContent: null,
+      ...parsedState,
+    };
+    const serializedState = stringify(storedState);
+    if (encode(serializedState).length &gt; 16 * 1024) {
+      throw new TypeError(
+        &quot;Widget state must be a JSON object of at most 16 KiB&quot;,
+      );
+    }
+    if (
+      hasOwn(storedState, &quot;imageIds&quot;) &amp;&amp;
+      (!isArray(storedState.imageIds) ||
+        storedState.imageIds.some(
+          (/** @type {unknown} */ id) =&gt; typeof id !== &quot;string&quot;,
+        ))
+    ) {
+      throw new TypeError(&quot;Widget state imageIds must be an array of strings&quot;);
+    }
+    if (storedState.imageIds?.length &gt; 0) {
+      throw Object.assign(
+        new TypeError(&quot;Visualization state does not support image attachments&quot;),
+        { code: -32602, data: { code: &quot;images_unsupported&quot; } },
+      );
+    }
+    state = storedState;
+    globalThis.openai.widgetState = state;
+    globalThis.dispatchEvent(
+      new CustomEvent(&quot;openai:set_globals&quot;, {
+        detail: { globals: { widgetState: state } },
+      }),
+    );
+    if (statePersistence === &quot;none&quot;) {
+      throw persistenceError();
+    }
+    const id = ++nextStateRequestId;
+    return new Promise((resolve, reject) =&gt; {
+      const timeout = globalThis.setTimeout(() =&gt; {
+        pendingStateWrites.delete(id);
+        reject(persistenceError());
+      }, 30_000);
+      pendingStateWrites.set(id, { resolve, reject, timeout, serializedState });
+      postToHost(&quot;widget-state-write&quot;, { id, state: serializedState });
+    });
+  };
+  const syncTheme = () =&gt; {
+    const theme = mediaQuery.matches ? &quot;dark&quot; : &quot;light&quot;;
+    root.dataset.theme = theme;
+    globalThis.openai = {
+      ...globalThis.openai,
+      openExternal,
+      sendFollowUpMessage,
+      setWidgetState,
+      theme,
+      visualizationStyleVariables: {},
+      visualizationTheme: theme,
+      widgetState: state,
+      statePersistence,
+      stateModelContext: &quot;none&quot;,
+    };
+    globalThis.dispatchEvent(
+      new CustomEvent(&quot;openai:set_globals&quot;, {
+        detail: { globals: globalThis.openai },
+      }),
+    );
+  };
+  const sendHeight = () =&gt; {
+    postToHost(&quot;height&quot;, {
+      height: Math.ceil(
+        Math.max(
+          document.body.scrollHeight,
+          document.body.getBoundingClientRect().height,
+        ),
+      ),
+    });
+  };
+
+  globalThis.addEventListener(
+    &quot;message&quot;,
+    (event) =&gt; {
+      const data = apply(getMessageData, event, []);
+      const ports = apply(getMessagePorts, event, []);
+      const source = apply(getMessageSource, event, []);
+      if (
+        hostPort != null ||
+        source !== parentWindow ||
+        typeof data !== &quot;object&quot; ||
+        data?.type !== &quot;codex-visualization-initialize&quot; ||
+        !isArray(ports) ||
+        ports.length !== 1
+      ) {
+        return;
+      }
+      apply(stopMessagePropagation, event, []);
+      const nextHostPort = ports[0];
+      try {
+        apply(addHostMessageListener, nextHostPort, [
+          &quot;message&quot;,
+          (event) =&gt; {
+            const data = apply(getMessageData, event, []);
+            if (typeof data === &quot;object&quot; &amp;&amp; data?.type === &quot;measure&quot;) {
+              sendHeight();
+            } else if (
+              typeof data === &quot;object&quot; &amp;&amp;
+              data?.type === &quot;widget-state-result&quot;
+            ) {
+              /** @type {unknown} */
+              const id = data.id;
+              if (typeof id !== &quot;number&quot;) {
+                return;
+              }
+              const pending = pendingStateWrites.get(id);
+              if (pending != null) {
+                pendingStateWrites.delete(id);
+                globalThis.clearTimeout(pending.timeout);
+                if (data.ok === true) {
+                  pending.resolve();
+                } else {
+                  pending.reject(persistenceError());
+                }
+              }
+            }
+          },
+        ]);
+        apply(startHostPort, nextHostPort, []);
+      } catch {
+        return;
+      }
+      hostPort = nextHostPort;
+      for (const [id, { serializedState }] of pendingStateWrites) {
+        postToHost(&quot;widget-state-write&quot;, { id, state: serializedState });
+      }
+      sendHeight();
+    },
+    { capture: true },
+  );
+  document.currentScript?.remove();
+  mediaQuery.addEventListener(&quot;change&quot;, syncTheme);
+  globalThis.addEventListener(&quot;click&quot;, (event) =&gt; {
+    if (event.defaultPrevented) {
+      return;
+    }
+    let element = null;
+    if (event.target instanceof globalThis.Element) {
+      element = event.target;
+    } else if (event.target instanceof globalThis.Node) {
+      element = event.target.parentElement;
+    }
+    const link = element?.closest(&quot;a[href]&quot;);
+    const href = link?.getAttribute(&quot;href&quot;);
+    if (href == null) {
+      return;
+    }
+    if (href.startsWith(&quot;#&quot;)) {
+      let id;
+      try {
+        id = decodeURIComponent(href.slice(1));
+      } catch {
+        return;
+      }
+      const target = id.length === 0 ? root : document.getElementById(id);
+      if (
+        target == null ||
+        globalThis.navigator.userActivation?.isActive !== true
+      ) {
+        return;
+      }
+      event.preventDefault();
+      postToHost(&quot;scroll-to&quot;, {
+        top: target.getBoundingClientRect().top + globalThis.scrollY,
+      });
+      return;
+    }
+    event.preventDefault();
+    openExternal({ href });
+  });
+  new ResizeObserver(sendHeight).observe(document.body);
+  syncTheme();
+})();
+&lt;/script&gt;
+&lt;style&gt;:root {
+  color-scheme: light dark;
+  background-color: var(
+    --background,
+    var(--color-background-primary, light-dark(rgb(255 255 255), rgb(24 24 24)))
+  ) !important;
+
+  /* Agent-facing contract; keep in sync with SKILL.md. */
+  --background: var(
+    --color-background-primary,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --card: color-mix(in oklab, var(--foreground) 5%, var(--background));
+  --card-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --popover: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255), rgb(45 45 45))
+  );
+  --popover-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --primary: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --primary-foreground: var(
+    --color-text-inverse,
+    light-dark(rgb(255 255 255), rgb(13 13 13))
+  );
+  --secondary: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%))
+  );
+  --secondary-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --muted-foreground: var(
+    --color-text-secondary,
+    light-dark(rgb(26 28 31 / 49.4%), rgb(255 255 255 / 49.8%))
+  );
+  --accent: var(
+    --color-background-info,
+    light-dark(rgb(229 242 255), rgb(13 39 63))
+  );
+  --accent-foreground: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --destructive: var(
+    --color-text-warning,
+    light-dark(rgb(226 85 7), rgb(255 133 73))
+  );
+  --border: var(
+    --color-border-secondary,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+  --input: var(
+    --color-border-primary,
+    light-dark(
+      rgb(26 28 31 / 11.8%),
+      color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+    )
+  );
+  --ring: var(
+    --color-ring-primary,
+    light-dark(rgb(51 156 255), rgb(131 195 255 / 76%))
+  );
+  --font-size-base: var(--font-text-md-size, 16px);
+  --blue: light-dark(rgb(51 156 255), rgb(51 156 255));
+  --orange: light-dark(rgb(226 85 7), rgb(251 106 34));
+  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
+  --red: light-dark(rgb(224 46 42), rgb(255 103 100));
+  --purple: light-dark(rgb(146 79 247), rgb(173 123 249));
+  --yellow: light-dark(rgb(255 195 0), rgb(255 210 64));
+  --viz-series-1: var(--primary);
+  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
+  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
+  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
+  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
+  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
+
+  /* Internal implementation variables; not part of the agent contract. */
+  --font-sans:
+    -apple-system-body, ui-sans-serif, -apple-system, system-ui, &quot;Segoe UI&quot;,
+    Helvetica, &quot;Apple Color Emoji&quot;, Arial, sans-serif, &quot;Segoe UI Emoji&quot;,
+    &quot;Segoe UI Symbol&quot;;
+  --font-mono:
+    ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;,
+    monospace;
+  --font-size-normal: max(11px, var(--font-size-base));
+  --font-size-tooltip: calc(var(--font-size-base) - 1px);
+  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
+  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
+  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
+  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --icon-size: 16px;
+  --line-height-normal: calc(var(--font-size-normal) * 1.5);
+  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
+  --line-height-small: calc(var(--font-size-small) + 4px);
+  --corner-shape: round;
+  --radius: var(--border-radius-lg, 8px);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
+  --checkmark-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 17'%3E%3Cpath d='M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z'/%3E%3C/svg%3E&quot;);
+
+  /* Legacy aliases; not part of the current agent contract. */
+  --viz-bg: transparent;
+  --viz-panel: var(--card);
+  --viz-border: var(--border);
+  --viz-text: var(--foreground);
+  --viz-muted: var(--muted-foreground);
+  --viz-accent: var(--primary);
+  --viz-accent-text: var(--primary-foreground);
+  --viz-accent-bg: var(--accent);
+  --viz-font-size: var(--font-size-base);
+  --viz-warning: var(--destructive);
+}
+
+:root[data-theme=&quot;light&quot;] {
+  color-scheme: light;
+}
+
+:root[data-theme=&quot;dark&quot;] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html &gt; body {
+  /* Preserve MCP aliases for older inline renderers without creating :root cycles. */
+  --color-background-primary: var(
+    --background,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --color-text-primary: var(
+    --foreground,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --color-border-secondary: var(
+    --border,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+
+  margin: 0;
+  padding: var(--visualize-paint-gutter, 0px);
+  color: var(--foreground);
+  background: transparent !important;
+  font-family: var(--font-sans) !important;
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--font-size-base);
+  line-height: calc(var(--font-size-base) * 1.625);
+  font-weight: var(--font-weight-normal);
+}
+
+.cursor-interaction {
+  cursor: var(--cursor-interaction, pointer);
+}
+
+a {
+  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
+  cursor: var(--cursor-interaction, pointer);
+  text-decoration: none;
+  text-underline-offset: 2px;
+  font-weight: inherit;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-block: 0;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li,
+.table {
+  font-family: var(--font-sans);
+}
+
+h1 {
+  font-size: calc(var(--font-size-base) * 1.5);
+  line-height: 1.3333333333;
+}
+
+h2 {
+  font-size: calc(var(--font-size-base) * 1.25);
+  line-height: 1.4;
+}
+h3 {
+  font-size: calc(var(--font-size-base) * 1.125);
+  line-height: 1.5555555556;
+}
+h4 {
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+h5,
+h6 {
+  font-size: var(--font-size-base);
+  line-height: calc(var(--font-size-base) * 1.625);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+b,
+strong,
+th {
+  font-weight: 600;
+}
+
+code:not(pre code) {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  corner-shape: var(--corner-shape);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
+}
+pre,
+pre code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.table {
+  width: 100%;
+  color: var(--foreground);
+  font: inherit;
+  text-align: start;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: calc(var(--font-size-base) * 0.875);
+  line-height: calc(var(--font-size-base) * 1.625);
+  font-family: var(--font-sans);
+}
+
+.table :is(th, td) {
+  padding-block: 10px;
+  padding-inline: 0 24px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+  border-bottom-color: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+.table :is(th, td):not(:last-child) {
+  padding-inline-end: calc(var(--font-size-base) * 1.5);
+}
+
+.table-responsive &gt; .table :is(th, td) {
+  overflow-wrap: break-word;
+}
+
+.table :is(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+.table :is(caption, thead th) {
+  font-weight: 600;
+}
+
+.table thead :is(th, td) {
+  border-bottom-color: var(--border-strong, var(--input));
+  padding-block: calc(var(--font-size-base) / 2);
+  line-height: var(--font-size-base);
+}
+
+.table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+.table tbody :is(th, td) {
+  padding-block: calc(var(--font-size-base) * 0.625);
+}
+
+.table.table-sm :is(th, td) {
+  padding-block: 8px;
+}
+
+.table.table-sm :is(th, td):not(:last-child) {
+  padding-inline-end: 16px;
+}
+
+.table :is(.text-end, [align=&quot;right&quot;]) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.table :is(.text-center, [align=&quot;center&quot;]) {
+  text-align: center;
+}
+
+.table .text-nowrap {
+  white-space: nowrap;
+}
+
+#widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: transparent !important;
+}
+
+.card {
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  border-radius: var(--radius-2xl);
+  corner-shape: var(--corner-shape);
+  color: var(--card-foreground);
+  background: var(--card);
+}
+
+.widget {
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-lg);
+  corner-shape: var(--corner-shape);
+  box-shadow: 0 0 0 0.5px var(--border-strong, var(--border));
+  color: var(--foreground);
+  background: var(--background);
+}
+
+#widget &gt; :not(.card, .widget, .progress) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(
+    20rem,
+    var(--tooltip-available-width, calc(100vw - 10px)),
+    calc(100vw - 10px)
+  );
+  max-height: min(
+    var(--tooltip-available-height, calc(100vh - 10px)),
+    calc(100vh - 10px)
+  );
+  border: 1px solid var(--border);
+  corner-shape: var(--corner-shape);
+  overflow-wrap: break-word;
+  white-space: normal;
+  pointer-events: none;
+  user-select: none;
+  font-family: var(--font-sans);
+  padding: 5px 12px;
+  border-color: color-mix(
+    in oklab,
+    light-dark(var(--primary-foreground), var(--foreground)) 5%,
+    transparent
+  );
+  border-radius: var(--radius-2xl);
+  color: light-dark(var(--primary-foreground), var(--foreground));
+  background: light-dark(var(--foreground), var(--popover));
+  box-shadow: 0 8px 18px rgb(15 23 42 / 20%);
+  letter-spacing: -0.15px;
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
+  gap: 10px;
+}
+
+.viz-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viz-stat-value {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+hr {
+  width: 100%;
+  height: 1px;
+  margin-block: 6px;
+  border: 0;
+  background: var(--border);
+}
+
+.nav {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress {
+  display: flex;
+  height: 8px;
+  margin-block: calc((var(--line-height-normal, 1.5em) - 8px) / 2);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+}
+
+.progress-bar:only-child {
+  border-radius: var(--radius-full);
+}
+
+.progress-bar {
+  height: 100%;
+  flex-shrink: 0;
+  border: 0;
+  background: var(--viz-series-1);
+}
+
+.viz-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  color: color-mix(in srgb, var(--foreground) 40%, var(--muted-foreground));
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  font-family: var(--font-sans);
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: var(--font-weight-normal);
+  line-height: 1;
+}
+
+small,
+.text-small {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-controls &gt; .form-label {
+  display: grid;
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 0;
+}
+
+.viz-controls &gt; .form-label &gt; :is(.form-control, .form-range, .form-select) {
+  grid-column: 1 / -1;
+}
+
+.btn,
+.nav-link,
+.form-check-input,
+.form-control,
+.form-range,
+.form-select {
+  font: inherit;
+}
+
+/* Match inline alignment without overriding a containing flex or grid layout. */
+.btn,
+.nav-link,
+.form-control,
+.form-select,
+.form-range,
+.form-check {
+  vertical-align: middle;
+}
+
+.btn,
+.nav-link {
+  --btn-size: calc(12px + 2 * var(--control-spacing, 12px));
+  appearance: button;
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+  border: 1px solid var(--input);
+  corner-shape: var(--corner-shape);
+  cursor: var(--cursor-interaction, pointer);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-font-smoothing: inherit;
+  font-family: var(--font-sans);
+  height: fit-content;
+  min-height: var(--btn-size);
+  padding-inline: var(--control-spacing, 12px);
+  border-color: transparent;
+  border-radius: var(--radius-full);
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: var(--font-weight-normal);
+  line-height: 18px;
+}
+
+.btn {
+  border-color: var(--border);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+}
+
+/* Codex Button size=&quot;compact&quot;; appearance stays with the button variant. */
+.btn-sm {
+  --btn-size: 24px;
+  padding-inline: 8px;
+  font-size: calc(var(--font-size-base) * 12 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 12 / 16), 1px);
+  line-height: 16px;
+}
+
+.btn:is(.btn-block, .viz-tile) {
+  inline-size: 100%;
+}
+
+.btn.viz-tile {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+a.btn {
+  cursor: var(--cursor-interaction, pointer);
+  text-decoration: none;
+}
+
+.btn:not(:disabled):hover {
+  background: light-dark(
+    color-mix(in srgb, var(--foreground) 5.5%, transparent),
+    color-mix(in srgb, var(--foreground) 8%, transparent)
+  );
+}
+
+.nav-link:not(:disabled):not([aria-disabled=&quot;true&quot;]):hover {
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.btn-primary {
+  border-color: var(--border);
+  color: var(--primary-foreground);
+  background: var(--foreground);
+  background-clip: border-box;
+}
+
+.btn-primary .text-muted {
+  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
+}
+
+.btn-primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+  background-clip: border-box;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  color: var(--muted-foreground);
+  background: light-dark(
+    color-mix(in srgb, var(--foreground) 5.5%, transparent),
+    color-mix(in srgb, var(--foreground) 8%, transparent)
+  );
+}
+
+.nav-pills .nav-link {
+  min-width: 0;
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.nav-justified .nav-link {
+  flex: 1 1 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.nav-pills .nav-link.active {
+  color: var(--foreground);
+  background: var(--muted);
+}
+
+/* Shared preview chrome; product styles stay inside each variant. */
+.viz-dotted-background {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 0.8px,
+    transparent 0.8px
+  );
+  background-position: center;
+  background-size: 16px 16px;
+}
+
+.viz-carousel {
+  position: relative;
+  min-width: 0;
+}
+
+.viz-carousel:has(&gt; .viz-carousel-controls) {
+  min-height: calc(60px + var(--viz-carousel-picker-height, 0px));
+  padding-bottom: 60px;
+}
+
+.viz-carousel &gt; [data-variant][hidden] {
+  display: none !important;
+}
+
+.viz-carousel &gt; [data-variant] {
+  isolation: isolate;
+}
+
+.viz-carousel-controls {
+  --viz-carousel-hover: light-dark(
+    color-mix(in srgb, var(--foreground) 5.4%, transparent),
+    color-mix(in srgb, var(--foreground) 7.8%, transparent)
+  );
+  position: absolute;
+  z-index: 2;
+  bottom: 8px;
+  left: 50%;
+  display: flex;
+  width: max-content;
+  /* Leave room for the host's design-controls launcher at the trailing edge. */
+  max-width: calc(100% - 96px);
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans);
+  /* Match the settings dropdown chrome independently of the content font size. */
+  font-size: 13px;
+  font-weight: var(--font-weight-normal);
+  line-height: 18px;
+  transform: translateX(-50%);
+  user-select: none;
+}
+
+/* Keep authored mockup button styles out of the shared carousel chrome. */
+.viz-carousel-controls button,
+.viz-carousel-picker &gt; summary {
+  display: flex !important;
+  height: auto !important;
+  min-height: 30px;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px;
+  padding: 0 6px !important;
+  -webkit-app-region: no-drag;
+  border: 0 !important;
+  border-radius: 14px !important;
+  color: inherit !important;
+  background: transparent !important;
+  font: inherit !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.viz-carousel-controls &gt; button,
+.viz-carousel-picker &gt; summary {
+  position: relative;
+  isolation: isolate;
+}
+
+.viz-carousel-controls &gt; button {
+  --icon-size: 16px;
+  width: 30px !important;
+  padding: 0 !important;
+}
+
+.viz-carousel-picker &gt; summary {
+  padding-inline: 12px !important;
+}
+
+.viz-carousel-controls .viz-carousel-caret {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  margin: 0;
+  color: inherit;
+  transform: rotate(180deg);
+}
+
+.viz-carousel-controls &gt; button &gt; svg,
+.viz-carousel-controls .viz-carousel-caret,
+.viz-carousel-count {
+  opacity: 0.5;
+}
+
+.viz-carousel-controls &gt; button::before,
+.viz-carousel-picker &gt; summary::before {
+  position: absolute;
+  z-index: -1;
+  inset: 3px;
+  border-radius: 12px;
+  content: &quot;&quot;;
+  pointer-events: none;
+}
+
+.viz-carousel-controls &gt; button:hover::before,
+.viz-carousel-picker &gt; summary:hover::before {
+  background: var(--viz-carousel-hover);
+}
+
+.viz-carousel-controls &gt; button,
+.viz-carousel-controls [data-lucide],
+.viz-carousel-controls .lucide {
+  flex-shrink: 0;
+}
+
+.viz-carousel-picker {
+  min-width: 0;
+}
+
+.viz-carousel-picker &gt; summary {
+  min-width: 0;
+  list-style: none;
+}
+
+.viz-carousel-picker &gt; summary::-webkit-details-marker {
+  display: none;
+}
+
+.viz-carousel-count {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.viz-carousel-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viz-carousel-options {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 4px);
+  left: 0;
+  display: flex;
+  max-height: 240px;
+  flex-direction: column;
+  gap: 2px;
+  overflow: auto;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  box-shadow: 0 4px 12px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 25%));
+}
+
+.viz-carousel-options &gt; button {
+  border-radius: max(0px, calc(var(--radius-lg) - 5px)) !important;
+  width: 100% !important;
+  min-height: 28px;
+  justify-content: flex-start !important;
+  padding: 4px 8px !important;
+  font-size: var(--font-size-small) !important;
+  text-align: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.viz-carousel-options &gt; [aria-current=&quot;true&quot;],
+.viz-carousel-options &gt; button:hover {
+  background: var(--viz-carousel-hover) !important;
+}
+
+.btn:disabled,
+.nav-link:disabled,
+.nav-link[aria-disabled=&quot;true&quot;] {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+[data-lucide] {
+  stroke-width: 1.6;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  padding: 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  corner-shape: var(--corner-shape);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  height: calc(12px + 2 * var(--control-spacing, 12px));
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  padding-inline: calc(4px + var(--control-spacing, 12px) / 2);
+  border-color: var(--input);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--popover) 96%, transparent);
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.4285714286;
+}
+.form-control:is(
+  [type=&quot;file&quot;],
+  [type=&quot;date&quot;],
+  [type=&quot;datetime-local&quot;],
+  [type=&quot;month&quot;],
+  [type=&quot;week&quot;],
+  [type=&quot;color&quot;]
+) {
+  height: calc(12px + 2 * var(--control-spacing, 12px));
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  line-height: 18px;
+}
+.form-control:is(
+  [type=&quot;date&quot;],
+  [type=&quot;datetime-local&quot;],
+  [type=&quot;month&quot;],
+  [type=&quot;week&quot;]
+) {
+  padding-inline: var(--control-spacing, 12px);
+}
+
+.form-control::placeholder {
+  color: var(--muted-foreground);
+}
+
+.form-control[type=&quot;file&quot;] {
+  overflow: hidden;
+  cursor: var(--cursor-interaction, pointer);
+  padding: 0;
+}
+
+.form-control[type=&quot;file&quot;]::file-selector-button {
+  padding: 0 8px;
+  border: 0;
+  border-right: 1px solid var(--input);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: inherit;
+  font: inherit;
+  min-height: calc(10px + 2 * var(--control-spacing, 12px));
+  padding-inline: var(--control-spacing, 12px);
+  margin-inline-end: var(--control-spacing, 12px);
+}
+
+.form-control[type=&quot;file&quot;]:not(:disabled):hover::file-selector-button {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-control-color[type=&quot;color&quot;] {
+  width: 40px;
+  height: calc(12px + 2 * var(--control-spacing, 12px));
+  padding: 3px;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-lg) - 4px);
+  corner-shape: var(--corner-shape);
+}
+
+textarea.form-control {
+  height: auto;
+  resize: vertical;
+  min-height: 96px;
+  padding: 8px 10px;
+}
+
+.form-control:focus-visible {
+  border-color: var(--ring);
+  box-shadow: none;
+}
+.form-control:disabled {
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  opacity: 1;
+}
+.form-control[aria-invalid=&quot;true&quot;] {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 20%, transparent);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+}
+
+.form-select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: fit-content;
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  margin: 0;
+  /* The secondary icon role is 14px at compact density and 16px at web density. */
+  --icon-size: calc(10px + var(--control-spacing, 12px) / 2);
+  /* Settings dropdowns retain a 12px inset and a 4px text-to-chevron gap. */
+  padding: 0 calc(16px + var(--icon-size)) 0 12px;
+  outline: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  corner-shape: var(--corner-shape);
+  color: var(--foreground);
+  background-color: var(--secondary);
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent calc(50% - 0.6px),
+      var(--muted-foreground) calc(50% - 0.6px) calc(50% + 0.6px),
+      transparent calc(50% + 0.6px)
+    ),
+    linear-gradient(
+      135deg,
+      transparent calc(50% - 0.6px),
+      var(--muted-foreground) calc(50% - 0.6px) calc(50% + 0.6px),
+      transparent calc(50% + 0.6px)
+    );
+  background-position:
+    calc(100% - 12px - var(--icon-size) / 2) 50%,
+    calc(100% - 12px - var(--icon-size) * 0.18) 50%;
+  background-repeat: no-repeat;
+  background-size: calc(var(--icon-size) * 0.32) calc(var(--icon-size) * 0.32);
+  cursor: var(--cursor-interaction, default);
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: var(--font-weight-normal);
+  line-height: 18px;
+}
+
+.form-select :is(option, optgroup) {
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+}
+
+.form-select :is(option, optgroup):disabled {
+  color: var(--muted-foreground);
+}
+
+.form-select:not(:disabled):hover {
+  background-color: light-dark(
+    color-mix(in srgb, var(--foreground) 5.5%, transparent),
+    color-mix(in srgb, var(--foreground) 8%, transparent)
+  );
+}
+
+.form-select:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.form-select:disabled {
+  opacity: 0.4;
+}
+
+.form-check {
+  display: flex;
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--input);
+  color: var(--primary-foreground);
+  background-color: transparent;
+  cursor: var(--cursor-interaction, default);
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
+  corner-shape: round;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  width: calc(10px + var(--control-spacing, 12px) / 2);
+  height: calc(10px + var(--control-spacing, 12px) / 2);
+  border-color: var(--border-strong, var(--input));
+  border-radius: calc(var(--radius-sm) / 2);
+  background-color: transparent;
+  color: var(--foreground);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input:not(:disabled):not(:checked):hover {
+  background-color: var(--card);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type=&quot;checkbox&quot;]:is(:checked, :indeterminate) {
+  border-color: var(--border-strong, var(--input));
+  background-color: color-mix(in srgb, var(--popover) 96%, transparent);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type=&quot;checkbox&quot;]:checked::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-foreground);
+  content: &quot;&quot;;
+  mask: var(--checkmark-image) center / 12px 12px no-repeat;
+  background-color: var(--foreground);
+}
+.form-check:not(.form-switch)
+  .form-check-input[type=&quot;checkbox&quot;]:indeterminate::before {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 65%;
+  height: 6.65%;
+  margin: auto;
+  border-radius: var(--radius-full);
+  background: var(--foreground);
+  mask: none;
+  content: &quot;&quot;;
+}
+
+.form-check-input[type=&quot;radio&quot;] {
+  border-radius: var(--radius-full);
+  width: 16px;
+  height: 16px;
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--input);
+}
+
+.form-check-input[type=&quot;radio&quot;]:checked {
+  border: 0;
+  background: radial-gradient(
+    circle,
+    var(--primary-foreground) 0 3px,
+    var(--foreground) 3px
+  );
+  box-shadow: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;]:focus-visible {
+  border-color: var(--ring);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+}
+.form-check:not(.form-switch) .form-check-input[type=&quot;radio&quot;]:disabled,
+.form-check:not(.form-switch)
+  .form-check-input[type=&quot;radio&quot;]:disabled
+  + .form-check-label {
+  opacity: 0.5;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-label {
+  color: var(--foreground);
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-switch .form-check-input {
+  position: relative;
+  width: 32px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  box-shadow: none;
+  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  content: &quot;&quot;;
+  transform: translate(2px, -50%);
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+  border-color: #fff;
+  background: #fff;
+}
+
+.form-switch .form-check-input:checked {
+  background: var(--blue);
+}
+
+.form-switch .form-check-input:checked::before {
+  transform: translate(14px, -50%);
+}
+
+.form-switch .form-check-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+  outline: none;
+}
+
+.form-range {
+  appearance: none;
+  display: block;
+  width: 100%;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  accent-color: var(--primary);
+  height: calc(12px + 2 * var(--control-spacing, 12px));
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  outline: none;
+  border-radius: var(--radius-full);
+  color: var(--foreground);
+  background: transparent;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  background: var(--form-range-track, var(--border));
+  height: 2px;
+  border-radius: var(--radius-full);
+}
+
+.form-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  margin-top: -9px;
+  border-color: transparent;
+  background: currentColor;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Outline the native track and thumb, preserving the larger input hit area. */
+.form-range:focus-visible::-webkit-slider-runnable-track {
+  outline: 2px auto Highlight;
+  outline-color: -webkit-focus-ring-color;
+}
+
+.form-range::-moz-range-track {
+  background: var(--form-range-track, var(--border));
+  height: 2px;
+  border-radius: var(--radius-full);
+}
+
+.form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  border-color: transparent;
+  background: currentColor;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-range:focus-visible::-moz-range-thumb {
+  outline: 2px solid Highlight;
+  outline-offset: 2px;
+}
+
+.form-range:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.btn:not(.btn-primary, .viz-tile):is(
+  [aria-pressed=&quot;true&quot;],
+  [aria-selected=&quot;true&quot;],
+  .is-selected
+) {
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: var(--blue);
+}
+
+.btn.viz-tile:is([aria-pressed=&quot;true&quot;], [aria-selected=&quot;true&quot;], .is-selected) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.btn:focus-visible,
+.nav-link:focus-visible {
+  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.viz-carousel-controls :is(button, summary):focus-visible {
+  outline: 2px solid var(--ring) !important;
+  outline-offset: 2px !important;
+}
+
+/* Web recipes are the default, including on renderers without inline style queries. */
+@supports (border-radius: if(style(--corner-shape: round): 1px; else: 2px)) {
+  /* Match the host's proportional text-sm scale at every text preference. */
+  .tooltip,
+  .viz-badge,
+  .btn,
+  .nav-link,
+  .form-control,
+  .form-select {
+    font-size: if(
+      style(--corner-shape: round): round(
+          nearest,
+          calc(var(--font-size-base) * 14 / 16),
+          1px
+        );
+        else: round(nearest, calc(var(--font-size-base) * 13 / 14), 1px)
+    );
+  }
+
+  .btn-sm {
+    font-size: if(
+      style(--corner-shape: round): round(
+          nearest,
+          calc(var(--font-size-base) * 12 / 16),
+          1px
+        );
+        else: round(nearest, calc(var(--font-size-base) * 12 / 14), 1px)
+    );
+  }
+
+  .btn,
+  .nav-link,
+  .form-select {
+    border-radius: if(
+      style(--corner-shape: round): var(--radius-full); else: var(--radius-lg)
+    );
+  }
+
+  .form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
+    border-radius: if(
+      style(--corner-shape: round): calc(var(--radius-sm) / 2);
+        else: calc(var(--radius-lg) * 0.4)
+    );
+  }
+
+  .tooltip {
+    font-weight: if(
+      style(--corner-shape: round): 600; else: var(--font-weight-normal)
+    );
+  }
+}
+
+@media (pointer: coarse) {
+  .viz-carousel:has(&gt; .viz-carousel-controls) {
+    min-height: calc(76px + var(--viz-carousel-picker-height, 0px));
+    padding-bottom: 76px;
+  }
+
+  .btn,
+  .nav-link,
+  .viz-carousel-controls button,
+  .viz-carousel-picker &gt; summary,
+  .form-control,
+  .form-select {
+    --btn-size: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Keep small-screen WebKit from zooming when a text field receives focus. */
+  .form-control,
+  .form-select {
+    font-size: max(16px, calc(var(--font-size-base) * 14 / 16));
+    font-size: max(
+      16px,
+      round(nearest, calc(var(--font-size-base) * 14 / 16), 1px)
+    );
+  }
+  .form-control:is(
+    [type=&quot;file&quot;],
+    [type=&quot;date&quot;],
+    [type=&quot;datetime-local&quot;],
+    [type=&quot;month&quot;],
+    [type=&quot;week&quot;],
+    [type=&quot;time&quot;],
+    [type=&quot;color&quot;]
+  ) {
+    height: 44px;
+    min-height: 44px;
+    font-size: max(16px, calc(var(--font-size-base) * 14 / 16));
+    font-size: max(
+      16px,
+      round(nearest, calc(var(--font-size-base) * 14 / 16), 1px)
+    );
+  }
+
+  .form-control[type=&quot;file&quot;]::file-selector-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .form-control-color[type=&quot;color&quot;] {
+    width: 44px;
+    height: 44px;
+  }
+
+  .form-control:is(
+    [type=&quot;date&quot;],
+    [type=&quot;datetime-local&quot;],
+    [type=&quot;month&quot;],
+    [type=&quot;time&quot;],
+    [type=&quot;week&quot;]
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    padding-block: 8px;
+  }
+
+  .form-check {
+    min-height: 44px;
+    padding-inline: 15px;
+  }
+
+  .form-check-input {
+    position: relative;
+  }
+
+  .form-check-input::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    content: &quot;&quot;;
+    transform: translate(-50%, -50%);
+  }
+
+  .form-check-label {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .form-range {
+    height: 44px;
+    touch-action: pan-y;
+  }
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#widget &gt; svg {
+  width: 100%;
+}
+
+/* Model-authored chart rules can otherwise stretch icons after these styles load. */
+svg.lucide {
+  display: block;
+  width: var(--icon-size) !important;
+  height: var(--icon-size) !important;
+  flex: none;
+  margin: 0 !important;
+  stroke-width: 1.6;
+}
+
+.text-warning,
+.text-destructive {
+  color: var(--destructive);
+}
+
+html&gt;body{padding:0}&lt;/style&gt;
+&lt;style id=&quot;codex-visualization-host-theme&quot;&gt;:root {}&lt;/style&gt;
+&lt;script&gt;
+(() =&gt; {
+  // Host colors are defaults; later authored styles can give the same names
+  // their own meaning (for example, --muted as a chart's label color).
+  const hostStyles = document.getElementById(&quot;codex-visualization-host-theme&quot;);
+  const hostStyle = hostStyles.sheet.cssRules[0].style;
+  // Typography, geometry and interaction cursors still follow the host.
+  const styleForProperty = (property) =&gt;
+    /^--(?:font-|radius|corner-shape$|control-spacing$|cursor-interaction$|icon-size$|visualize-paint-gutter$)/.test(property)
+      ? document.documentElement.style
+      : hostStyle;
+  const initialGlobals =
+    globalThis.__codexVisualizationInitialGlobals ?? globalThis.openai;
+  delete globalThis.__codexVisualizationInitialGlobals;
+  if (initialGlobals?.statePersistence != null) {
+    globalThis.openai ??= {};
+    globalThis.openai.statePersistence = initialGlobals.statePersistence;
+    globalThis.openai.stateModelContext = initialGlobals.stateModelContext ?? &quot;none&quot;;
+  }
+  if (!true) {
+    return;
+  }
+  let appliedProperties = [];
+  const applyHostStyleVariables = (styleVariables) =&gt; {
+    if (styleVariables == null || typeof styleVariables !== &quot;object&quot;) {
+      return;
+    }
+    for (const property of appliedProperties) {
+      styleForProperty(property).removeProperty(property);
+    }
+    appliedProperties = [];
+    for (const [property, value] of Object.entries(styleVariables)) {
+      if (property.startsWith(&quot;--&quot;) &amp;&amp; typeof value === &quot;string&quot;) {
+        styleForProperty(property).setProperty(property, value);
+        appliedProperties.push(property);
+      }
+    }
+  };
+
+  const syncHostStyles = (globals) =&gt; {
+    applyHostStyleVariables(globals?.visualizationStyleVariables);
+    const sandboxDocument = globalThis.frameElement?.ownerDocument;
+    if (sandboxDocument != null &amp;&amp; globals?.visualizationTheme != null) {
+      let colorSchemeMeta = sandboxDocument.querySelector(
+        'meta[name=&quot;color-scheme&quot;]',
+      );
+      if (colorSchemeMeta == null) {
+        colorSchemeMeta = sandboxDocument.createElement(&quot;meta&quot;);
+        colorSchemeMeta.name = &quot;color-scheme&quot;;
+        sandboxDocument.head.appendChild(colorSchemeMeta);
+      }
+      colorSchemeMeta.content = globals.visualizationTheme;
+      sandboxDocument.documentElement.style.colorScheme =
+        globals.visualizationTheme;
+      // Paint the host surface behind transparent saved visualization documents.
+      sandboxDocument.documentElement.style.backgroundColor =
+        hostStyle.getPropertyValue(&quot;--background&quot;);
+    }
+  };
+
+  syncHostStyles(initialGlobals);
+  globalThis.addEventListener(&quot;openai:set_globals&quot;, (event) =&gt; {
+    syncHostStyles(event.detail?.globals);
+  });
+})();
+&lt;/script&gt;
+
+
+
+
+
+&lt;style&gt;
+#nyay-flow-explorer { color: var(--foreground); }
+#nyay-flow-explorer .nf-heading { margin-right: 100px; margin-bottom: calc(var(--font-size-base) * 1); }
+#nyay-flow-explorer .nf-heading .text-small { margin-top: calc(var(--font-size-base) * .25); }
+#nyay-flow-explorer .nf-controls { margin-bottom: calc(var(--font-size-base) * 1); }
+#nyay-flow-explorer .nf-title { margin-bottom: calc(var(--font-size-base) * .5); }
+#nyay-flow-explorer .nf-graph { width: 100%; min-width: 0; }
+#nyay-flow-explorer .nf-svg { display: block; width: 100%; overflow: visible; }
+#nyay-flow-explorer .nf-svg text { fill: var(--foreground); }
+#nyay-flow-explorer .nf-svg .nf-caption { fill: var(--muted-foreground); }
+#nyay-flow-explorer .nf-legend { display: flex; flex-wrap: wrap; gap: calc(var(--font-size-base) * 1); margin-top: calc(var(--font-size-base) * .5); }
+#nyay-flow-explorer .nf-key { display: inline-flex; align-items: center; gap: calc(var(--font-size-base) * .35); }
+#nyay-flow-explorer .nf-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+#nyay-flow-explorer .nf-detail { margin-top: calc(var(--font-size-base) * 1); overflow-wrap: anywhere; }
+#nyay-flow-explorer .nf-detail strong { font-weight: 500; }
+#nyay-flow-explorer .nf-proof { margin-top: calc(var(--font-size-base) * .75); }
+@media (max-width: 420px) { #nyay-flow-explorer .nf-heading { margin-right: 80px; } }
+&lt;/style&gt;
+&lt;div id=&quot;nyay-flow-explorer&quot;&gt;
+  &lt;div class=&quot;nf-heading&quot;&gt;
+    &lt;h2&gt;Nyay Setu · Technical flow atlas&lt;/h2&gt;
+    &lt;div class=&quot;text-small text-muted&quot;&gt;Kya → kaise → kyun · code audit: 30 Oct 2026&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;viz-controls nf-controls&quot;&gt;
+    &lt;label class=&quot;form-label&quot;&gt;Flow diagram
+      &lt;select class=&quot;form-select&quot; id=&quot;nf-topic&quot; aria-label=&quot;Choose technical flow&quot;&gt;&lt;/select&gt;
+    &lt;/label&gt;
+    &lt;label class=&quot;form-label&quot;&gt;Component / step
+      &lt;select class=&quot;form-select&quot; id=&quot;nf-node&quot; aria-label=&quot;Choose component for reason and alternatives&quot;&gt;&lt;/select&gt;
+    &lt;/label&gt;
+  &lt;/div&gt;
+  &lt;h3 class=&quot;nf-title&quot; id=&quot;nf-title&quot;&gt;Overall architecture&lt;/h3&gt;
+  &lt;div class=&quot;nf-graph&quot; id=&quot;nf-graph&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;nf-legend text-small&quot; aria-label=&quot;Implementation status legend&quot;&gt;
+    &lt;span class=&quot;nf-key&quot;&gt;&lt;span class=&quot;nf-dot&quot; style=&quot;background:var(--viz-series-2)&quot;&gt;&lt;/span&gt;Implemented&lt;/span&gt;
+    &lt;span class=&quot;nf-key&quot;&gt;&lt;span class=&quot;nf-dot&quot; style=&quot;background:var(--viz-series-3);clip-path:polygon(50% 0%,0% 100%,100% 100%)&quot;&gt;&lt;/span&gt;Partial / demo&lt;/span&gt;
+    &lt;span class=&quot;nf-key&quot;&gt;&lt;span class=&quot;nf-dot&quot; style=&quot;background:var(--viz-series-4);border-radius:0&quot;&gt;&lt;/span&gt;Planned&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;nf-detail&quot; id=&quot;nf-detail&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;nf-proof text-small text-muted&quot; id=&quot;nf-proof&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+(() =&gt; {
+  const root = document.getElementById('nyay-flow-explorer');
+  const topicControl = root.querySelector('#nf-topic');
+  const nodeControl = root.querySelector('#nf-node');
+  const graph = root.querySelector('#nf-graph');
+  const title = root.querySelector('#nf-title');
+  const detail = root.querySelector('#nf-detail');
+  const proof = root.querySelector('#nf-proof');
+  const N = (id, label, action, why, alternative, status = 'live', limit = '') =&gt; ({id,label,action,why,alternative,status,limit});
+  const E = (from,to,label='') =&gt; ({from,to,label});
+  const diagrams = [
+    {id:'architecture',name:'01 · Overall architecture',title:'Browser → APIs → AI, data aur 3D',
+      tiers:[['citizen','advocate','admin'],['express'],['mysql','flask','json'],['chroma','gemini'],['court']],
+      nodes:[
+        N('citizen','Citizen portal','HTML + CSS + JavaScript','Legal problem, chat aur preparation ek entry se.','React / Vue: larger UI ke liye stronger component structure.'),
+        N('advocate','Advocate portal','Cases, clients, appointments','Professional workflow ko citizen experience se organize karna.','One combined portal: fewer shells, more role-dependent UI.'),
+        N('admin','Admin desk','Manual credential decisions','Email verification aur professional review alag hain.','Official registry integration, if available and authorized.'),
+        N('express','Express · :3000','API gateway + static hosting','Accounts, uploads aur business routes ke liye lightweight JS layer.','Fastify / NestJS / Python-only backend; migration trade-offs.'),
+        N('mysql','MySQL','Identity + business records','Related, shared account records aur parameterized SQL.','PostgreSQL is also valid; canonical schema matters.'),
+        N('flask','Flask · :5000','Retrieval + model orchestration','Python NLP/vector ecosystem ko HTTP interface.','FastAPI for typed contracts; framework swap alone speed guarantee nahi.'),
+        N('json','JSON workspace','Legacy persistence + fallback','Local prototype continuity aur existing store integration.','Move authoritative writes to transactional SQL.','partial','Best-effort dual writes; transactional replication nahi.'),
+        N('chroma','Chroma + MiniLM','Relevant passages retrieve','Entire corpus model ko bhejne ki zarurat nahi.','pgvector / FAISS / managed vector store.'),
+        N('gemini','Gemini','Answer + dialogue + review','Hosted multilingual generation, own LLM server ke bina.','Other hosted or local LLMs: benchmark with legal tasks.'),
+        N('court','Three.js court','Browser mein scene execute','AI text ko controlled visual practice mein convert karna.','Babylon.js / game-engine web export.')
+      ],edges:[E('citizen','express'),E('advocate','express'),E('admin','express'),E('express','mysql'),E('express','flask'),E('express','json'),E('flask','chroma'),E('flask','gemini'),E('gemini','court','turns')],
+      note:'Architecture schematic · Three.js runs in browser; Gemini returns text, not rendered video.'},
+    {id:'models',name:'02 · Teen types ke models',title:'LLM ≠ embedding encoder ≠ 3D avatar',
+      tiers:[['text'],['llm','embedding','avatar'],['answer','passage','animation']],
+      nodes:[N('text','Task / input','Question, legal text, scene','Har task ke liye correct representation choose karna.','One model ko sab roles assign karna inaccurate hai.'),
+        N('llm','Gemini Flash-Lite','Language → structured text','Answers, language analysis aur next court turn.','Other LLMs after quality / latency / cost evaluation.'),
+        N('embedding','MiniLM · 384d','Text → numeric vector','Meaning-based passage retrieval.','Multilingual/domain encoders; re-indexing needed.'),
+        N('avatar','GLB assets','Mesh + skeleton + clips','Judge, counsel aur witnesses ko render karna.','Other rigged assets / procedural figures.'),
+        N('answer','Generated answer','Primary: 3.1 Flash-Lite','Hosted pretrained inference use hota hai.','Custom training only if measured need.','live','Fallback configured; per-turn model not exposed by health.'),
+        N('passage','Relevant excerpts','Chroma cosine search','Evidence context ko focused rakhna.','Hybrid lexical + vector search / reranking.'),
+        N('animation','Animated character','Three.js AnimationMixer','Body clips + procedural movement.','Facial blend shapes for proper lip sync.','partial','Accurate phoneme lip-sync pipeline absent.')],
+      edges:[E('text','llm'),E('text','embedding'),E('text','avatar'),E('llm','answer'),E('embedding','passage'),E('avatar','animation')],note:'No custom LLM training or fine-tuning pipeline implemented.'},
+    {id:'chat',name:'03 · AI chat: end-to-end',title:'Message → retrieval → draft → review → saved answer',
+      tiers:[['user'],['saved'],['language'],['retrieval'],['draft'],['review'],['result','repair']],
+      nodes:[N('user','User + history','Message, role, language, context','Latest question ko earlier facts se connect karna.','Stateless FAQ: simpler, but no meaningful follow-up.'),
+        N('saved','Local thread save','Question pehle retain','Network failure par original question lost nahi.','Server-only writes: stronger centralization, weaker offline recovery.'),
+        N('language','Language analysis','Gemini → English search terms','English corpus search; response user language mein.','Multilingual encoder / lightweight language detector.'),
+        N('retrieval','Grounding','MiniLM + Chroma + filters','Relevant external passages context mein dena.','Pure LLM answer: source traceability weaker.'),
+        N('draft','Gemini draft','JSON answer + source IDs','UI ko predictable machine-readable fields.','Free text: simpler but parsing and validation harder.'),
+        N('review','Consistency review','Question + facts + excerpts check','Unsupported facts/citations reduce karne ki extra pass.','Human review / separate model; cost and latency trade-off.'),
+        N('result','Render + sync','Escaped Markdown + sources','Readable output aur durable account history.','Raw HTML output would require much stronger sanitization.'),
+        N('repair','Repair / fallback','Failed checks → correction','Unchecked draft ko final banne se rokna.','Return error immediately; faster but less helpful.','live','Review legal truth guarantee nahi.')],
+      edges:[E('user','saved'),E('saved','language'),E('language','retrieval'),E('retrieval','draft'),E('draft','review'),E('review','result','pass'),E('review','repair','repair')],
+      note:'Normally 3 logical LLM calls: detection + draft + review; optional repair and transport retries add more.'},
+    {id:'rag',name:'04 · RAG retrieval ke andar',title:'Meaning search → relevance filter → evidence',
+      tiers:[['query'],['router'],['encoder'],['index'],['distance'],['scope'],['sources']],
+      nodes:[N('query','English search query','Original facts still authoritative','Retrieval language normalize karna.','Direct multilingual search, after evaluating encoder quality.'),
+        N('router','Keyword routing','Top 2 matching categories','Unnecessary collection queries reduce karna.','Trained classifier or semantic routing; more evaluation needed.'),
+        N('encoder','all-MiniLM-L6-v2','384-dimensional query vector','Query aur passages comparable embedding space mein.','New encoder requires corpus re-embedding.'),
+        N('index','Chroma HNSW','Approximate nearest neighbours','Large vector set mein efficient semantic lookup.','Exact scan: simpler, more compute; hybrid search improves lexical match.'),
+        N('distance','Distance &lt; 0.58','Lower cosine distance = closer','Weak matches filter karna.','Tune threshold using labeled relevance judgments.'),
+        N('scope','Domain guard','Non-drug query → NDPS remove','Generic words se irrelevant law attach na ho.','Broader corpus + metadata/date/jurisdiction filters.'),
+        N('sources','S1, S2… excerpts','Selected passages → LLM','Inspect source IDs and evidence context.','Reranker / authority-aware retrieval.','live','Similarity score is not legal accuracy.')],
+      edges:[E('query','router'),E('router','encoder'),E('encoder','index'),E('index','distance'),E('distance','scope'),E('scope','sources')],
+      note:'Audit: 24,776 vectors · one loaded NDPS collection · vectors are not a count of unique judgments.'},
+    {id:'ingestion',name:'05 · Legal data preparation',title:'Build-time ingestion aur current runtime path',
+      tiers:[['raw'],['split'],['embed'],['scriptdb','zip'],['runtime']],
+      nodes:[N('raw','Legal JSON / text','Judgment text + metadata','Source content ko structured searchable records mein badalna.','Verified official-source ingestion with provenance/version tracking.'),
+        N('split','Chunk + overlap','Script: 1,200 / 150 characters','Boundary par important context retain karna.','Token/semantic section chunking, after evaluation.'),
+        N('embed','MiniLM encoding','Passage → 384d vectors','Documents and later query same embedding model use karein.','Other encoder → re-index and validate.'),
+        N('scriptdb','Script output DB','processed/chroma_db*','Batch upsert and metadata storage.','Wire one reproducible canonical ingestion pipeline.','partial','Names/paths differ from active category runtime.'),
+        N('zip','Prebuilt category DBs','Extraction into data/chroma_db','Existing category databases load karna.','Rebuild from source with checksummed manifest.','partial','Four extracted folders contain no collections.'),
+        N('runtime','Runtime retrieval','sc_narcotics_ndps loaded','Existing local index query-time reuse.','Populate and validate remaining categories.')],
+      edges:[E('raw','split'),E('split','embed'),E('embed','scriptdb'),E('scriptdb','runtime','wiring gap'),E('zip','runtime','current path')],note:'Script parameters do not prove every chunk in the prebuilt corpus was produced by that script.'},
+    {id:'court',name:'06 · Court practice workflow',title:'Accepted record → next AI turn → controlled practice',
+      tiers:[['brief'],['opening'],['question'],['manual','aiwitness'],['record'],['follow','cross'],['release']],
+      nodes:[N('brief','Case brief','User-authored facts from chat','Earlier AI advice ko established evidence na banana.','Validated structured intake, when implemented.'),
+        N('opening','Opening turns','Gemini + counsel/bench review','Case-specific start; no assumed final judgment.','Neutral opening when review unavailable.'),
+        N('question','Question + answer gate','One active witness + stage','Wrong speaker / skipped answer prevent karna.','Server-owned workflow for stronger authorization.'),
+        N('manual','Manual witness','Defense default: user submits','Human testimony verbatim retain karna.','Explicit AI assistance only when user selects.'),
+        N('aiwitness','AI witness','Opposing side / selected aid','Practice partner from supplied facts/context.','Human role-play.','live','Simulated answer is not verified evidence.'),
+        N('record','Accepted transcript','Witness ID + side + exact words','Next response actual completed hearing se grounded.','Structured event log and summarized long-session memory.'),
+        N('follow','Direct follow-up','React to submitted answer','Unresolved issue explore; repeat answered lines avoid.','No further questions.'),
+        N('cross','Cross / objection','Opposite counsel; rephrase gate','Question ownership and ruling sequence maintain.','No further questions; practice ruling is not real adjudication.'),
+        N('release','Release + save','Per-room progress retained','Preparation ko resume/review karna.','Export an event-based hearing record.')],
+      edges:[E('brief','opening'),E('opening','question'),E('question','manual'),E('question','aiwitness'),E('manual','record'),E('aiwitness','record'),E('record','follow'),E('record','cross'),E('follow','release'),E('cross','release')],note:'Educational simulation · DEFENSE = user-side internally; PROSECUTION = opposing side, including civil practice.'},
+    {id:'graphics',name:'07 · 3D scene aur animation',title:'AI text → JS state machine → WebGL frames',
+      tiers:[['turn'],['director'],['room','avatar'],['loop'],['camera','speech'],['dispose']],
+      nodes:[N('turn','Structured AI turn','Actor + text + question state','Model output ko constrained execution input banana.','Unstructured script parsing; more fragile.'),
+        N('director','Practice director','Permission, paths, answer gates','Movement and stage order deterministic rakhna.','Hand-authored video lacks adaptive interaction.'),
+        N('room','Court environment','Supreme / High / District','Different representative room configurations.','Babylon.js / game-engine scene.'),
+        N('avatar','GLB + animation rig','Existing body clips + gestures','Reusable characters without generating a video per turn.','New rigs with facial blend shapes.','partial','No accurate phoneme lip sync.'),
+        N('loop','requestAnimationFrame','Mixer + movement + render','Browser GPU continuously redraws scene.','Server-rendered video would add transport/compute.'),
+        N('camera','Camera controls','Auto / manual / fullscreen','Hearing roles and witness interaction clearly show.','Fixed camera: simpler, less flexible.'),
+        N('speech','Speech + captions','Voice lifecycle gates answers','Keep spoken and visible turn progression aligned.','Captions/manual completion if matching voice missing.'),
+        N('dispose','Exit / room switch','Cancel and release resources','Old callbacks, overlapping audio and GPU leaks avoid.','Retain every scene: higher memory risk.')],
+      edges:[E('turn','director'),E('director','room'),E('director','avatar'),E('room','loop'),E('avatar','loop'),E('loop','camera'),E('loop','speech'),E('camera','dispose'),E('speech','dispose')],note:'Resolution targets are capped by viewport/pixel budget; resolution is not photorealism or FPS proof.'},
+    {id:'register',name:'08 · Registration + email OTP',title:'Signup → verify email → complete profile',
+      tiers:[['form'],['hash'],['challenge'],['mail'],['verify'],['session'],['profile']],
+      nodes:[N('form','Email + password','POST register-initiate','Server input validation aur unverified identity create.','Managed identity provider; still validate roles.'),
+        N('hash','bcrypt password hash','Salted slow comparison value','Plaintext password persist na ho.','Evaluate Argon2id; plain SHA is not password hashing.'),
+        N('challenge','Random 6-digit OTP','Hash + expiry + attempt state','Email possession confirm karna.','Passkeys / authenticator methods for stronger sign-in.'),
+        N('mail','SMTP / selected API','Resend → Brevo → SendGrid → SMTP','Transactional code delivery.','Another mail channel; priority selection is not runtime failover.'),
+        N('verify','Verify code','5 min · 5 wrong attempts','Expired/used/locked challenges reject karna.','Central shared limiter for multi-instance scale.'),
+        N('session','JWT + session row','Set HttpOnly session cookie','Signed claims plus server-side revocation.','Opaque session ID with server store.'),
+        N('profile','Complete profile','Citizen / professional details','Email access and advocate eligibility separate.','Verified registry integration + human review.')],
+      edges:[E('form','hash'),E('hash','challenge'),E('challenge','mail'),E('mail','verify'),E('verify','session'),E('session','profile')],note:'Default resend cooldown: 30s · OTP response currently also contains token JSON; cookie-only contract needs cleanup.'},
+    {id:'login',name:'09 · Login aur protected request',title:'Password → OTP → cookie → server authorization',
+      tiers:[['credentials'],['password'],['otp'],['cookie'],['strict'],['allowed','denied']],
+      nodes:[N('credentials','Email + password','SQL identity; JSON fallback','Registered account locate karna.','Single authoritative identity repository.'),
+        N('password','Password + lockout','bcrypt compare; failure window','Wrong password attempts restrict karna.','Shared per-account/IP rate limits.'),
+        N('otp','Mandatory email OTP','Successful password → challenge','Normal backend login second verification step.','Passkeys or TOTP; device records do not bypass current OTP.'),
+        N('cookie','JWT session cookie','sub + role + sid + expiry','Matching requests automatically authenticated credential carry.','Opaque server session; JWT is signed, not encrypted.'),
+        N('strict','Strict middleware','Signature + expiry + active sid','Revoked/suspended session cannot use strict endpoints.','Consistent ownership checks on every business object.'),
+        N('allowed','Authorized route','req.user + req.session','Account-scoped data access with role checks where required.','Fine-grained permission policy for each resource.'),
+        N('denied','401 / 403 / lock','Reject invalid session/action','UI snapshot ko server identity na maana jaye.','Fail-closed handling; current optionalAuth routes need fixes.')],
+      edges:[E('credentials','password'),E('password','otp'),E('otp','cookie'),E('cookie','strict'),E('strict','allowed','valid'),E('strict','denied','invalid')],note:'Google client decode / offline synthetic UI login are incomplete auth paths; they do not establish a real server session.'},
+    {id:'switch',name:'10 · Logout + account switching',title:'Account A → revoke → clean → Account B',
+      tiers:[['a'],['logout'],['revoke','clean'],['b'],['scoped','gap']],
+      nodes:[N('a','Account A active','Cookie + UI/cache state','Server identity aur browser state distinguish karna.','Separate browser profile for independent parallel accounts.'),
+        N('logout','POST logout','Send current cookie','Current session server par revoke karna.','Offline local sign-out cannot guarantee remote revocation.'),
+        N('revoke','Server cleanup','Revoke sid + clear cookie','Old token strict middleware mein invalid ho.','Shared durable revocation store.'),
+        N('clean','Browser cleanup','Clear UI + pending work','A ka cached data B ko show/sync na ho.','Owner-keyed cache and cancelled timers.','partial','window.Store guard / global cache cleanup gaps.'),
+        N('b','Account B login','Password + OTP + hydration','B ka actual server account load karna.','Dedicated multi-account switcher not implemented.'),
+        N('scoped','Assistant isolation','Owner-keyed threads + checks','Old account response new chat mein apply na ho.','Server owner scope remains required.'),
+        N('gap','Cross-tab / cache gaps','One shared cookie namespace','Whole app account isolation still needs hardening.','BroadcastChannel + revalidation + scoped store.','partial')],
+      edges:[E('a','logout'),E('logout','revoke'),E('logout','clean'),E('revoke','b'),E('clean','b'),E('b','scoped'),E('b','gap')],note:'No dedicated simultaneous multi-account switch API found. Assistant isolation tests do not certify every portal.'},
+    {id:'storage',name:'11 · Four storage layers',title:'Business records, legal vectors aur browser state',
+      tiers:[['data'],['sql','json'],['chroma','browser']],
+      nodes:[N('data','Data purpose','Choose storage by job','Everything ko same storage responsibility assign na karna.','Consolidate business authority while keeping caches separate.'),
+        N('sql','MySQL','Users, sessions, bookings, threads','Shared durable business relationships.','PostgreSQL; schema and transaction discipline more important.'),
+        N('json','JSON file store','Workspace + fallback records','Legacy local prototype persistence.','SQL transaction/repositories.','partial','Temp-file rename ≠ transaction or replication.'),
+        N('chroma','Chroma vector DB','Legal chunks + 384d vectors','Semantic passage lookup.','pgvector / FAISS / managed vector database.'),
+        N('browser','Browser storage','UI cache, local chats, drafts','Fast response and reload/network recovery.','IndexedDB for larger structured cache.','live','JS-readable storage is not trusted auth or encrypted vault.')],
+      edges:[E('data','sql','business'),E('data','json','legacy'),E('data','chroma','retrieval'),E('data','browser','cache')],note:'MySQL 8.0.45 connectivity checked; table existence does not prove a current route uses that table.'},
+    {id:'sync',name:'12 · Chat save, conflict aur resume',title:'Local-first thread → owner-scoped revision save',
+      tiers:[['change'],['local'],['put'],['ok','conflict','offline'],['court']],
+      nodes:[N('change','Thread change','Message / draft / court snapshot','Correct thread and owner capture karna.','Mutable global active-chat save risks wrong-thread writes.'),
+        N('local','Local persistence','Owner key; 400ms debounce','Instant UI and retained changes during outage.','Server-only persistence reduces copies but loses offline recovery.'),
+        N('put','Authenticated PUT','owner + id + expectedRevision','Concurrent writes detect karna.','Server event log / CRDT if collaborative editing needed.'),
+        N('ok','Revision matches','Save → revision + 1','New edits safely synchronize.','Transactional normalized child tables at larger scale.'),
+        N('conflict','409 conflict','Keep local; export / refresh','Old tab newer remote history overwrite na kare.','Explicit merge UI, not silent replacement.'),
+        N('offline','503 / network error','Local changes retained','Failure visible; no false remote-save guarantee.','Background queue with bounded retry.'),
+        N('court','Court prep retained','Delete chat ≠ delete prep','Saved rehearsal can resume separately.','Separate explicit session deletion.')],
+      edges:[E('change','local'),E('local','put'),E('put','ok','match'),E('put','conflict','stale'),E('put','offline','unavailable'),E('ok','court')],note:'AI-thread repository requires MySQL; it does not fall back to backend JSON. Browser local copy is retained.'},
+    {id:'booking',name:'13 · Lawyer → consultation → ledger',title:'Discovery → booking → advocate action',
+      tiers:[['browse'],['match'],['booking'],['persist'],['notify'],['accept'],['case','ledger','call']],
+      nodes:[N('browse','Browse lawyers','API listing + demo fallback','Professional discovery.','Search/index with explicit verified-visibility filters.'),
+        N('match','Recommendations','Keyword / specialization filter','Simple prototype suggestions.','Evaluated ranking model or transparent weighted rules.','partial','98% badge is static, not calibrated matching accuracy.'),
+        N('booking','Booking request','Date + mode + fee + case','Citizen and advocate engagement record.','Server-priced slot-locked order workflow.'),
+        N('persist','SQL + JSON mirror','Consultation and workspace','Both portals can display request.','Canonical transaction + outbox + idempotency.','partial','Best-effort mixed writes can diverge.'),
+        N('notify','Notifications','SQL + fetch / polling','Advocate request discover kar sake.','WebSocket / push + durable delivery.'),
+        N('accept','Accept / reject','Status and client notification','Request decision drives next workflow.','Owner-checked state transition transaction.'),
+        N('case','Case + appointment','Backend / browser records','Case preparation and schedule organize.','One authoritative case representation.','partial','Multiple steps are not one atomic transaction.'),
+        N('ledger','Payment ledger','Pending entries + CSV','Accounting-style prototype reporting.','Razorpay/Stripe order + signed webhook.','partial','No real payment capture integration.'),
+        N('call','Consultation preview','Timer + local media controls','Demonstrate intended call interface.','WebRTC + signaling + TURN.','partial','Live video/audio transport absent.')],
+      edges:[E('browse','match'),E('match','booking'),E('booking','persist'),E('persist','notify'),E('notify','accept'),E('accept','case'),E('accept','ledger'),E('accept','call')],note:'Demo statuses are intentional labels here: booking success does not prove money moved or a video connection exists.'},
+    {id:'verify',name:'14 · Documents + advocate verification',title:'Credentials → intake checks → human review',
+      tiers:[['profile'],['bar','upload','identity'],['review'],['decision']],
+      nodes:[N('profile','Professional profile','Email verified ≠ advocate verified','Separate identity access from professional eligibility.','Official authoritative verification integration.'),
+        N('bar','Bar registration check','Format + internal duplicates','Basic consistency screening before manual desk.','Official registry lookup if available.','partial','Not a connected official Bar Council API.'),
+        N('upload','Real file upload','Multer · MIME / size / checksum','Store credential bytes and detect duplicate submission.','Private object storage + magic-byte scan / malware scan.'),
+        N('identity','Identity submission','Structured flags','Record submission for manual review.','Real liveness provider after evaluation.','partial','No OCR / face / biometric-liveness model attached.'),
+        N('review','Admin review queue','Authenticated + admin role','Human decides submitted credentials.','Audited review tooling and verified source integration.'),
+        N('decision','Approve / reject / ask','Status + action log + notice','Explicit review state and accountability.','Provider-backed attestations when supported.')],
+      edges:[E('profile','bar'),E('profile','upload'),E('profile','identity'),E('bar','review'),E('upload','review'),E('identity','review'),E('review','decision')],note:'File hash identifies duplicate content; it is not encryption or authenticity proof. Upload default limit: 10MB.'},
+    {id:'voice',name:'15 · Voice aur attachments',title:'Input/output paths: browser APIs aur explicit limits',
+      tiers:[['input'],['stt','attachment'],['assistant'],['browservoice','fixedtts','captions']],
+      nodes:[N('input','User input','Typed text / audio / file','Accessibility and familiar input choices.','Text-only if browser capability unavailable.'),
+        N('stt','Browser speech input','SpeechRecognition','Dictation without own STT server.','Dedicated STT with clear privacy/cost policy.','live','Some browser recognition sends audio to a remote service.'),
+        N('attachment','Text / CSV context','FileReader text extraction','Give model real text when available.','PDF parser + OCR pipeline.','partial','PDF/image chat attachment usually metadata only.'),
+        N('assistant','AI response / court turn','Selected language','Language preference maintains continuity.','Human translated content for high-stakes tasks.'),
+        N('browservoice','Browser / OS voice','Current case read-aloud','Use matching installed voice; cancel on state change.','Dedicated speech service with explicit data policy.'),
+        N('fixedtts','Fixed practice cues','Translate TTS fallback','Only built-in procedural text in current court fallback.','Supported authenticated TTS provider.','partial','Client allowlist; endpoint itself accepts arbitrary text.'),
+        N('captions','Captions / continue','Missing voice fallback','Hearing stays usable when speech unavailable.','Install matching voice; no universal voice guarantee.')],
+      edges:[E('input','stt'),E('input','attachment'),E('stt','assistant'),E('attachment','assistant'),E('assistant','browservoice'),E('assistant','fixedtts'),E('assistant','captions')],note:'No custom Whisper/Gemini audio model integrated; no blanket offline or device-only privacy guarantee.'},
+    {id:'reliability',name:'16 · Review, timeout aur recovery',title:'Bounded AI work → reject stale results → retain hearing',
+      tiers:[['request'],['generation'],['review'],['accept','retry','stale'],['saved']],
+      nodes:[N('request','Court request context','Session + witness + epoch','Reply ko correct record version se bind karna.','Server-owned hearing log for stronger trust boundaries.'),
+        N('generation','Generation budget','34s · ≤2 attempts · ≤16s each','Provider delays ko bounded rakhna.','Unbounded retries risk quota and long frozen UX.'),
+        N('review','Separate review budget','Up to 20s; overall action ≤58s','Factual/role/legal support checks without unbounded wait.','Human review or explicit neutral fallback.'),
+        N('accept','Accept valid result','Same owner / stage / epoch','Wrong session mein new answer apply na ho.','Explicit workflow/version contract.'),
+        N('retry','Retryable failure','503 + Retry-After','Save draft; retry once for short provider pause.','Manual retry when quota/outage persists.'),
+        N('stale','Abort / ignore stale','Room, route, draft changed','Late response manual edit overwrite na kare.','Request cancellation + identity/version checks together.'),
+        N('saved','Saved record + draft','Resume without losing testimony','Recovery is separate from provider uptime.','Event-sourced durable session storage.')],
+      edges:[E('request','generation'),E('generation','review'),E('review','accept','valid'),E('review','retry','provider fail'),E('review','stale','changed'),E('accept','saved'),E('retry','saved'),E('stale','saved')],note:'Proxy 70s · browser 75s per attempt · automatic retry can extend total wait. Tests: 80 JS + 83 Python, not legal-accuracy benchmarks.'},
+    {id:'choices',name:'17 · Hum ye stack kyun use karte hain?',title:'Requirement → current choice → alternative trade-off',
+      tiers:[['need'],['ui','api','ai'],['data','three','security']],
+      nodes:[N('need','Prototype requirements','Multilingual + workflow + 3D','Choices ko actual task and constraints se justify karna.','Technology popularity alone reason nahi.'),
+        N('ui','Vanilla JS + router','Direct browser UI','Small prototype and Three.js integration simple.','React/Vue + TypeScript: better large-app organization.','live','Global state and runtime overrides increase complexity.'),
+        N('api','Express + Flask','Business / AI boundary','JS application APIs plus Python retrieval ecosystem.','One backend language simplifies operations; rewrite cost.'),
+        N('ai','Gemini + local RAG','Hosted generation + passages','No own LLM serving; evidence context inspectable.','Local LLM / other API / fine-tuning: compare measured quality.','live','RAG does not guarantee current law.'),
+        N('data','MySQL + Chroma','Relations / semantic vectors','Each storage handles a different access pattern.','PostgreSQL + pgvector can consolidate operations.'),
+        N('three','Three.js + GLB','Interactive browser rendering','Reuse assets and animate without generated video.','Babylon / engine export / simple 2D practice.'),
+        N('security','bcrypt + cookie + sid','Hashing + session lifecycle','Reusable security primitives and revocation mechanism.','Argon2id / opaque sessions / passkeys.','partial','Primitives do not fix missing ownership, CORS or demo isolation.')],
+      edges:[E('need','ui'),E('need','api'),E('need','ai'),E('ui','three'),E('api','data'),E('api','security'),E('ai','data')],note:'Rationales are architectural trade-offs, not a claim that every alternative was benchmarked or rejected.'},
+    {id:'status',name:'18 · Implemented vs demo vs next',title:'Present truthfully: working core aur concrete next steps',
+      tiers:[['current'],['chatcore','courtcore','business'],['demo','gaps'],['next']],
+      nodes:[N('current','Audited working prototype','Source + runtime + regressions','Implemented, configured and verified distinguish karna.','Do not infer capability from a UI label.'),
+        N('chatcore','Conversational core','RAG + review + saved threads','Contextual assistance and visible source limits.','Expand corpus and evaluate faithfulness.'),
+        N('courtcore','Practice core','3D + witness gates + resume','Adaptive rehearsal with controlled transitions.','More realistic role mapping and browser QA.'),
+        N('business','Business APIs','Accounts, uploads, bookings','End-to-end product workflow foundations.','Canonical transactional data layer.','partial','Authorization and mixed persistence need hardening.'),
+        N('demo','Demo / incomplete UI','Payment, video, 98% badge','Show intended experience only with clear status.','Gateway, WebRTC and measured matching.','partial'),
+        N('gaps','Fix first','Auth / ownership / cache / DTO','Prevent wrong-user data access or credential exposure.','Consistent strict auth, public allowlists and owner-scoped stores.','partial'),
+        N('next','Production milestone','Security → data → corpus → integrations','Build reliability on verified foundations.','Scale infrastructure after measurable need.','future')],
+      edges:[E('current','chatcore'),E('current','courtcore'),E('current','business'),E('chatcore','gaps'),E('courtcore','demo'),E('business','gaps'),E('demo','next'),E('gaps','next')],note:'No zero-hallucination, 100% security, real-payment, E2EE or universal legal-accuracy claim established.'}
+  ];
+  const escape = value =&gt; String(value).replace(/[&amp;&lt;&gt;&quot;']/g, c =&gt; ({'&amp;':'&amp;amp;','&lt;':'&amp;lt;','&gt;':'&amp;gt;','&quot;':'&amp;quot;',&quot;'&quot;:'&amp;#39;'}[c]));
+  let topic = diagrams[0].id;
+  let selected = 'express';
+  const model = () =&gt; diagrams.find(d =&gt; d.id === topic) || diagrams[0];
+  const statusText = {live:'Implemented',partial:'Partial / demo',future:'Planned'};
+  const statusColor = {live:'var(--viz-series-2)',partial:'var(--viz-series-3)',future:'var(--viz-series-4)'};
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svgElement = (tag, attributes={}) =&gt; {
+    const e = document.createElementNS(svgNS,tag);
+    for (const [key,value] of Object.entries(attributes)) e.setAttribute(key,String(value));
+    return e;
+  };
+  const canvas = document.createElement('canvas');
+  const measure = canvas.getContext('2d');
+  function wrap(text,width,fontSize,weight=400) {
+    measure.font = weight+' '+fontSize+'px '+getComputedStyle(root).fontFamily;
+    const words=String(text).split(/\s+/),lines=[];
+    let line='';
+    for(const word of words){
+      const candidate=line?line+' '+word:word;
+      if(line &amp;&amp; measure.measureText(candidate).width&gt;width){lines.push(line);line=word;}
+      else line=candidate;
+    }
+    if(line)lines.push(line);
+    return lines;
+  }
+  function svgText(parent,lines,x,y,sizeClass,weight,lineGap){
+    const e=svgElement('text',{x,y,'text-anchor':'middle','font-weight':weight});
+    if(sizeClass)e.setAttribute('class',sizeClass);
+    lines.forEach((line,i)=&gt;{const span=svgElement('tspan',{x,dy:i?lineGap:0});span.textContent=line;e.appendChild(span);});
+    parent.appendChild(e);return e;
+  }
+  function fillControls(){
+    topicControl.innerHTML=diagrams.map(d=&gt;'&lt;option value=&quot;'+d.id+'&quot;&gt;'+escape(d.name)+'&lt;/option&gt;').join('');
+    topicControl.value=topic;
+    nodeControl.innerHTML=model().tiers.flat().map(id=&gt;{const n=model().nodes.find(n=&gt;n.id===id);return '&lt;option value=&quot;'+id+'&quot;&gt;'+escape(n.label)+'&lt;/option&gt;';}).join('');
+    nodeControl.value=selected;
+  }
+  function render(){
+    const d=model();
+    if(!d.nodes.some(n=&gt;n.id===selected))selected=d.nodes[0].id;
+    nodeControl.value=selected;
+    title.textContent=d.title;
+    const node=d.nodes.find(n=&gt;n.id===selected);
+    detail.innerHTML='&lt;strong&gt;'+escape(node.label)+' · '+statusText[node.status]+' · Kyun:&lt;/strong&gt; '+escape(node.why)+' &lt;strong&gt;Vikalp:&lt;/strong&gt; '+escape(node.alternative)+(node.limit?' &lt;strong&gt;Seema:&lt;/strong&gt; '+escape(node.limit):'');
+    proof.textContent=d.note;
+    const width=Math.max(280,Math.floor(graph.getBoundingClientRect().width));
+    const base=parseFloat(getComputedStyle(root).fontSize)||14;
+    const small=base*12/14;
+    const maxCols=width&lt;390?1:width&lt;630?2:3;
+    const margin=20,gap=18,verticalGap=48;
+    const rows=[];
+    for(const tier of d.tiers)for(let i=0;i&lt;tier.length;i+=maxCols)rows.push(tier.slice(i,i+maxCols));
+    const positions=new Map();let y=12;
+    rows.forEach((ids,rowIndex)=&gt;{
+      const w=Math.min(420,(width-margin*2-gap*(ids.length-1))/ids.length);
+      let rowHeight=0;
+      ids.forEach((id,index)=&gt;{
+        const n=d.nodes.find(n=&gt;n.id===id);
+        const labelLines=wrap(n.label,w-26,base,500),actionLines=wrap(n.action,w-26,small);
+        const height=24+labelLines.length*base*1.35+8+actionLines.length*small*1.4+22;
+        rowHeight=Math.max(rowHeight,height);
+        positions.set(id,{x:(width-(w*ids.length+gap*(ids.length-1)))/2+index*(w+gap),y,w,h:height,labelLines,actionLines,row:rowIndex});
+      });
+      for(const id of ids)positions.get(id).h=rowHeight;
+      y+=rowHeight+verticalGap;
+    });
+    const height=y-verticalGap+16;
+    const svg=svgElement('svg',{viewBox:'0 0 '+width+' '+height,width,height,class:'nf-svg',role:'img','aria-labelledby':'nf-svg-title nf-svg-desc'});
+    const heading=svgElement('title',{id:'nf-svg-title'});heading.textContent=d.title;svg.appendChild(heading);
+    const desc=svgElement('desc',{id:'nf-svg-desc'});desc.textContent=d.nodes.map(n=&gt;n.label+': '+n.action+'; '+statusText[n.status]).join('. ')+'. Arrows: '+d.edges.map(e=&gt;e.from+' to '+e.to+(e.label?' ('+e.label+')':'')).join(', ');svg.appendChild(desc);
+    const defs=svgElement('defs');
+    const marker=svgElement('marker',{id:'nf-arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:6,markerHeight:6,orient:'auto-start-reverse'});
+    marker.appendChild(svgElement('path',{d:'M 1 1 L 9 5 L 1 9 Z',fill:'var(--muted-foreground)'}));defs.appendChild(marker);svg.appendChild(defs);
+    const edges=svgElement('g',{'aria-hidden':'true'});svg.appendChild(edges);
+    d.edges.forEach((edge,index)=&gt;{
+      const a=positions.get(edge.from),b=positions.get(edge.to);
+      const sx=a.x+a.w/2,sy=a.y+a.h,tx=b.x+b.w/2,ty=b.y-4;
+      const active=edge.from===selected||edge.to===selected;
+      let path;
+      if(b.row===a.row+1){const mid=(sy+ty)/2;path='M '+sx+' '+sy+' V '+mid+' H '+tx+' V '+ty;}
+      else if(b.row===a.row){const midY=Math.max(sy,b.y+b.h)+14;path='M '+sx+' '+sy+' V '+midY+' H '+tx+' V '+(b.y+b.h+4);}
+      else {const rail=index%2?width-8:8;path='M '+sx+' '+sy+' V '+(sy+18)+' H '+rail+' V '+(ty-18)+' H '+tx+' V '+ty;}
+      edges.appendChild(svgElement('path',{d:path,fill:'none',stroke:active?'var(--viz-series-1)':'var(--border)','stroke-width':active?1.7:1.2,'stroke-dasharray':edge.label==='wiring gap'?'4 4':'none','marker-end':'url(#nf-arrow)'}));
+      if(edge.label&amp;&amp;b.row===a.row+1){
+        const label=svgElement('text',{x:(sx+tx)/2,y:(sy+ty)/2-7,'text-anchor':'middle',class:'text-small nf-caption'});
+        label.textContent=edge.label;edges.appendChild(label);
+      }
+    });
+    for(const n of d.nodes){
+      const p=positions.get(n.id),active=n.id===selected;
+      const group=svgElement('g',{'data-node':n.id,class:'cursor-interaction'});
+      group.appendChild(svgElement('rect',{x:p.x,y:p.y,width:p.w,height:p.h,rx:7,
+        fill:active?'color-mix(in srgb, var(--viz-series-1) 13%, transparent)':'color-mix(in srgb, var(--foreground) 3%, transparent)',
+        stroke:'var(--border)','stroke-width':1}));
+      if(n.status==='partial')group.appendChild(svgElement('path',{d:'M '+(p.x+12)+' '+(p.y+7)+' l -4 8 h 8 Z',fill:statusColor[n.status]}));
+      else if(n.status==='future')group.appendChild(svgElement('rect',{x:p.x+8.5,y:p.y+8.5,width:7,height:7,fill:statusColor[n.status]}));
+      else group.appendChild(svgElement('circle',{cx:p.x+12,cy:p.y+12,r:3.5,fill:statusColor[n.status]}));
+      svgText(group,p.labelLines,p.x+p.w/2,p.y+27,'',500,base*1.35);
+      svgText(group,p.actionLines,p.x+p.w/2,p.y+27+p.labelLines.length*base*1.35+5,'text-small nf-caption',400,small*1.4);
+      if(active)group.appendChild(svgElement('rect',{x:p.x+12,y:p.y+p.h-9,width:p.w-24,height:2,fill:'var(--viz-series-1)'}));
+      const accessible=svgElement('title');accessible.textContent=n.label+' · '+statusText[n.status]+'. '+n.why;group.appendChild(accessible);
+      svg.appendChild(group);
+    }
+    graph.replaceChildren(svg);
+    root.dataset.topic=topic;root.dataset.selected=selected;
+  }
+  function persist(){
+    const api=window.openai;
+    if(api&amp;&amp;typeof api.setWidgetState==='function'){
+      try{const p=api.setWidgetState({modelContent:{technicalFlow:topic,component:selected},privateContent:{topic,selected}});if(p&amp;&amp;typeof p.catch==='function')p.catch(()=&gt;{});}catch(_){}
+    }
+  }
+  function restore(snapshot){
+    const state=snapshot?.privateContent||snapshot?.modelContent||snapshot;
+    if(!state||typeof state!=='object')return;
+    const candidate=state.topic||state.technicalFlow;
+    if(diagrams.some(d=&gt;d.id===candidate))topic=candidate;
+    const component=state.selected||state.component;
+    selected=model().nodes.some(n=&gt;n.id===component)?component:model().nodes[0].id;
+    fillControls();render();
+  }
+  topicControl.addEventListener('change',()=&gt;{topic=topicControl.value;selected=model().nodes[0].id;fillControls();render();persist();});
+  nodeControl.addEventListener('change',()=&gt;{selected=nodeControl.value;render();persist();});
+  graph.addEventListener('click',event=&gt;{const target=event.target.closest('[data-node]');if(!target)return;selected=target.getAttribute('data-node');render();persist();});
+  window.addEventListener('openai:set_globals',event=&gt;{const state=event.detail?.globals?.widgetState;if(state)restore(state);});
+  let resizeTimer;
+  const observer=new ResizeObserver(()=&gt;{clearTimeout(resizeTimer);resizeTimer=setTimeout(render,60);});observer.observe(graph);
+  fillControls();render();
+  if(window.openai?.widgetState)restore(window.openai.widgetState);
+})();
+&lt;/script&gt;
+
+
+&lt;style id=&quot;codex-visualization-document-scrollbar&quot;&gt;html,body{scrollbar-width:none!important}html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important}&lt;/style&gt;
+
+&lt;script src=&quot;https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+(() =&gt; {
+  if (window.FloatingUIDOM == null) {
+    return;
+  }
+  const { autoUpdate, computePosition, flip, offset, shift, size } =
+    window.FloatingUIDOM;
+  const tooltipPlacements = new Set([&quot;top&quot;, &quot;right&quot;, &quot;bottom&quot;, &quot;left&quot;]);
+  const tooltipId = `codex-visualization-tooltip-${
+    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
+  }`;
+  const tooltipGap = 5;
+  const hoverDelay = 700;
+  const skipDelay = 300;
+  let activeTrigger = null;
+  let pendingTrigger = null;
+  let tooltip = null;
+  let openTimeout = null;
+  let autoUpdateCleanup = null;
+  let positionRequest = 0;
+  let skipDelayUntil = 0;
+  let lastPointerWasTouch = false;
+  let pinnedByTouch = false;
+
+  const getTrigger = (event) =&gt; {
+    for (const target of event.composedPath()) {
+      if (target?.nodeType === Node.ELEMENT_NODE) {
+        const trigger = target.closest(&quot;[data-tooltip]&quot;);
+        if (trigger) return trigger;
+      }
+    }
+    return null;
+  };
+  const containsTarget = (trigger, target) =&gt;
+    target?.nodeType != null &amp;&amp; trigger.contains(target);
+  const getContent = (trigger) =&gt;
+    trigger.getAttribute(&quot;data-tooltip&quot;)?.trim() ?? &quot;&quot;;
+  const getPlacement = (trigger) =&gt; {
+    const placement = trigger.getAttribute(&quot;data-tooltip-placement&quot;);
+    return tooltipPlacements.has(placement) ? placement : &quot;top&quot;;
+  };
+  const getTooltip = () =&gt; {
+    if (tooltip == null) {
+      tooltip = document.createElement(&quot;div&quot;);
+      tooltip.id = tooltipId;
+      tooltip.className = &quot;tooltip&quot;;
+      tooltip.setAttribute(&quot;role&quot;, &quot;tooltip&quot;);
+    }
+    return tooltip;
+  };
+  const setDescribedBy = (trigger, described) =&gt; {
+    const ids = new Set(
+      (trigger.getAttribute(&quot;aria-describedby&quot;) ?? &quot;&quot;)
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (described) {
+      ids.add(tooltipId);
+    } else {
+      ids.delete(tooltipId);
+    }
+    if (ids.size === 0) {
+      trigger.removeAttribute(&quot;aria-describedby&quot;);
+    } else {
+      trigger.setAttribute(&quot;aria-describedby&quot;, [...ids].join(&quot; &quot;));
+    }
+  };
+  const clearOpenTimeout = () =&gt; {
+    if (openTimeout != null) {
+      window.clearTimeout(openTimeout);
+      openTimeout = null;
+    }
+    pendingTrigger = null;
+  };
+  const closeTooltip = (activateSkipDelay = true) =&gt; {
+    clearOpenTimeout();
+    pinnedByTouch = false;
+    positionRequest += 1;
+    autoUpdateCleanup?.();
+    autoUpdateCleanup = null;
+    if (activeTrigger == null) {
+      return;
+    }
+    setDescribedBy(activeTrigger, false);
+    activeTrigger = null;
+    tooltip?.remove();
+    if (activateSkipDelay) {
+      skipDelayUntil = Date.now() + skipDelay;
+    }
+  };
+  const updatePosition = (trigger, floating) =&gt; {
+    const request = ++positionRequest;
+    void computePosition(trigger, floating, {
+      middleware: [
+        offset(tooltipGap),
+        flip({ padding: tooltipGap }),
+        shift({ padding: tooltipGap }),
+        size({
+          padding: tooltipGap,
+          apply({ availableHeight, availableWidth, elements }) {
+            elements.floating.style.setProperty(
+              &quot;--tooltip-available-width&quot;,
+              `${Math.max(0, availableWidth)}px`,
+            );
+            elements.floating.style.setProperty(
+              &quot;--tooltip-available-height&quot;,
+              `${Math.max(0, availableHeight)}px`,
+            );
+          },
+        }),
+      ],
+      placement: getPlacement(trigger),
+      strategy: &quot;fixed&quot;,
+    })
+      .then(({ x, y }) =&gt; {
+        if (activeTrigger !== trigger || request !== positionRequest) {
+          return;
+        }
+        const scale = window.devicePixelRatio || 1;
+        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
+        floating.style.visibility = &quot;visible&quot;;
+      })
+      .catch(() =&gt; {
+        if (activeTrigger === trigger &amp;&amp; request === positionRequest) {
+          closeTooltip(false);
+        }
+      });
+  };
+  const openTooltip = (trigger) =&gt; {
+    const content = getContent(trigger);
+    if (!trigger.isConnected || content.length === 0) {
+      return;
+    }
+    clearOpenTimeout();
+    if (activeTrigger === trigger) {
+      return;
+    }
+    closeTooltip();
+    const floating = getTooltip();
+    floating.textContent = content;
+    floating.style.visibility = &quot;hidden&quot;;
+    floating.style.transform = &quot;translate(0, 0)&quot;;
+    document.body.appendChild(floating);
+    activeTrigger = trigger;
+    setDescribedBy(trigger, true);
+    autoUpdateCleanup = autoUpdate(trigger, floating, () =&gt; {
+      updatePosition(trigger, floating);
+    });
+  };
+  const requestOpen = (trigger, immediate = false) =&gt; {
+    if (
+      getContent(trigger).length === 0 ||
+      activeTrigger === trigger ||
+      pendingTrigger === trigger
+    ) {
+      return;
+    }
+    clearOpenTimeout();
+    pendingTrigger = trigger;
+    const delay =
+      immediate || activeTrigger != null || Date.now() &lt; skipDelayUntil
+        ? 0
+        : hoverDelay;
+    if (delay === 0) {
+      openTooltip(trigger);
+      return;
+    }
+    openTimeout = window.setTimeout(() =&gt; {
+      openTimeout = null;
+      pendingTrigger = null;
+      openTooltip(trigger);
+    }, delay);
+  };
+  const handlePointerOpen = (event) =&gt; {
+    if (event.pointerType === &quot;touch&quot;) {
+      return;
+    }
+    const trigger = getTrigger(event);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    requestOpen(trigger);
+  };
+  const handlePointer = (event) =&gt; {
+    lastPointerWasTouch =
+      event.type === &quot;pointerdown&quot; &amp;&amp; event.pointerType === &quot;touch&quot;;
+  };
+  const handleTouchClick = (event) =&gt; {
+    const isTouch = event.pointerType === &quot;touch&quot; || lastPointerWasTouch;
+    lastPointerWasTouch = false;
+    if (!isTouch || event.detail === 0) {
+      return;
+    }
+    const trigger = getTrigger(event);
+    if (
+      trigger == null ||
+      !trigger.isConnected ||
+      getContent(trigger).length === 0 ||
+      (pinnedByTouch &amp;&amp; activeTrigger === trigger)
+    ) {
+      if (pinnedByTouch) {
+        closeTooltip();
+      }
+      return;
+    }
+    openTooltip(trigger);
+    pinnedByTouch = activeTrigger === trigger;
+    window.setTimeout(() =&gt; {
+      if (activeTrigger === trigger &amp;&amp; !trigger.isConnected) {
+        closeTooltip(false);
+      }
+    }, 0);
+  };
+  const handleLeave = (event) =&gt; {
+    if (pinnedByTouch) {
+      return;
+    }
+    const trigger = getTrigger(event);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handleFocusIn = (event) =&gt; {
+    const trigger = getTrigger(event);
+    if (trigger?.matches(&quot;:focus-visible&quot;)) {
+      requestOpen(trigger, true);
+    }
+  };
+  const handleKeyDown = (event) =&gt; {
+    if (event.key === &quot;Escape&quot;) {
+      closeTooltip();
+    }
+  };
+  const handleContextMenu = (event) =&gt; {
+    lastPointerWasTouch = false;
+    const trigger = getTrigger(event);
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handlers = {
+    pointerover: handlePointerOpen,
+    pointerdown: handlePointer,
+    pointercancel: handlePointer,
+    click: handleTouchClick,
+    pointerout: handleLeave,
+    focusin: handleFocusIn,
+    focusout: handleLeave,
+    keydown: handleKeyDown,
+    contextmenu: handleContextMenu,
+  };
+  const roots = new Map();
+  const handledEvents = new WeakSet();
+  const handleEvent = (event) =&gt; {
+    if (handledEvents.has(event)) return;
+    handledEvents.add(event);
+    handlers[event.type](event);
+  };
+  const discoverRoots = (node) =&gt; {
+    if (node.shadowRoot) listen(node.shadowRoot);
+    for (const element of node.querySelectorAll(&quot;*&quot;)) {
+      if (element.shadowRoot) listen(element.shadowRoot);
+    }
+  };
+  const listen = (root) =&gt; {
+    if (roots.has(root)) return;
+    for (const type of Object.keys(handlers)) root.addEventListener(type, handleEvent);
+    const observer = new window.MutationObserver((records) =&gt; {
+      for (const { addedNodes } of records) {
+        for (const node of addedNodes) {
+          if (node.nodeType === Node.ELEMENT_NODE) discoverRoots(node);
+        }
+      }
+      for (const [root, cleanup] of roots) {
+        if (root.host &amp;&amp; !root.host.isConnected) {
+          cleanup();
+          roots.delete(root);
+        }
+      }
+      if (activeTrigger &amp;&amp; !activeTrigger.isConnected) closeTooltip(false);
+    });
+    observer.observe(root, { childList: true, subtree: true });
+    roots.set(root, () =&gt; {
+      observer.disconnect();
+      for (const type of Object.keys(handlers)) root.removeEventListener(type, handleEvent);
+    });
+    discoverRoots(root);
+  };
+  const destroy = () =&gt; {
+    closeTooltip(false);
+    lastPointerWasTouch = false;
+    for (const cleanup of roots.values()) cleanup();
+    roots.clear();
+    tooltip = null;
+  };
+
+  // Events between children of one shadow root never reach the document.
+  listen(document);
+  window.addEventListener(&quot;pagehide&quot;, destroy, { once: true });
+})();
+&lt;/script&gt;
+&lt;script id=&quot;codex-visualization-tabs&quot;&gt;
+(() =&gt; {
+  const selector = '.nav[role=&quot;tablist&quot;] [role=&quot;tab&quot;]';
+  const disabled = ':disabled,[aria-disabled=&quot;true&quot;]';
+  const selectTab = (selected) =&gt; {
+    const panelId = selected.getAttribute(&quot;aria-controls&quot;);
+    for (const tab of selected.closest('[role=&quot;tablist&quot;]').querySelectorAll('[role=&quot;tab&quot;]')) {
+      const active = tab === selected;
+      tab.classList.toggle(&quot;active&quot;, active);
+      tab.setAttribute(&quot;aria-selected&quot;, String(active));
+      const id = tab.getAttribute(&quot;aria-controls&quot;);
+      const panel = id &amp;&amp; document.getElementById(id);
+      if (panel != null) {
+        panel.hidden = id !== panelId;
+        if (!panel.hidden &amp;&amp; selected.id) {
+          panel.setAttribute(&quot;aria-labelledby&quot;, selected.id);
+        }
+      }
+    }
+  };
+  const interact = (event) =&gt; {
+    const tab = event.target?.closest?.(selector);
+    if (event.defaultPrevented || tab == null || tab.matches(disabled)) {
+      return;
+    }
+    if (event.type === &quot;click&quot;) {
+      selectTab(tab);
+      return;
+    }
+    const tabs = Array.from(
+      tab.closest('[role=&quot;tablist&quot;]').querySelectorAll('[role=&quot;tab&quot;]'),
+    ).filter((candidate) =&gt; !candidate.matches(disabled));
+    const current = tabs.indexOf(tab);
+    let next;
+    if (event.key === &quot;ArrowRight&quot; || event.key === &quot;ArrowDown&quot;) {
+      next = (current + 1) % tabs.length;
+    } else if (event.key === &quot;ArrowLeft&quot; || event.key === &quot;ArrowUp&quot;) {
+      next = (current + tabs.length - 1) % tabs.length;
+    } else if (event.key === &quot;Home&quot;) {
+      next = 0;
+    } else if (event.key === &quot;End&quot;) {
+      next = tabs.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    tabs[next].focus();
+    selectTab(tabs[next]);
+  };
+
+  for (const list of document.querySelectorAll('.nav[role=&quot;tablist&quot;]')) {
+    const selected =
+      list.querySelector('[role=&quot;tab&quot;][aria-selected=&quot;true&quot;]') ??
+      list.querySelector('[role=&quot;tab&quot;].active') ??
+      list.querySelector('[role=&quot;tab&quot;]');
+    if (selected != null) {
+      selectTab(selected);
+    }
+  }
+  document.addEventListener(&quot;click&quot;, interact);
+  document.addEventListener(&quot;keydown&quot;, interact);
+  window.addEventListener(&quot;pagehide&quot;, () =&gt; {
+    document.removeEventListener(&quot;click&quot;, interact);
+    document.removeEventListener(&quot;keydown&quot;, interact);
+  }, { once: true });
+})();
+&lt;/script&gt;
+&lt;script id=&quot;codex-visualization-carousel&quot;&gt;
+  (() =&gt; {
+    for (const root of document.querySelectorAll(&quot;.viz-carousel&quot;)) {
+      const panels = Array.from(
+        root.querySelectorAll(&quot;:scope &gt; [data-variant]&quot;),
+      );
+      if (panels.length === 0) {
+        continue;
+      }
+      root.setAttribute(&quot;role&quot;, &quot;group&quot;);
+      panels.forEach((panel, index) =&gt; {
+        panel.hidden = index !== 0;
+        panel.setAttribute(&quot;role&quot;, &quot;group&quot;);
+        if (!panel.hasAttribute(&quot;aria-label&quot;)) {
+          panel.setAttribute(&quot;aria-label&quot;, panel.dataset.variant);
+        }
+      });
+      root.dataset.activeVariant = panels[0].dataset.variant;
+      if (panels.length === 1) {
+        continue;
+      }
+
+      const controls = document.createElement(&quot;div&quot;);
+      controls.className = &quot;viz-carousel-controls&quot;;
+      // Portable copy of the settings dropdown's legacy glyph; no 14px icon-package preset matches it.
+      // https://github.com/openai/openai/blob/master/codex/codex-apps/webview/src/icons/chevron.svg
+      controls.innerHTML = `
+      &lt;button type=&quot;button&quot; class=&quot;viz-carousel-previous cursor-interaction&quot;&gt;&lt;i data-lucide=&quot;chevron-left&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt;&lt;/button&gt;
+      &lt;details class=&quot;viz-carousel-picker&quot;&gt;
+        &lt;summary class=&quot;cursor-interaction&quot;&gt;
+          &lt;span class=&quot;viz-carousel-count tabular-nums&quot;&gt;&lt;/span&gt;
+          &lt;span class=&quot;viz-carousel-name&quot;&gt;&lt;/span&gt;
+          &lt;svg class=&quot;viz-carousel-caret&quot; width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 20 21&quot; fill=&quot;none&quot; aria-hidden=&quot;true&quot; focusable=&quot;false&quot;&gt;
+            &lt;path d=&quot;M15.2793 7.71101C15.539 7.45131 15.961 7.45131 16.2207 7.71101C16.4804 7.97071 16.4804 8.39272 16.2207 8.65242L10.4707 14.4024C10.211 14.6621 9.78902 14.6621 9.52932 14.4024L3.77932 8.65242L3.69436 8.54792C3.52385 8.28979 3.55205 7.93828 3.77932 7.71101C4.00659 7.48374 4.3581 7.45554 4.61623 7.62605L4.72073 7.71101L10 12.9903L15.2793 7.71101Z&quot; fill=&quot;currentColor&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;0.6&quot; /&gt;
+          &lt;/svg&gt;
+        &lt;/summary&gt;
+        &lt;div class=&quot;viz-carousel-options&quot;&gt;&lt;/div&gt;
+      &lt;/details&gt;
+      &lt;button type=&quot;button&quot; class=&quot;viz-carousel-next cursor-interaction&quot;&gt;&lt;i data-lucide=&quot;chevron-right&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt;&lt;/button&gt;`;
+      const previous = controls.querySelector(&quot;.viz-carousel-previous&quot;);
+      const next = controls.querySelector(&quot;.viz-carousel-next&quot;);
+      const picker = controls.querySelector(&quot;.viz-carousel-picker&quot;);
+      const summary = picker.querySelector(&quot;summary&quot;);
+      const count = controls.querySelector(&quot;.viz-carousel-count&quot;);
+      const name = controls.querySelector(&quot;.viz-carousel-name&quot;);
+      const options = controls.querySelector(&quot;.viz-carousel-options&quot;);
+      const status = document.createElement(&quot;span&quot;);
+      status.className = &quot;sr-only&quot;;
+      status.setAttribute(&quot;role&quot;, &quot;status&quot;);
+      status.setAttribute(&quot;aria-live&quot;, &quot;polite&quot;);
+      status.setAttribute(&quot;aria-atomic&quot;, &quot;true&quot;);
+      previous.setAttribute(
+        &quot;aria-label&quot;,
+        root.dataset.previousLabel ?? &quot;Previous variant&quot;,
+      );
+      next.setAttribute(&quot;aria-label&quot;, root.dataset.nextLabel ?? &quot;Next variant&quot;);
+
+      let active = 0;
+      let mousePointerId = null;
+      let summaryPointerHandled = false;
+      summary.addEventListener(&quot;pointerdown&quot;, (event) =&gt; {
+        summaryPointerHandled =
+          event.pointerType === &quot;mouse&quot; &amp;&amp; event.button === 0 &amp;&amp; !event.ctrlKey;
+        if (!summaryPointerHandled) {
+          return;
+        }
+        event.preventDefault();
+        summary.focus({ preventScroll: true });
+        picker.open = !picker.open;
+        mousePointerId = picker.open ? event.pointerId : null;
+      });
+      summary.addEventListener(&quot;click&quot;, (event) =&gt; {
+        if (summaryPointerHandled &amp;&amp; event.detail &gt; 0) {
+          event.preventDefault();
+        }
+      });
+      const choices = panels.map((panel, index) =&gt; {
+        const choice = document.createElement(&quot;button&quot;);
+        choice.type = &quot;button&quot;;
+        choice.className = &quot;cursor-interaction&quot;;
+        choice.textContent = panel.dataset.variant;
+        choice.addEventListener(&quot;click&quot;, () =&gt; {
+          select(index);
+          summary.focus();
+        });
+        choice.addEventListener(&quot;pointerup&quot;, (event) =&gt; {
+          if (
+            picker.open &amp;&amp;
+            event.pointerType === &quot;mouse&quot; &amp;&amp;
+            event.button === 0 &amp;&amp;
+            event.pointerId === mousePointerId
+          ) {
+            choice.click();
+          }
+        });
+        options.appendChild(choice);
+        return choice;
+      });
+      const select = (index) =&gt; {
+        const changed = active !== index;
+        active = index;
+        panels.forEach((panel, position) =&gt; {
+          panel.hidden = position !== active;
+          choices[position].setAttribute(
+            &quot;aria-current&quot;,
+            String(position === active),
+          );
+        });
+        root.dataset.activeVariant = panels[active].dataset.variant;
+        count.textContent = `${active + 1} / ${panels.length}`;
+        name.textContent = panels[active].dataset.variant;
+        picker.open = false;
+        mousePointerId = null;
+        if (changed) {
+          status.textContent = `${count.textContent}: ${name.textContent}`;
+        }
+      };
+      previous.addEventListener(&quot;click&quot;, () =&gt;
+        select((active + panels.length - 1) % panels.length),
+      );
+      next.addEventListener(&quot;click&quot;, () =&gt;
+        select((active + 1) % panels.length),
+      );
+      picker.addEventListener(&quot;keydown&quot;, (event) =&gt; {
+        if (event.key === &quot;Escape&quot; &amp;&amp; picker.open) {
+          event.preventDefault();
+          picker.open = false;
+          mousePointerId = null;
+          summary.focus();
+          return;
+        }
+        if (event.altKey || event.ctrlKey || event.metaKey) {
+          return;
+        }
+        const index = choices.indexOf(document.activeElement);
+        let nextIndex;
+        if (event.key === &quot;ArrowDown&quot;) {
+          nextIndex = index &lt; 0 ? active : (index + 1) % choices.length;
+        } else if (event.key === &quot;ArrowUp&quot;) {
+          nextIndex = index &lt; 0 ? active : (index + choices.length - 1) % choices.length;
+        } else if (picker.open &amp;&amp; event.key === &quot;Home&quot;) {
+          nextIndex = 0;
+        } else if (picker.open &amp;&amp; event.key === &quot;End&quot;) {
+          nextIndex = choices.length - 1;
+        } else {
+          return;
+        }
+        event.preventDefault();
+        picker.open = true;
+        choices[nextIndex].focus();
+      });
+      picker.addEventListener(&quot;focusout&quot;, (event) =&gt; {
+        if (!picker.contains(event.relatedTarget)) {
+          picker.open = false;
+          mousePointerId = null;
+        }
+      });
+      const dismiss = (event) =&gt; {
+        if (!summary.contains(event.target)) {
+          mousePointerId = null;
+        }
+        if (!picker.contains(event.target)) {
+          picker.open = false;
+        }
+      };
+      const endPointerSelection = () =&gt; {
+        mousePointerId = null;
+      };
+      const sizePicker = () =&gt; {
+        root.style.setProperty(
+          &quot;--viz-carousel-picker-height&quot;,
+          `${picker.open ? options.offsetHeight : 0}px`,
+        );
+      };
+      picker.addEventListener(&quot;toggle&quot;, sizePicker);
+      window.addEventListener(&quot;resize&quot;, sizePicker);
+      document.addEventListener(&quot;pointerdown&quot;, dismiss);
+      document.addEventListener(&quot;pointerup&quot;, endPointerSelection);
+      document.addEventListener(&quot;pointercancel&quot;, endPointerSelection);
+      window.addEventListener(&quot;blur&quot;, endPointerSelection);
+      window.addEventListener(
+        &quot;pagehide&quot;,
+        () =&gt; {
+          document.removeEventListener(&quot;pointerdown&quot;, dismiss);
+          document.removeEventListener(&quot;pointerup&quot;, endPointerSelection);
+          document.removeEventListener(&quot;pointercancel&quot;, endPointerSelection);
+          window.removeEventListener(&quot;blur&quot;, endPointerSelection);
+          window.removeEventListener(&quot;resize&quot;, sizePicker);
+        },
+        { once: true },
+      );
+      root.append(controls, status);
+      select(0);
+    }
+  })();
+&lt;/script&gt;
+&lt;script id=&quot;codex-visualization-lucide&quot; async src=&quot;https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+(() =&gt; {
+  const initialize = () =&gt; {
+    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  if (globalThis.lucide != null) {
+    initialize();
+    return;
+  }
+  document
+    .getElementById(&quot;codex-visualization-lucide&quot;)
+    ?.addEventListener(&quot;load&quot;, initialize, { once: true });
+})();
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
+
+<script>(() => {
+  const frame = document.getElementById("codex-visualization");
+  if (!(frame instanceof HTMLIFrameElement)) {
+    return;
+  }
+  const isShare = document.documentElement.classList.contains(
+    "visualization-share-root",
+  );
+  let viewportHeight = globalThis.innerHeight;
+  let sizeFingerprint = null;
+  let sizeWriteTimeout;
+  let lastSize = null;
+  let pendingSize = null;
+  const storageKey = `codex:visualization-widget-state-v2:${JSON.stringify([
+    globalThis.location.pathname,
+    globalThis.location.search,
+  ])}`;
+  const sizeStorageKey = `${storageKey}:share-size-v1`;
+  const parseState = (serializedState) => {
+    if (
+      typeof serializedState !== "string" ||
+      new TextEncoder().encode(serializedState).length > 16 * 1024
+    ) {
+      throw new TypeError(
+        "Widget state must be a JSON object of at most 16 KiB",
+      );
+    }
+    /** @type {unknown} */
+    const state = JSON.parse(serializedState);
+    if (
+      state == null ||
+      typeof state !== "object" ||
+      Array.isArray(state) ||
+      ("imageIds" in state &&
+        (!Array.isArray(state.imageIds) || state.imageIds.length > 0))
+    ) {
+      throw new TypeError("Widget state must be a JSON object");
+    }
+    const storedState = { modelContent: null, privateContent: null, ...state };
+    const canonicalState = JSON.stringify(
+      storedState,
+      (_key, /** @type {unknown} */ value) => {
+        if (typeof value === "number" && !Number.isFinite(value)) {
+          throw new TypeError("Widget state must contain finite numbers");
+        }
+        return value;
+      },
+    );
+    if (new TextEncoder().encode(canonicalState).length > 16 * 1024) {
+      throw new TypeError(
+        "Widget state must be a JSON object of at most 16 KiB",
+      );
+    }
+    return storedState;
+  };
+  let storage = null;
+  let state = null;
+  try {
+    const localStorage = globalThis.localStorage;
+    const probeKey = `${storageKey}:probe`;
+    localStorage.setItem(probeKey, "1");
+    localStorage.removeItem(probeKey);
+    storage = localStorage;
+    const savedState = storage.getItem(storageKey);
+    if (savedState != null) {
+      try {
+        state = parseState(savedState);
+      } catch {
+        // Invalid saved state does not disable future writes.
+      }
+    }
+  } catch {
+    storage = null;
+  }
+  const persistSize = () => {
+    globalThis.clearTimeout(sizeWriteTimeout);
+    if (pendingSize == null) {
+      return;
+    }
+    try {
+      storage?.setItem(sizeStorageKey, pendingSize);
+    } catch {
+      // A denied or full cache must not affect the visualization.
+    }
+    pendingSize = null;
+  };
+  if (isShare) {
+    globalThis.addEventListener("pagehide", persistSize);
+  }
+  const initialGlobals = {
+    widgetState: state,
+    statePersistence: storage == null ? "none" : "local",
+  };
+
+  const channel = new MessageChannel();
+  channel.port1.addEventListener("message", (event) => {
+    const data = event.data;
+    if (typeof data !== "object" || data == null) {
+      return;
+    }
+    if (data.type === "widget-state-write") {
+      if (!Number.isSafeInteger(data.id) || data.id <= 0) {
+        return;
+      }
+      let ok = false;
+      try {
+        if (storage != null) {
+          const state = parseState(data.state);
+          storage.setItem(storageKey, JSON.stringify(state));
+          ok = true;
+        }
+      } catch {
+        // Storage denial, quota limits, and invalid state return a failed receipt.
+      }
+      channel.port1.postMessage({
+        type: "widget-state-result",
+        id: data.id,
+        ok,
+      });
+      return;
+    }
+    if (data.type === "height") {
+      const height = data.height;
+      if (
+        typeof height !== "number" ||
+        !Number.isFinite(height) ||
+        height < 0
+      ) {
+        return;
+      }
+      if (height <= 10_000) {
+        const width = isShare && storage != null ? frame.clientWidth : null;
+        frame.style.height = Math.ceil(height) + "px";
+        if (isShare && storage != null) {
+          const size = JSON.stringify({
+            fingerprint: sizeFingerprint,
+            width,
+            viewportHeight: globalThis.innerHeight,
+            dark: globalThis.matchMedia("(prefers-color-scheme: dark)").matches,
+            scale: globalThis.devicePixelRatio,
+            height: Math.ceil(height),
+          });
+          if (size !== lastSize) {
+            lastSize = size;
+            pendingSize = size;
+            globalThis.clearTimeout(sizeWriteTimeout);
+            sizeWriteTimeout = globalThis.setTimeout(persistSize, 100);
+          }
+        }
+      }
+      if (isShare) {
+        // Keep unusually tall content accessible without accepting an unbounded height.
+        if (height > 10_000 && Number.parseFloat(frame.style.height) === 0) {
+          frame.style.removeProperty("height");
+        }
+        frame.scrolling = height > 10_000 ? "auto" : "no";
+        document.documentElement.classList.add("visualization-share-ready");
+      }
+      return;
+    }
+    if (data.type === "scroll-to") {
+      const top = data.top;
+      if (
+        typeof top === "number" &&
+        Number.isFinite(top) &&
+        top >= 0 &&
+        globalThis.navigator.userActivation?.isActive === true
+      ) {
+        globalThis.scrollTo({
+          top: Math.ceil(
+            globalThis.scrollY + frame.getBoundingClientRect().top + top,
+          ),
+        });
+      }
+      return;
+    }
+    if (data.type === "open-external") {
+      const rawHref = data.href;
+      if (typeof rawHref !== "string") {
+        return;
+      }
+      let href;
+      try {
+        const url = new URL(rawHref, document.baseURI);
+        if (url.protocol !== "https:") {
+          return;
+        }
+        href = url.href;
+      } catch {
+        return;
+      }
+      if (globalThis.navigator.userActivation?.isActive === true) {
+        const anchor = document.createElement("a");
+        anchor.href = href;
+        anchor.rel = "noopener noreferrer";
+        anchor.target = "_blank";
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+      }
+      return;
+    }
+    if (data.type === "follow-up") {
+      const prompt = data.prompt;
+      if (
+        typeof prompt !== "string" ||
+        globalThis.navigator.userActivation?.isActive !== true
+      ) {
+        return;
+      }
+      const title = data.title;
+      globalThis.prompt(typeof title === "string" ? title : prompt, prompt);
+    }
+  });
+  channel.port1.start();
+  const srcdoc = frame.dataset.srcdoc;
+  if (srcdoc == null) {
+    return;
+  }
+  globalThis.addEventListener("resize", () => {
+    const height = Number.parseFloat(frame.style.height);
+    if (!isShare && (!Number.isFinite(height) || height <= viewportHeight)) {
+      frame.style.removeProperty("height");
+    }
+    viewportHeight = globalThis.innerHeight;
+    channel.port1.postMessage({ type: "measure" });
+  });
+  frame.addEventListener(
+    "load",
+    () => {
+      frame.contentWindow?.postMessage(
+        { type: "codex-visualization-initialize" },
+        "*",
+        [channel.port2],
+      );
+    },
+    { once: true },
+  );
+  // Match the trusted bootstrap element, not the same text in an authored title.
+  const frameHtml = srcdoc.replace(
+    '<script type="application/json" id="codex-visualization-widget-state">__CODEX_VISUALIZATION_WIDGET_STATE__<\/script>',
+    () =>
+      '<script type="application/json" id="codex-visualization-widget-state">' +
+      JSON.stringify(initialGlobals).replaceAll("<", "\\u003c") +
+      "<\/script>",
+  );
+  if (isShare && storage != null) {
+    // Fingerprint the rendered document, including restored widget state, without
+    // storing its content. This is a layout cache, not a security identity.
+    let hash = 5381;
+    for (let index = 0; index < frameHtml.length; index += 1) {
+      hash = (hash * 33 + frameHtml.charCodeAt(index)) % 4_294_967_296;
+    }
+    sizeFingerprint = hash.toString(36);
+    try {
+      const size = JSON.parse(storage.getItem(sizeStorageKey) ?? "null");
+      if (
+        size?.fingerprint === sizeFingerprint &&
+        size.width === frame.clientWidth &&
+        size.viewportHeight === globalThis.innerHeight &&
+        size.dark ===
+          globalThis.matchMedia("(prefers-color-scheme: dark)").matches &&
+        size.scale === globalThis.devicePixelRatio &&
+        typeof size.height === "number" &&
+        Number.isFinite(size.height) &&
+        size.height >= 0 &&
+        size.height <= 10_000
+      ) {
+        frame.style.height = size.height + "px";
+      }
+    } catch {
+      // Ignore missing or invalid cache entries and measure the live frame.
+    }
+  }
+  frame.srcdoc = frameHtml;
+  delete frame.dataset.srcdoc;
+})();
+</script>
+</body>
+</html>

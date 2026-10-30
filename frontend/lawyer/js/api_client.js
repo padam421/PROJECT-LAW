@@ -8,7 +8,33 @@
 
 const ApiClient = {
   apiUrl(endpoint) {
-    return window.AuthManager ? AuthManager.getApiUrl(endpoint) : endpoint;
+    return typeof AuthManager !== 'undefined' ? AuthManager.getApiUrl(endpoint) : endpoint;
+  },
+
+  async requestJSON(endpoint, { signal, timeoutMs = 30000, ...options } = {}) {
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) abort();
+    const timeout = setTimeout(abort, timeoutMs);
+    try {
+      const res = await fetch(this.apiUrl(endpoint), { ...options, credentials: 'include', signal: controller.signal });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        const error = new Error(res.status === 401 ? 'Your session has ended. Sign in again to continue verification.' : data?.error || 'The request could not be completed. Please retry.');
+        error.status = res.status;
+        throw error;
+      }
+      if (!data) throw new Error('The server returned an invalid response. Please retry.');
+      return data;
+    } catch (error) {
+      if (error.name === 'AbortError' && !signal?.aborted) throw new Error('The request took too long. Please retry; your saved submissions are retained.');
+      if (error instanceof TypeError) throw new Error('Could not connect to the server. Check your connection and retry.');
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+      signal?.removeEventListener('abort', abort);
+    }
   },
 
   /**
@@ -38,19 +64,18 @@ const ApiClient = {
   /* --------------------------------------------------------
      BAR COUNCIL REGISTRY CHECK (internal simulation, honestly labelled)
      -------------------------------------------------------- */
-  async lookupBarCouncil(barNumber, stateCouncil) {
-    await this.delay(700);
+  async lookupBarCouncil(barNumber, stateCouncil, options = {}) {
     try {
-      const res = await fetch(this.apiUrl('/api/lawyer/verification/bar-lookup'), {
+      const data = await this.requestJSON('/api/lawyer/verification/bar-lookup', {
+        ...options,
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json', ...this.headers() },
         body: JSON.stringify({ barNumber, stateCouncil })
       });
-      const data = await res.json();
-      if (!res.ok) return { status: 'error', message: data.error || 'Lookup failed.' };
       // Map backend outcome → UI states
       switch (data.outcome) {
+        case 'demo_not_verified':
+          return { status: 'demo', message: data.reason };
         case 'verified':
           return { status: 'verified', message: 'Registry match confirmed.' };
         case 'manual_verification_required':
@@ -65,34 +90,33 @@ const ApiClient = {
         default:
           return { status: 'unable', message: data.reason || 'Unable to verify right now.' };
       }
-    } catch (_e) {
-      return { status: 'error', message: 'Network error during registry lookup.' };
+    } catch (error) {
+      if (error.name === 'AbortError') throw error;
+      return { status: 'error', message: error.message };
     }
   },
 
   /* --------------------------------------------------------
      CREDENTIAL DOCUMENTS (real uploads, honest review states)
      -------------------------------------------------------- */
-  async uploadDocument(file, category, label) {
+  async uploadDocument(file, category, label, options = {}) {
     const form = new FormData();
     form.append('document', file);
     form.append('category', category || 'other');
     form.append('label', label || file.name);
-    const res = await fetch(this.apiUrl('/api/lawyer/documents/upload'), {
+    const data = await this.requestJSON('/api/lawyer/documents/upload', {
+      timeoutMs: 60000,
+      ...options,
       method: 'POST',
-      credentials: 'include',
       headers: this.headers(),
       body: form
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Upload failed.');
+    if (!data.document) throw new Error('The upload was not confirmed. Please retry.');
     return data.document;
   },
 
-  async listDocuments() {
-    const res = await fetch(this.apiUrl('/api/lawyer/documents'), { credentials: 'include', headers: this.headers() });
-    if (!res.ok) return [];
-    const data = await res.json();
+  async listDocuments(options = {}) {
+    const data = await this.requestJSON('/api/lawyer/documents', { ...options, headers: this.headers() });
     return data.documents || [];
   },
 
@@ -101,33 +125,31 @@ const ApiClient = {
     return this.apiUrl(`/api/lawyer/documents/${docId}/download`);
   },
 
-  async deleteDocument(docId) {
-    const res = await fetch(this.apiUrl(`/api/lawyer/documents/${docId}`), {
+  async deleteDocument(docId, options = {}) {
+    const data = await this.requestJSON(`/api/lawyer/documents/${docId}`, {
+      ...options,
       method: 'DELETE',
-      credentials: 'include',
       headers: this.headers()
     });
-    return res.ok;
+    return data.ok === true;
   },
 
   /* --------------------------------------------------------
      IDENTITY / LIVENESS SUBMISSION (structured, manual review)
      -------------------------------------------------------- */
-  async submitIdentityCheck(selfieCaptured, idDocSubmitted) {
-    await this.delay(600);
-    const res = await fetch(this.apiUrl('/api/lawyer/identity-check'), {
+  async submitIdentityCheck(selfieCaptured, idDocSubmitted, options = {}) {
+    const data = await this.requestJSON('/api/lawyer/identity-check', {
+      ...options,
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...this.headers() },
       body: JSON.stringify({ selfieCaptured: !!selfieCaptured, idDocSubmitted: !!idDocSubmitted })
     });
-    return res.ok;
+    if (!data.identity) throw new Error('Identity submission was not confirmed. Please retry.');
+    return data.identity;
   },
 
-  async fetchVerificationSummary() {
-    const res = await fetch(this.apiUrl('/api/lawyer/verification-summary'), { credentials: 'include', headers: this.headers() });
-    if (!res.ok) return null;
-    return res.json();
+  async fetchVerificationSummary(options = {}) {
+    return this.requestJSON('/api/lawyer/verification-summary', { ...options, headers: this.headers() });
   },
 
   /* --------------------------------------------------------
@@ -359,8 +381,9 @@ const ApiClient = {
      PROFILE
      -------------------------------------------------------- */
   async updateProfile(patch) {
-    const res = await fetch('/api/lawyer/profile', {
+    const res = await fetch(this.apiUrl('/api/lawyer/profile'), {
       method: 'PATCH',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...this.headers() },
       body: JSON.stringify(patch)
     });
@@ -376,7 +399,7 @@ const ApiClient = {
 
   async setProfileDeactivated(deactivated) {
     const endpoint = deactivated ? '/api/lawyer/deactivate' : '/api/lawyer/reactivate';
-    const res = await fetch(endpoint, { method: 'POST', headers: this.headers() });
+    const res = await fetch(this.apiUrl(endpoint), { method: 'POST', credentials: 'include', headers: this.headers() });
     if (res.ok && Store.getState('lawyerProfile')) {
       const lp = Store.getState('lawyerProfile');
       lp.profileDeactivated = deactivated;
@@ -389,7 +412,7 @@ const ApiClient = {
      PAYMENTS EXPORT (real CSV from server)
      -------------------------------------------------------- */
   async exportPaymentsCsv() {
-    const res = await fetch('/api/payments/export.csv', { headers: this.headers() });
+    const res = await fetch(this.apiUrl('/api/payments/export.csv'), { credentials: 'include', headers: this.headers() });
     if (!res.ok) throw new Error('Export failed.');
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);

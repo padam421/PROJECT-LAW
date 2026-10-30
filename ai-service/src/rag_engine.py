@@ -207,13 +207,68 @@ class LegalRAGEngine:
         results.sort(key=lambda x: x["distance"])
         return results[:top_k]
 
-    def call_gemini(self, prompt: str, system_instruction: str = None, temperature: float = 0.15):
+    def call_court_model(self, prompt, system_instruction=None, temperature=0.2, json_output=True, deadline=None):
+        try:context=json.loads(prompt)
+        except (ValueError,TypeError):context={}
+        scope=context.get('active_examination') or {}
+        if context.get('action')=='witness_answer' and scope.get('witness') in ('WITNESS_DEFENSE','WITNESS_PROSECUTION'):
+            actors=[scope['witness']]
+        elif scope.get('questioningSide') in ('DEFENSE','PROSECUTION'):
+            actors=['JUDGE',scope['questioningSide']]
+        else:actors=['JUDGE','DEFENSE','PROSECUTION']
+        # Constrain speaker identities during decoding rather than accepting a random role then retrying.
+        schema={'type':'object','properties':{
+            'turns':{'type':'array','maxItems':4,'items':{'type':'object','properties':{
+                'actor':{'type':'string','enum':actors},'text':{'type':'string'},'name':{'type':'string'}},
+                'required':['actor','text']}},
+            'needs_answer':{'type':'boolean'},'question':{'type':'string'},
+            'question_actor':{'type':'string','enum':actors},
+            'witness_side':{'type':'string','enum':[scope['side']] if scope.get('side') in ('DEFENSE','PROSECUTION') else ['DEFENSE','PROSECUTION']}},
+            'required':['turns','needs_answer','question']}
+        if context.get('action')=='opening':
+            schema['properties']['needs_answer']={'type':'boolean','enum':[False]}
+            schema['properties']['question']={'type':'string','enum':['']}
+        return self.call_gemini(prompt, system_instruction, temperature, json_output, profile='court',response_schema=schema,deadline=deadline)
+
+    def review_court_model(self, prompt, system_instruction, deadline):
+        try:context=json.loads(prompt)
+        except (ValueError,TypeError):context={}
+        scope=context.get('active_examination') or {}
+        actors=['JUDGE',scope['questioningSide']] if scope.get('questioningSide') in ('DEFENSE','PROSECUTION') else ['JUDGE','DEFENSE','PROSECUTION']
+        if context.get('action')=='review_turn':
+            actors=list(dict.fromkeys(t['actor'] for t in context.get('proposal',{}).get('turns',[])
+                                     if t.get('actor') in ('JUDGE','DEFENSE','PROSECUTION'))) or actors
+        response={'type':'object','properties':{
+            'turns':{'type':'array','maxItems':4,'items':{'type':'object','properties':{
+                'actor':{'type':'string','enum':actors},'text':{'type':'string'}},'required':['actor','text']}},
+            'needs_answer':{'type':'boolean'},'question':{'type':'string'},
+            'question_actor':{'type':'string','enum':actors},
+            'witness_side':{'type':'string','enum':[scope['side']] if scope.get('side') in ('DEFENSE','PROSECUTION') else ['DEFENSE','PROSECUTION']}},
+            'required':['turns','needs_answer','question']}
+        if context.get('action')=='opening':
+            response['properties']['needs_answer']={'type':'boolean','enum':[False]}
+            response['properties']['question']={'type':'string','enum':['']}
+        schema={'type':'object','properties':{'response':response,
+            'checks':{'type':'object','properties':{key:{'type':'boolean'} for key in ('facts','law','procedure','roles','clarity')},
+                      'required':['facts','law','procedure','roles','clarity']},
+            'legal_claims':{'type':'array','items':{'type':'object','properties':{
+                'text':{'type':'string'},'kind':{'type':'string','enum':['law','reported','inquiry']},
+                'source_ids':{'type':'array','items':{'type':'string'}},'support_quote':{'type':'string'}},
+                'required':['text','kind','source_ids','support_quote']}}},
+            'required':['response','checks','legal_claims']}
+        return self.call_gemini(prompt,system_instruction,0.0,True,profile='court_review',response_schema=schema,deadline=deadline)
+
+    def call_gemini(self, prompt: str, system_instruction: str = None, temperature: float = 0.15, json_output: bool = False, profile=None, response_schema=None, deadline=None):
         """
-        Calls Gemini API with ultra-fast models and multi-model fallback.
-        Priority: gemini-3.5-flash-lite (~1.3s) -> gemini-flash-lite-latest -> gemini-3.5-flash.
+        Calls Gemini with the existing chat fallback or a bounded court profile.
         """
+        court=profile in ('court','court_review')
         api_key = GEMINI_API_KEY or load_env_key()
         if not api_key:
+            if court:
+                error=RuntimeError('The courtroom AI provider is not configured. Your hearing is saved.')
+                error.status_code=503;error.retryable=False;error.retry_after=0
+                raise error
             return "Error: GEMINI_API_KEY is not configured in .env file."
 
         candidate_models = [
@@ -222,6 +277,18 @@ class LegalRAGEngine:
             "gemini-flash-lite-latest",
             "gemini-flash-latest"
         ]
+        deadline=(deadline if deadline is not None else time.monotonic()+34) if court else None
+        if court:
+            # Review and testimony have different latency/payloads. A review timeout must
+            # never open the circuit for the next witness answer. Use a fixed fallback
+            # model rather than a latest alias that can resolve to the failing primary.
+            cooldown_attr='_court_review_model_cooldown' if profile=='court_review' else '_court_model_cooldown'
+            preferred_attr='_court_review_preferred_model' if profile=='court_review' else '_court_preferred_model'
+            cooldown=getattr(self,cooldown_attr,{})
+            preferred=getattr(self,preferred_attr,'gemini-3.1-flash-lite')
+            candidates=list(dict.fromkeys([preferred,'gemini-3.1-flash-lite','gemini-3.5-flash-lite']))
+            rate_cooldown=getattr(self,'_court_rate_cooldown',{})
+            candidate_models=[model for model in candidates if max(cooldown.get(model,0),rate_cooldown.get(model,0))<=time.monotonic()][:2]
 
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
@@ -229,7 +296,7 @@ class LegalRAGEngine:
                 "temperature": temperature,
                 "topP": 0.85,
                 "topK": 40,
-                "maxOutputTokens": 8192
+                "maxOutputTokens": 2048 if court else 16384 if profile == 'advocate' else 8192
             }
         }
 
@@ -237,36 +304,79 @@ class LegalRAGEngine:
             payload["systemInstruction"] = {
                 "parts": [{"text": system_instruction}]
             }
+        if json_output:
+            payload['generationConfig']['responseMimeType'] = 'application/json'
+            if response_schema:payload['generationConfig']['responseJsonSchema']=response_schema
 
-        data_bytes = json.dumps(payload).encode("utf-8")
-
+        attempted=[]
         for model in candidate_models:
+            if court:
+                payload['generationConfig']['thinkingConfig']=({'thinkingBudget':0} if model.startswith('gemini-2.5-') else {'thinkingLevel':'minimal'})
+            data_bytes = json.dumps(payload).encode("utf-8")
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-            for attempt in range(2):
+            for attempt in range(1 if court else 2):
+                remaining=deadline-time.monotonic() if court else 60
+                if remaining<=0:break
+                attempted.append(model)
                 req = urllib.request.Request(
                     url,
                     data=data_bytes,
                     headers={"Content-Type": "application/json"}
                 )
                 try:
-                    with urllib.request.urlopen(req, timeout=60) as resp:
+                    with urllib.request.urlopen(req, timeout=min(10 if profile=='court_review' else 16,remaining) if court else 60) as resp:
                         res = json.loads(resp.read().decode("utf-8"))
-                        candidates = res.get("candidates", [])
-                        if candidates and "content" in candidates[0]:
-                            parts = candidates[0]["content"].get("parts", [])
-                            if parts:
-                                return parts[0].get("text", "")
+                        response_candidates = res.get("candidates", [])
+                        if response_candidates and "content" in response_candidates[0]:
+                            parts = response_candidates[0]["content"].get("parts", [])
+                            text=''.join(part.get('text','') for part in parts if not part.get('thought'))
+                            if text:
+                                if court:
+                                    # Do not pass truncated/invalid JSON into the hearing.
+                                    # Trying the other model stays inside this request's budget.
+                                    parsed=json.loads(text) if json_output else text
+                                    if json_output and (not isinstance(parsed,dict) or response_candidates[0].get('finishReason')=='MAX_TOKENS'):
+                                        raise ValueError('Incomplete structured response')
+                                    setattr(self,preferred_attr,model)
+                                    cooldown.pop(model,None)
+                                return text
+                        if court:raise ValueError('Empty structured response')
                 except urllib.error.HTTPError as e:
                     print(f"Gemini API ({model}, attempt {attempt+1}) HTTP {e.code}")
+                    if court:
+                        delay=30 if e.code==429 else 10 if e.code>=500 else 300
+                        if e.code==429:
+                            try:delay=max(1,min(120,int(e.headers.get('Retry-After',delay))))
+                            except (TypeError,ValueError,AttributeError):pass
+                            # Quotas apply to the provider model across both request types.
+                            # Only timeouts remain isolated between review and generation.
+                            rate_cooldown[model]=time.monotonic()+delay;self._court_rate_cooldown=rate_cooldown
+                        cooldown[model]=time.monotonic()+delay;setattr(self,cooldown_attr,cooldown)
+                        break
                     if e.code in [429, 503]:
                         time.sleep(1.0)
                         continue
                     break
                 except Exception as e:
-                    print(f"Gemini API ({model}, attempt {attempt+1}) connection exception: {e}")
+                    # Exception text can contain the provider URL/API key; log only its type.
+                    print(f"Gemini API ({model}, attempt {attempt+1}) connection exception: {type(e).__name__}")
+                    if court:
+                        cooldown[model]=time.monotonic()+5;setattr(self,cooldown_attr,cooldown)
+                        break
                     time.sleep(1.0)
                     continue
 
+        if court:
+            # The first timeout's short cooldown can expire while trying the fallback.
+            # Give all failed attempts a brief recovery window measured from completion.
+            for model in attempted:cooldown[model]=max(cooldown.get(model,0),time.monotonic()+5)
+            setattr(self,cooldown_attr,cooldown)
+            remaining_cooldowns=[max(cooldown.get(model,0),rate_cooldown.get(model,0))-time.monotonic() for model in candidates
+                                 if max(cooldown.get(model,0),rate_cooldown.get(model,0))>time.monotonic()]
+            retry_after=max(1,int(min(remaining_cooldowns,default=5))+1)
+            error=RuntimeError(f'AI is temporarily unavailable. Your hearing is saved; retry in {retry_after} seconds.')
+            error.status_code=503;error.retryable=True;error.retry_after=retry_after
+            raise error
         return "Hamare AI Service par is samay uchh traffic hai. Kripya kuch kshano baad punah prayas karein."
 
     def detect_and_translate_query(self, query: str, preferred_lang: str = None) -> dict:
@@ -343,261 +453,13 @@ Respond strictly in valid JSON format:
             "english_translation": query
         }
 
-    def answer_query(self, query: str, user_role: str = "user", case_context: str = None, language: str = "auto", chat_history: list = None):
-        """
-        Main Zero-Hallucination Legal Engine.
-        - Deep problem statement analysis before retrieval.
-        - NEVER refuses a valid legal query (e.g. Cheque Bounce, Loan, Recovery, Property, Criminal, Civil).
-        - User Portal: ALWAYS delivers the 4-Section Citizen Brief (Photo 2 Format) directly on first turn.
-        - Advocate Portal: Delivers the Elaborated 5-Point Judicial Dossier (Photo 1 Format).
-        - Divergent Scenario 2 Generation when 'Not Satisfied' (is_retry) is clicked.
-        - Dynamic temperature: 0.75 for retries and 0.35 for initial queries.
-        """
-        combined_query = query
-        if case_context:
-            combined_query = f"{query} {case_context}"
+    def answer_query(self, query, user_role="user", case_context=None, language="auto", chat_history=None, retry=False):
+        from conversation_engine import answer
+        return answer(self, query, user_role, case_context, language, chat_history, retry)
 
-        # 1. Deep problem statement analysis & language detection
-        lang_info = self.detect_and_translate_query(combined_query, preferred_lang=language)
-        lang_name = lang_info.get("language_name", "Hindi/English")
-        lang_code = lang_info.get("detected_language_code", "hi")
-        search_query = lang_info.get("english_translation", combined_query)
-        problem_analysis = lang_info.get("problem_analysis", query)
-        primary_legal_issue = lang_info.get("primary_legal_issue", "")
-        statutory_sections = lang_info.get("statutory_sections", "")
-        is_legal = lang_info.get("is_legal", True)
-
-        is_lawyer = (user_role == "lawyer")
-        is_retry = bool(chat_history and isinstance(chat_history, list) and len(chat_history) > 0)
-
-        # Fast decline only for completely non-legal queries (e.g. food recipes, sports scores, weather)
-        if not is_legal and not self.is_legal_query(combined_query):
-            non_legal_notice = (
-                "### ⚖️ न्याय सेतु (Nyay Setu)\n\n"
-                "न्याय सेतु एक समर्पित विधिक सहायता पोर्टल है। कृपया कानून, अदालत, पुलिस, चेक बाउंस, संपत्ति, या अपने विधिक अधिकारों से संबंधित प्रश्न पूछें।"
-                if lang_code == "hi" or lang_name.lower() == "hindi" else
-                "### ⚖️ Nyay Setu Legal Assistant\n\n"
-                "Nyay Setu is a dedicated judicial assistance platform. Please ask questions related to law, courts, police, recovery, property, or your legal rights."
-            )
-            return non_legal_notice, lang_info
-
-        # 2. Search authentic Supreme Court precedents using English search terms
-        precedents = self.search_precedents(search_query, top_k=5 if is_retry else 4)
-        if not precedents:
-            # Fallback search across writ / constitutional collection
-            precedents = self.search_precedents(f"legal rights dispute {search_query}", top_k=3)
-
-        # 3. Build Grounding Context from authentic ChromaDB precedents or statutory jurisprudence
-        context_blocks = []
-        if precedents:
-            for i, p in enumerate(precedents, 1):
-                meta = p["metadata"]
-                case_no = meta.get("case_number", "Supreme Court Matter")
-                year = meta.get("year", "N/A")
-                citation = meta.get("citation", "")
-                judges = meta.get("judges", "")
-                court = meta.get("court", "Supreme Court of India")
-                category_name = p.get("category_name", "Supreme Court Precedent")
-                text = p["document"]
-
-                context_blocks.append(
-                    f"--- [AUTHENTIC PRECEDENT #{i} ({category_name})] ---\n"
-                    f"Court: {court}\n"
-                    f"Case Title / Number: {case_no} ({year})\n"
-                    f"Citation: {citation}\n"
-                    f"Bench / Coram: {judges}\n"
-                    f"Judicial Excerpt & Holding:\n{text}\n"
-                )
-        else:
-            context_blocks.append(
-                "--- [ESTABLISHED STATUTORY JURISPRUDENCE & SUPREME COURT BENCH RATIOS] ---\n"
-                "Governed by established Indian Statutes (e.g. Negotiable Instruments Act 1881, Bharatiya Nyaya Sanhita 2023 / IPC, "
-                "Bharatiya Nagarik Suraksha Sanhita 2023 / CrPC, Bharatiya Sakshya Adhiniyam 2023 / Evidence Act, Code of Civil Procedure 1908, "
-                "Consumer Protection Act 2019) and authoritative Supreme Court of India benchmark precedents and ratios."
-            )
-
-        context_str = "\n".join(context_blocks)
-
-        # Format previous chat history for retry context
-        history_str = ""
-        if is_retry:
-            h_lines = []
-            for item in chat_history[-6:]:
-                sender = item.get("sender", "user")
-                t = item.get("text", "")[:800]
-                h_lines.append(f"[{sender.upper()}]: {t}")
-            history_str = "\nPREVIOUS ATTEMPTS & REJECTED EXPLANATION (DO NOT REPEAT):\n" + "\n".join(h_lines) + "\n"
-
-        # 4. Construct Role-Specific System Instructions & Prompts
-        scenario_num = 2 if is_retry else 1
-        scenario_badge = f"#### 📌 Scenario {scenario_num}: " + (
-            "Alternative Trial Confrontation & Cross-Examination" if is_retry else "Primary Defense & Admissibility Hearing"
-        )
-        if is_lawyer:
-            scenario_badge = f"#### 📌 Scenario {scenario_num}: " + (
-                "Alternative Procedural Challenge & Tactical Recovery Route" if is_retry else "Primary Litigation Strategy & Enforcement"
-            )
-
-        retry_mandate = ""
-        if is_retry:
-            retry_mandate = f"""
-=============================================================================
-CRITICAL MANDATE: DIVERGENT ALTERNATIVE SCENARIO GENERATION (NOT SATISFIED RETRY)
-=============================================================================
-The user clicked 'NOT SATISFIED' (असंतोषजनक / पुनः विश्लेषण) on the previous response.
-UNDER NO CIRCUMSTANCES SHOULD YOU GENERATE THE SAME OR SIMILAR CONTENT!
-You MUST generate a COMPLETELY DIFFERENT LEGAL SCENARIO & CONTRASTING TACTICAL TRAJECTORY (SCENARIO 2):
-1. PIVOT TO A DIFFERENT LEGAL ANGLE / DEFENSE / REMEDY:
-   - If previous response focused on criminal proceedings (e.g. Section 138 NI Act or FIR), pivot to Civil Remedies (Order 37 CPC Summary Suit, Money Recovery, Interim Attachment under Order 38 Rule 5 CPC, Compounding/Mediation Settlement, or Section 482 Quashing).
-   - If previous focused on factual defenses, pivot to Strict Procedural Non-compliance (e.g. limitation bar, defective statutory demand notice, dispatch proof defects, lack of legally enforceable debt, bank memo discrepancies, or Section 63 BSA electronic certificate defects).
-2. DIVERGENT COURTROOM DEBATE / PROCEDURAL CHALLENGE:
-   - Do NOT repeat the previous dialogue or arguments!
-   - In user format: start debate with '{scenario_badge}' and present a completely fresh hearing round with new bench queries and alternative defense arguments.
-3. FRESH STRATEGIC ROADMAP:
-   - Outline an alternative litigation roadmap, contrasting tactical maneuvers, and new application drafts.
-"""
-
-        if is_lawyer:
-            # -------------------------------------------------------------
-            # ADVOCATE FORMAT (ELABORATED FROM PHOTO 1 ADVISORY FORMAT)
-            # -------------------------------------------------------------
-            system_instruction = (
-                "You are 'Nyay Setu Advocate AI' — India's Premier High-Stakes Judicial Counsel & Legal Dossier Engine for Practicing Advocates.\n"
-                f"CRITICAL REGIONAL LANGUAGE MANDATE: Conduct the entire legal dossier strictly in {lang_name} (Language code: {lang_code}).\n"
-                "Retain standard statutory provisions (e.g., Section 138 NI Act, Section 302 IPC / BNS 101, Article 226/32, BNSS 528, Order 37 CPC) and formal case citations.\n\n"
-                "MANDATORY ADVOCATE ADVISORY DOSSIER STRUCTURE (ELABORATED FROM PHOTO 1 FORMAT):\n\n"
-                "### ⚖️ Nyay Setu — Legal Case Assessment & Judicial Evaluation\n"
-                "- **केस सारांश व विधिक स्थिति (Executive Case Assessment)**: Authoritative judicial assessment of the client's brief, actionable causes of action, locus standi, and maintainability in court.\n"
-                "- **प्राथमिक विधिक निष्कर्ष (Primary Legal Finding)**: Prima facie evaluation of liability, civil vs criminal remedies, and prospective success rate.\n\n"
-                "### 📌 Applicable Statutory Sections & Statutory Grounds\n"
-                "- **लागू विशिष्ट कानूनी धाराएं (Specific Statutory Provisions)**: Complete section breakdown under BNS 2023 / IPC, BNSS 2023 / CrPC, BSA 2023 / Evidence Act, Special Acts (e.g. NI Act 1881, CPC, Consumer Act).\n"
-                "- **सांविधिक तत्व व साक्ष्य भार (Essential Ingredients & Burden of Proof)**: Threshold elements to prove, statutory presumptions (e.g. Sec 139 NI Act), reverse burdens, and statutory defenses.\n\n"
-                "### 📌 Key Procedural Facts & Evidentiary Checkpoints\n"
-                "- **प्रक्रियात्मक अनिवार्यताएं व समयसीमा (Mandatory Procedural Timelines)**: Strict limitation periods (e.g. 30 days statutory notice, 15 days cure period, 30 days filing window, dispatch proof, tracking receipts).\n"
-                "- **साक्ष्य बिंदु व प्रक्रियात्मक कमियां (Evidentiary Checkpoints & Tactical Vulnerabilities)**: Document verification (original instrument, return memo, postal receipt, ledger/bank statements), forensic compliance under Section 63 BSA 2023, procedural defects to exploit or avoid.\n\n"
-                "### 📌 Supreme Court Precedents & Judicial Ratios\n"
-                "- Authoritative Supreme Court and High Court precedents directly governing this dispute:\n"
-                "  * Full Case Title, Year, Bench/Coram, and Citation\n"
-                "  * Factual background and core Ratio Decidendi (विधि सिद्धांत)\n"
-                "  * Direct application to strengthen the counsel's case or overcome opponent defenses.\n\n"
-                "### 📌 Strategic Recommendations & Counsel Action Plan\n"
-                "- **अधिवक्ता हेतु तत्काल विधिक कार्ययोजना (Immediate Litigation Action Plan)**: Exact pleadings/notices to draft (Statutory Demand Notice, Criminal Complaint u/s 138/142 NI Act, Summary Suit Order 37 CPC, Section 143A interim compensation application).\n"
-                "- **जिरह व दलीलों के मुख्य बिंदु (Core Argument & Cross-Examination Pointers)**: Specific points to elicit during cross-examination of the opposite party.\n"
-                "- **सावधानी एवं प्रक्रियात्मक सुरक्षा (Tactical Safeguards for Counsel)**: How to avoid limitation dismissal, service presumption arguments under Section 27 General Clauses Act, evidence preservation.\n"
-                + retry_mandate
-            )
-        else:
-            # -------------------------------------------------------------
-            # CITIZEN / USER FORMAT (4 SECTIONS MATCHING PHOTO 2 FORMAT)
-            # -------------------------------------------------------------
-            system_instruction = (
-                "You are 'Nyay Setu Supreme Court AI' — India's Premier High-Stakes Judicial Counsel & Courtroom Simulation Engine for Citizens.\n"
-                f"CRITICAL REGIONAL LANGUAGE MANDATE: The user's query is in {lang_name} (Language code: {lang_code}).\n"
-                f"You MUST generate the ENTIRE legal analysis, precedent breakdown, courtroom debate scenarios, and tactical roadmap STRICTLY, NATURALLY, AND COMPREHENSIVELY in {lang_name}.\n"
-                "Do NOT mix languages except standard statutory provisions (e.g., Section 138 NI Act, Section 302 IPC / BNS 101, Art 226/32, Order 37 CPC) and official case citations.\n\n"
-                "MANDATORY 4-SECTION CITIZEN BRIEF STRUCTURE (MATCHING PHOTO 2 FORMAT EXACTLY):\n\n"
-                "### 1. 📌 Comprehensive Case Analysis & Statutory Framework\n"
-                "- **विस्तृत समस्या का विश्लेषण (Factual & Problem Breakdown)**: Directly break down the user's specific problem in plain, reassuring language (e.g., loan given, cheque dishonour with 'Funds Insufficient' memo, drawer avoiding contact).\n"
-                "- **लागू धाराएं और कानून (Applicable Statutory Sections)**: State exact charging, recovery, and defense sections under old and new codes (e.g., Section 138/142 NI Act, Section 420 IPC / Section 318(4) BNS 2023, Order 37 CPC Summary Suit, Section 143A interim compensation).\n"
-                "- **नागरिक के कानूनी अधिकार एवं प्रक्रियात्मक सुरक्षा (Citizen's Legal Rights & Protections)**: Explain rights, statutory presumptions under Section 139 NI Act, strict 30-day statutory legal notice requirement, 15-day cure period, and 1-month limitation to file court complaint.\n"
-                "- **अधिकार क्षेत्र वाली अदालत (Competent Court & Forum)**: Exact competent court (e.g., Judicial Magistrate First Class / Metropolitan Magistrate having jurisdiction over the payee's bank branch).\n"
-                "- **अनिवार्य दस्तावेजों की चेकलिस्ट (Mandatory Documents Checklist)**: Original cheque, bank return memo, copy of statutory legal demand notice, speed post receipt & tracking report, bank statement showing initial transfer.\n\n"
-                "### 2. 📚 Supreme Court Precedents & Legal Ratios\n"
-                "- Cite authentic landmark Supreme Court precedents applicable to this exact dispute (e.g., Rangappa v. Sri Mohan, Dashrath Rupsingh Rathod, Bir Singh v. Mukesh Kumar, MSR Leathers):\n"
-                "  * Case Title, Year, Bench, and Citation\n"
-                "  * Factual background of the precedent\n"
-                "  * The core Ratio Decidendi (कानूनी सिद्धांत) laid down by the Supreme Court\n"
-                "  * How this judgment directly shields or applies to the citizen's specific case.\n\n"
-                "### 3. 🏛️ Courtroom Debate Simulation\n"
-                f"{scenario_badge}\n"
-                f"Simulate an intense, realistic Indian Courtroom Hearing equivalent to a 3-minute live hearing strictly in {lang_name}.\n"
-                "Write an extended, substantive multi-round argument with AT LEAST 8 to 12 sequential dialogue exchanges between the 3 courtroom actors.\n"
-                "Format EVERY speaker turn using these exact prefixes on a new line so the frontend renders them into styled debate cards:\n"
-                "🏛️ **माननीय न्यायाधीश (Hon'ble Judge)**: [Opens hearing, tests counsels, questions factual defects, delivers bench directions]\n"
-                "🛡️ **मेरा वकील (Counsel for Defense/Petitioner)**: [Presents forceful defense/claim, quotes Supreme Court precedents, argues statutory presumptions, prays for relief/compensation]\n"
-                "⚖️ **विपक्षी वकील (Opponent Lawyer / Public Prosecutor)**: [Fiercely opposes, argues defense grounds or denies liability]\n\n"
-                "The debate MUST progress through: Opening -> Opposition -> Precedent Counter-Strike -> Evidentiary/Cross Arguments -> Final Bench Order.\n\n"
-                "### 4. 🧭 Strategic Tactical Roadmap & Immediate Action Plan\n"
-                "- **तत्काल 24-48 घंटे की कार्ययोजना (Immediate 24-48 Hours Action Plan)**: Immediate steps (e.g., draft and dispatch Section 138 Statutory Legal Demand Notice within 30 days of dishonour memo via Registered AD/Speed Post).\n"
-                "- **सावधानी एवं बचाव (Critical Precautions)**: What NOT to do, strict limitation timelines, how to preserve delivery proofs and bank statements.\n"
-                "- **कानूनी आवेदन (Key Applications / Complaints to Draft)**: Section 138 Criminal Complaint under Section 142 NI Act, Summary Suit under Order 37 CPC for civil money recovery.\n"
-                "- **नागरिक हेतु स्पष्ट कानूनी मार्गदर्शन (Simple Citizen Guidance)**: Clear actionable roadmap to recover funds with interest.\n"
-                + retry_mandate
-            )
-
-        user_prompt = (
-            f"CLIENT CASE QUERY / PROBLEM STATEMENT (Language: {lang_name}):\n{query}\n\n"
-            f"DEEP PROBLEM STATEMENT ANALYSIS:\n"
-            f"• Factual & Dispute Breakdown: {problem_analysis}\n"
-            f"• Primary Legal Issue: {primary_legal_issue}\n"
-            f"• Statutory Sections: {statutory_sections}\n\n"
-            + (f"CASE RECORD CONTEXT / ATTACHMENT:\n{case_context}\n\n" if case_context else "")
-            + (f"{history_str}\n" if history_str else "")
-            + f"AUTHENTIC JURISPRUDENCE & SUPREME COURT PRECEDENTS:\n"
-            f"{context_str}\n\n"
-            + (
-                f"REGENERATE A COMPLETELY NEW SCENARIO (SCENARIO 2). Do NOT duplicate previous arguments. Deliver fresh judicial angles and an alternative tactical strategy strictly in {lang_name}."
-                if is_retry else
-                f"Generate the comprehensive, in-depth legal analysis strictly in {lang_name} adhering to the required structure."
-            )
-        )
-
-        # Dynamic temperature: 0.75 on retry for high divergence and alternative scenario creation; 0.35 on initial query
-        temp = 0.75 if is_retry else 0.35
-        response_text = self.call_gemini(user_prompt, system_instruction=system_instruction, temperature=temp)
-        return response_text, lang_info
-
-    def simulate_courtroom(self, case_summary: str, category: str = None, language: str = "auto"):
-        """
-        Deep Courtroom Hearing Simulator supporting all 22 Regional Languages.
-        Generates 3-4 realistic trajectory scenarios and intense courtroom debate.
-        """
-        lang_info = self.detect_and_translate_query(case_summary, preferred_lang=language)
-        lang_name = lang_info.get("language_name", "Hindi/English")
-        lang_code = lang_info.get("detected_language_code", "hi")
-        search_query = lang_info.get("english_translation", case_summary)
-
-        precedents = self.search_precedents(search_query, top_k=4)
-
-        if not precedents:
-            refusal_text = (
-                "### 🛡️ Virtual Courtroom Simulator — Zero-Hallucination Guard\n\n"
-                "Aapka case summary hamare Supreme Court database ke categories (Constitutional Writs, Murder/Homicide, "
-                "Narcotics NDPS, Rape POCSO, Terrorism UAPA) se match nahi kar raha hai.\n\n"
-                "Virtual Courtroom simulation sirf authentic judicial precedents par aadharit hoti hai taaki aapko "
-                "actual courtroom proceedings ka realistic anubhav mil sake. Kripya apne case ke specific sections ya factual summary ke saath punah prastut karein."
-            )
-            return refusal_text, lang_info
-
-        context_str = "\n\nRELEVANT SUPREME COURT BENCH PRECEDENTS FOR COURT ARGUMENTS:\n" + "\n".join(
-            [f"• {p['metadata'].get('case_number', 'SC Case')} ({p['metadata'].get('year', '')}): {p['document'][:500]}..." for p in precedents]
-        )
-
-        system_instruction = (
-            "You are the Chief Presiding Officer of the Nyay Setu Virtual Courtroom Simulator.\n"
-            f"CRITICAL LANGUAGE MANDATE: Conduct the proceedings and simulation strictly in {lang_name} ({lang_code}).\n"
-            "Your task is to take the provided case brief, construct 3 to 4 realistic courtroom trajectory scenarios, "
-            "and simulate an authentic, intense Indian Courtroom Hearing between:\n"
-            "1. **Honorable Judge Bench (My Lord / Your Honour)**\n"
-            "2. **Counsel for Petitioner / Defense Advocate (Mera Lawyer)**\n"
-            "3. **Counsel for Respondent / Public Prosecutor (Opponent Lawyer)**\n\n"
-            "OUTPUT STRUCTURE MUST BE CLEAN MARKDOWN:\n"
-            "### 1. 📌 Case Classification & Statutory Charges\n"
-            "### 2. 🎯 Courtroom Trajectory Scenarios (3-4 Likely Outcomes based on Evidence)\n"
-            "### 3. 🏛️ Live Courtroom Simulation Dialogue (Round 1 Opening, Round 2 Cross-Argument, Round 3 Bench Ruling)\n"
-            "### 4. ⚖️ Bench's Interim / Final Order (Direction & Next Hearing Date)\n"
-            "### 5. 🛡️ Tactical Advice for the Litigant / Advocate\n\n"
-            f"Strictly adhere to realistic Indian judicial etiquette and procedural codes (CPC, CrPC/BNSS, BSA 2023) in {lang_name}."
-        )
-
-        prompt = (
-            f"CASE SUMMARY PROVIDED BY CLIENT / COUNSEL (Language: {lang_name}):\n{case_summary}\n"
-            f"{context_str}\n\n"
-            f"Generate the full Virtual Courtroom Simulation strictly in {lang_name}."
-        )
-
-        sim_text = self.call_gemini(prompt, system_instruction=system_instruction, temperature=0.15)
-        return sim_text, lang_info
+    def simulate_courtroom(self, case_summary, category=None, language="auto", chat_history=None, court_type="DISTRICT", action="opening", user_input="", role="user", examination=None):
+        from conversation_engine import court_turn
+        return court_turn(self, case_summary, chat_history, language, court_type, action, user_input, role, examination)
 
 # Singleton instance
 rag_engine = None

@@ -277,6 +277,13 @@ const Utils = {
     return re.test(String(phone).replace(/[\s\-\+]/g, '').replace(/^91/, ''));
   },
 
+  validateBarNumber(bar) {
+    const value = String(bar || '').trim().toUpperCase();
+    if (!/^[A-Z]{2}\/[A-Z0-9]+\/\d{4}$/.test(value)) return false;
+    const year = Number(value.split('/').pop());
+    return year >= 1950 && year <= new Date().getFullYear();
+  },
+
   validateOTP(otp) {
     return /^\d{6}$/.test(String(otp));
   },

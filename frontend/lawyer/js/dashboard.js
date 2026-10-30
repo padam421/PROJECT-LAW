@@ -27,7 +27,7 @@ const DashboardPage = {
             <span class="greeting-badge ${isVerified ? '' : 'pending'}">
               ${isVerified
                 ? `<span class="verified-tick"><span class="material-symbols-rounded">check</span></span> Verified Advocate &bull; Bar ID ${Utils.escapeHtml(lawyer.barCouncil || '')}`
-                : `<span class="material-symbols-rounded icon-sm">hourglass_top</span> Verification in progress`}
+                : lawyer.demoMode ? 'Demo profile — not verified' : `<span class="material-symbols-rounded icon-sm">hourglass_top</span> Verification in progress`}
             </span>
             <span class="greeting-date">${Utils.formatDate(new Date(), 'full')}</span>
           </div>

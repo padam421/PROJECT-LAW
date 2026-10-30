@@ -10,6 +10,7 @@ const Components = {
      -------------------------------------------------------- */
   VerifiedBadge(size = 'sm') {
     const lawyer = Store.getState('lawyerProfile') || {};
+    if (lawyer.demoMode) return '<span class="badge badge-neutral" title="Demo profile; not professionally verified">Demo</span>';
     if (lawyer.verificationStatus === 'verified') {
       return `<span class="verified-tick" title="Verified Advocate"><span class="material-symbols-rounded">check</span></span>`;
     }
@@ -248,12 +249,17 @@ const Components = {
     pageTitle = 'Dashboard',
     breadcrumbs = []
   ) {
+    const research = activeNav === 'ai-assistant';
+    const court = activeNav === 'court';
+    const focused = research || court;
     return `
-      <div class="app-layout">
+      <div class="app-layout${focused ? ' adv-focus-layout' : ''}${research ? ' adv-research-layout' : ''}${court ? ' adv-court-layout' : ''}">
         ${this.Sidebar(activeNav)}
         <div class="app-main">
-          ${this.TopBar(pageTitle, breadcrumbs)}
+          ${focused ? '' : this.TopBar(pageTitle, breadcrumbs)}
           <main class="app-content" id="main-content">
+            ${focused ? '<button class="adv-mobile-nav" onclick="Components.toggleSidebar()" aria-label="Toggle navigation menu"><span class="material-symbols-rounded" aria-hidden="true">menu</span> Menu</button>' : ''}
+            ${AuthManager.getSession()?.demoMode ? '<div class="doc-comparison-banner mb-4"><span class="material-symbols-rounded">science</span><span><strong>Hackathon demo account</strong> — sample information only; not a professionally verified advocate.</span></div>' : ''}
             ${contentHtml}
           </main>
         </div>

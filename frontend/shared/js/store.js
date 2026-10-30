@@ -15,6 +15,12 @@ const Store = {
   STORAGE_KEY: 'lc_store_cache',
   _pendingSync: {},       // collection -> timer
   _online: false,
+  _owner: null,
+
+  storageKey() {
+    const owner = typeof AuthManager !== 'undefined' ? AuthManager.getSession()?.id : null;
+    return this.STORAGE_KEY + '_' + encodeURIComponent(owner || 'signed-out');
+  },
 
   /* --------------------------------------------------------
      STATE MANAGEMENT
@@ -72,17 +78,20 @@ const Store = {
 
   queueServerSync(collection) {
     if (!this.SYNCED_COLLECTIONS.includes(collection)) return;
-    if (!AuthManager || !AuthManager.isLoggedIn()) return;
+    if (typeof AuthManager === 'undefined' || !AuthManager.isLoggedIn()) return;
+    const owner = AuthManager.getSession().id;
     clearTimeout(this._pendingSync[collection]);
     this._pendingSync[collection] = setTimeout(async () => {
+      if (AuthManager.getSession()?.id !== owner) return;
       try {
-        const url = window.AuthManager ? AuthManager.getApiUrl(`/api/state/${collection}`) : `/api/state/${collection}`;
+        const url = AuthManager.getApiUrl(`/api/state/${collection}`);
         const res = await fetch(url, {
           method: 'PUT',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ value: this._state[collection] })
         });
+        if (AuthManager.getSession()?.id !== owner) return;
         if (res.status === 401) AuthManager.clearSession();
         this._online = res.ok;
       } catch (_e) {
@@ -95,12 +104,13 @@ const Store = {
   async init() {
     // 1. Instant paint from cache
     try {
-      const cached = localStorage.getItem(this.STORAGE_KEY);
+      const cached = localStorage.getItem(this.storageKey());
       if (cached) this._state = JSON.parse(cached);
+      this._owner = typeof AuthManager !== 'undefined' ? AuthManager.getSession()?.id : null;
     } catch (_e) { /* ignore corrupt cache */ }
 
     // 2. Authoritative refresh from API
-    if (window.AuthManager && AuthManager.isLoggedIn()) {
+    if (typeof AuthManager !== 'undefined' && AuthManager.isLoggedIn()) {
       await this.refreshFromServer().catch(() => {});
     }
 
@@ -135,10 +145,23 @@ const Store = {
 
   /** Pull the authoritative workspace after sign-in or major actions. */
   async refreshFromServer() {
-    const url = window.AuthManager ? AuthManager.getApiUrl('/api/state') : '/api/state';
-    const res = await fetch(url, { credentials: 'include' });
-    if (!res.ok) throw new Error(`State fetch failed (${res.status})`);
-    const data = await res.json();
+    const owner = typeof AuthManager !== 'undefined' ? AuthManager.getSession()?.id : null;
+    if (!owner) throw new Error('Sign in to load your workspace.');
+    const url = AuthManager.getApiUrl('/api/state');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    let data;
+    try {
+      const res = await fetch(url, { credentials: 'include', signal: controller.signal });
+      if (!res.ok) throw new Error(`State fetch failed (${res.status})`);
+      data = await res.json();
+    } finally { clearTimeout(timeout); }
+    if (AuthManager.getSession()?.id !== owner) return false;
+    if (data.lawyer?.id !== owner) throw new Error('Workspace account did not match the signed-in account.');
+    if (this._owner !== owner) {
+      this._state = Object.fromEntries(this.SYNCED_COLLECTIONS.map(key => [key, ['availability','settings'].includes(key) ? {} : []]));
+      this._owner = owner;
+    }
     this._online = true;
 
     this._state.lawyerProfile = data.lawyer;
@@ -155,7 +178,7 @@ const Store = {
 
   persistCache() {
     try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this._state));
+      localStorage.setItem(this.storageKey(), JSON.stringify(this._state));
     } catch (e) {
       console.warn('[Store] Cache persist failed:', e);
     }
@@ -163,8 +186,13 @@ const Store = {
 
   /** Sign-out hygiene: drop cached workspace so the next account starts clean. */
   resetLocal() {
-    localStorage.removeItem(this.STORAGE_KEY);
+    const owner = this._owner || (typeof AuthManager !== 'undefined' ? AuthManager.getSession()?.id : null);
+    localStorage.removeItem(this.STORAGE_KEY + '_' + encodeURIComponent(owner || 'signed-out'));
+    Object.values(this._pendingSync).forEach(clearTimeout);
+    this._pendingSync = {};
     this._state = {};
+    this._owner = null;
+    this._online = false;
   },
 
   /* --------------------------------------------------------

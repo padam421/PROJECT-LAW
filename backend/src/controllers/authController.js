@@ -69,21 +69,28 @@ exports.registerInitiate = async (req, res) => {
   });
 };
 
+exports.startLawyerDemo = async (req, res) => {
+  const result = await authService.startLawyerDemo(req);
+  if (!result.ok) return res.status(result.code).json({ error: result.error });
+  authService.setAuthCookie(res, result.token);
+  res.json({ ok: true, demoMode: true, user: result.user, sessionId: result.sessionId });
+};
+
 /* ----------------------------------------------------------
    REGISTRATION — Phase 2: profile details after verification
    ---------------------------------------------------------- */
 exports.registerComplete = async (req, res) => {
   const user = req.user;
 
-  if (!user.isVerified) {
+  if (!user.isVerified && !user.demoMode) {
     return res.status(403).json({ error: 'Verify your email address before completing your profile.' });
   }
   if (user.registrationStage === 'complete') {
     return res.status(409).json({ error: 'Your profile is already complete.', code: 'already_complete' });
   }
 
-  const isClient = user.role === 'user' || req.body.role === 'user';
-  if (!isClient) {
+  const isClient = user.role === 'user';
+  if (!isClient && !user.demoMode) {
     const check = validateBody(profileSchema, req.body || {});
     if (!check.ok) {
       return res.status(400).json({ error: 'Please correct the highlighted fields.', fieldErrors: check.errors });

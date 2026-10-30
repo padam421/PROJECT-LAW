@@ -329,28 +329,28 @@ const VirtualCourtSimulator = {
       {
         actor: 'JUDGE',
         name: 'Hon\'ble Presiding Judge',
-        text: 'The court is now in session. Counsel for the Petitioner, proceed with your opening submissions.',
+        text: 'Counsel, please identify the dispute and the facts each side wishes to discuss in this practice hearing.',
         pitch: 0.75, rate: 0.92, gavel: true,
         facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
       },
       {
         actor: 'DEFENSE',
         name: 'Adv. Defense Counsel (मेरा वकील)',
-        text: 'Much obliged, Milord. We approach this Hon\'ble Bench challenging the grave procedural lapses and violations of constitutional safeguards under Article 21.',
+        text: 'Please describe your account of events and identify any documents or witnesses you wish to discuss.',
         pitch: 1.0, rate: 1.0, gavel: false,
         facing: { DEFENSE: 0.85, PROSECUTION: -1.4 }
       },
       {
         actor: 'PROSECUTION',
         name: 'Adv. Public Prosecutor (विपक्षी वकील)',
-        text: 'Objection, Milord! The prosecution has established a prima facie case based on cogent material on record. The petitioner cannot seek relief on mere procedural technicalities.',
+        text: 'Which parts of that account are agreed, and which remain disputed?',
         pitch: 1.22, rate: 1.02, gavel: false,
         facing: { DEFENSE: 1.4, PROSECUTION: -0.85 }
       },
       {
         actor: 'JUDGE',
         name: 'Hon\'ble Presiding Judge',
-        text: 'The Bench has noted the submissions. Procedural safeguards under the law are substantive rights. Both parties are directed to file their affidavits. The Court is adjourned.',
+        text: 'Counsel, identify the information still needed to understand the dispute before proceeding.',
         pitch: 0.75, rate: 0.92, gavel: true,
         facing: { DEFENSE: 0.85, PROSECUTION: -0.85 }
       }
@@ -567,13 +567,14 @@ const VirtualCourtSimulator = {
 
   saveInteractionDraft(value) {
     const stage=this._activeStage, key=stage?.answerKey || stage?.questionKey;
-    if(!key)return;this._interactions[key] ||= {};this._interactions[key].draft=value;
+    if(!key)return;this._interactions[key] ||= {};Object.assign(this._interactions[key],{draft:value,status:value?'drafted':'pending',answerMode:'manual'});
   },
 
-  submitWitnessAnswer() {
+  submitWitnessAnswer(value = null, answerMode = 'manual') {
     const stage=this._activeStage,input=document.getElementById('v3-witness-input');
-    if(stage?.kind!=='await-answer'||!input?.value.trim()||!input.reportValidity())return;
-    this._interactions[stage.answerKey]={...this._interactions[stage.answerKey],answer:input.value.trim(),draft:''};
+    const answer=typeof value==='string'?value.trim():input?.value.trim();
+    if(stage?.kind!=='await-answer'||this._interactions[stage.answerKey]?.answer||!answer||value===null&&!input.reportValidity())return;
+    this._interactions[stage.answerKey]={...this._interactions[stage.answerKey],answer,draft:'',status:'submitted',answerMode};
     this._isPaused=false;this._stageElapsed=0;this._runStage(false);
   },
 
@@ -587,29 +588,37 @@ const VirtualCourtSimulator = {
     document.getElementById('v3-status-text').textContent='IN SESSION';
   },
 
-  resolveFollowUp(ask) {
+  resolveFollowUp(ask, generatedQuestion = null, questionReviewed = false, questionReviewEpoch = 0, questionReviewKey = null) {
     const stage=this._activeStage;
     if(!stage||!['choice','edit-question'].includes(stage.kind))return;
     if(!ask) {
       const target=this._timeline.findIndex(entry=>entry.id===stage.exitId);
       if(target<0)return;this._timelineIndex=target;
     }else{
-      const input=document.getElementById('v3-witness-input');
-      if(!input?.value.trim()||!input.reportValidity())return;
-      const question=input.value.trim(),words=this._interactionWords();
-      this._interactions[stage.questionKey]={question,draft:''};
+      const input=document.getElementById('v3-question-input');
+      const question=typeof generatedQuestion==='string'?generatedQuestion.trim():input?.value.trim(),words=this._interactionWords();
+      if(!question||generatedQuestion===null&&!input.reportValidity())return;
+      this._interactions[stage.questionKey]={...this._interactions[stage.questionKey],question,draft:'',status:'pending'};
       if(stage.repeat){
         const key=stage.questionKey+':'+this._timelineIndex+':'+this._timeline.length;
         this._interactions[key]={question};
-        const base={sourceIndex:stage.sourceIndex,positions:stage.positions,camera:stage.camera,duration:0};
-        const entries=[{...base,kind:'question',actor:stage.other,questionKey:key,text:question,lookAt:stage.witness},
+        const base={sourceIndex:stage.sourceIndex,positions:stage.positions,camera:stage.camera,duration:0,
+          witnessId:stage.witnessId,witness:stage.witness,witnessName:stage.witnessName,side:stage.side,examinationStage:stage.examinationStage,questioningSide:stage.questioningSide};
+        const entries=[{...base,kind:'question',actor:stage.other,questionKey:key,text:question,lookAt:stage.witness,_courtReviewed:questionReviewed,_courtReviewEpoch:questionReviewEpoch,_courtReviewKey:questionReviewKey},
           {...base,kind:'await-answer',actor:stage.witness,answerKey:key,text:words.waiting,silent:true,lookAt:stage.other,side:stage.side},
           {...stage,questionKey:key+':next'}];
         this._timeline.splice(this._timelineIndex,1,...entries);
       }else if(stage.kind==='edit-question'){
-        this._timeline.splice(this._timelineIndex+1,0,{...stage,kind:'question',text:question,silent:false,lookAt:stage.witness});
+        this._timeline.splice(this._timelineIndex+1,0,{...stage,kind:'question',text:question,silent:false,lookAt:stage.witness,_courtReviewed:questionReviewed,_courtReviewEpoch:questionReviewEpoch,_courtReviewKey:questionReviewKey});
+        if(stage.replacesAnswerKey){
+          this._interactions[stage.replacesAnswerKey] = {...this._interactions[stage.replacesAnswerKey],question,status:'pending'};
+        }
         this._timelineIndex++;
-      }else this._timelineIndex++;
+      }else{
+        const pending=this._timeline.find(t=>t.kind==='question'&&t.questionKey===stage.questionKey);
+        if(pending){pending._courtReviewed=questionReviewed;pending._courtReviewEpoch=questionReviewEpoch;pending._courtReviewKey=questionReviewKey;}
+        this._timelineIndex++;
+      }
     }
     this._isPaused=false;this._stageElapsed=0;this._runStage(true);
   },
@@ -617,14 +626,16 @@ const VirtualCourtSimulator = {
   raiseObjection() {
     const stage=this._activeStage;
     if(stage?.kind!=='await-answer')return;
-    const words=this._interactionWords(),asker=stage.lookAt,opponent=asker==='DEFENSE'?'PROSECUTION':'DEFENSE';
+    const words=this._interactionWords(),asker=stage.questioningSide||(['DEFENSE','PROSECUTION'].includes(stage.lookAt)?stage.lookAt:stage.side),opponent=asker==='DEFENSE'?'PROSECUTION':'DEFENSE';
     const judges=Object.keys(this.SPEAKER_COORDS).filter(k=>k.startsWith('JUDGE'));
     const judge=judges[this._timelineIndex%judges.length];
-    const base={sourceIndex:stage.sourceIndex,positions:stage.positions,duration:0};
+    const base={sourceIndex:stage.sourceIndex,positions:stage.positions,duration:0,witnessId:stage.witnessId,
+      witness:stage.witness||stage.actor,witnessName:stage.witnessName,side:stage.side,examinationStage:stage.examinationStage,questioningSide:asker};
     this._timeline.splice(this._timelineIndex,0,
       {...base,kind:'practice',actor:opponent,text:words.objection,cue:'objection',camera:opponent,gesture:'objection',lookAt:judge},
       {...base,kind:'practice',actor:judge,text:words.ruling,cue:'ruling',camera:'JUDGE'},
-      {...base,kind:'edit-question',actor:asker,text:words.questionLabel,questionKey:stage.answerKey,witness:stage.actor,camera:stage.camera,silent:true});
+      {...base,kind:'edit-question',actor:asker,text:words.questionLabel,questionKey:stage.answerKey+':rephrase:'+this._timelineIndex,replacesAnswerKey:stage.answerKey,witness:stage.actor,camera:stage.camera,silent:true,
+        witnessId:stage.witnessId,side:stage.side,examinationStage:stage.examinationStage,questioningSide:asker});
     this._isPaused=false;this._stageElapsed=0;this._runStage(true);
   },
 
@@ -635,9 +646,9 @@ const VirtualCourtSimulator = {
     panel.hidden=!this._awaiting;
     document.querySelector('[aria-label="Next stage"]')?.toggleAttribute('disabled',this._awaiting || stage.kind==='answer'&&!this._speechDone);
     if(!this._awaiting){panel.replaceChildren();return;}
-    const key=stage.answerKey||stage.questionKey,label=answer?words.answerLabel:words.questionLabel;
+    const key=stage.answerKey||stage.questionKey,label=answer?words.answerLabel:words.questionLabel,inputId=answer?'v3-witness-input':'v3-question-input';
     const draft=this._interactions[key]?.draft||'';
-    panel.innerHTML='<label for="v3-witness-input">'+Utils.escapeHtml(label)+'</label><textarea id="v3-witness-input" dir="auto" required maxlength="4000" rows="2" aria-label="'+Utils.escapeHtml(label)+'" oninput="VirtualCourtSimulator.saveInteractionDraft(this.value)">'+Utils.escapeHtml(draft)+'</textarea><div class="v3-answer-actions">'
+    panel.innerHTML='<label for="'+inputId+'">'+Utils.escapeHtml(label)+'</label><textarea id="'+inputId+'" dir="auto" required maxlength="4000" rows="2" aria-label="'+Utils.escapeHtml(label)+'" oninput="VirtualCourtSimulator.saveInteractionDraft(this.value)">'+Utils.escapeHtml(draft)+'</textarea><div class="v3-answer-actions">'
       +'<button class="v3-answer-submit" onclick="VirtualCourtSimulator.'+(answer?'submitWitnessAnswer()':'resolveFollowUp(true)')+'">'+Utils.escapeHtml(answer?words.submit:words.ask)+'</button>'
       +(stage.kind==='choice'?'<button onclick="VirtualCourtSimulator.resolveFollowUp(false)">'+Utils.escapeHtml(words.done)+'</button>':'')
       +(answer?'<button onclick="VirtualCourtSimulator.raiseObjection()">'+Utils.escapeHtml(words.object)+'</button>':'')+'</div>';

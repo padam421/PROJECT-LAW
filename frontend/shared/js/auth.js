@@ -124,6 +124,33 @@ const AuthManager = {
     return endpoint;
   },
 
+  async authRequest(endpoint, payload, headers = {}) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(this.getApiUrl(endpoint), {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...headers },
+        body: JSON.stringify(payload), signal: controller.signal
+      });
+      const data = await response.json();
+      return { response, data };
+    } finally { clearTimeout(timeout); }
+  },
+
+  async startLawyerDemo() {
+    try {
+      const { response, data } = await this.authRequest('/api/auth/demo-lawyer', {});
+      if (!response.ok || !data.demoMode || !data.user?.id) return { success: false, error: data.error || 'Demo session could not be started.' };
+      if (typeof Store !== 'undefined') Store.resetLocal();
+      this.clearPendingOTP();
+      this.setSession(data.user, data.sessionId);
+      return { success: true };
+    } catch (_error) {
+      return { success: false, error: 'Could not start the demo. Check that the backend is running, then retry.' };
+    }
+  },
+
   /* --------------------------------------------------------
      GOOGLE OAUTH 2.0 HANDLER
      -------------------------------------------------------- */
@@ -182,23 +209,18 @@ const AuthManager = {
      -------------------------------------------------------- */
   async login(emailOrPhone, password /* rememberMe kept for UX parity */) {
     try {
-      const res = await fetch(this.getApiUrl('/api/auth/login'), {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'X-LC-Device': this.getDeviceId() },
-        body: JSON.stringify({ identifier: emailOrPhone, email: emailOrPhone, password })
-      });
-      const data = await res.json();
+      const { response: res, data } = await this.authRequest('/api/auth/login',
+        { identifier: emailOrPhone, email: emailOrPhone, password }, { 'X-LC-Device': this.getDeviceId() });
 
       if (!res.ok) {
         return { success: false, error: data.error || 'Sign-in failed. Please try again.', reason: data.reason, retryAfterMs: data.retryAfterMs };
       }
 
       // Direct login when verified and 2FA not required
-      if (data.directLogin || !data.requires2FA) {
+      if (data.directLogin && data.user?.id && data.sessionId) {
         this.clearPendingOTP();
         this.setSession(data.user, data.sessionId);
-        if (window.Store) await Store.refreshFromServer().catch(() => {});
+        if (typeof Store !== 'undefined') await Store.refreshFromServer().catch(() => {});
         return {
           success: true,
           directLogin: true,
@@ -207,6 +229,7 @@ const AuthManager = {
         };
       }
 
+      if (!data.challengeId) return { success: false, error: 'The server did not start email verification. Please retry.' };
       this._pendingOTPChallenge = {
         id: data.challengeId,
         email: data.email || (emailOrPhone.includes('@') ? emailOrPhone : ''),
@@ -229,55 +252,20 @@ const AuthManager = {
         maskedEmail: data.maskedEmail
       };
     } catch (_e) {
-      console.warn('[AuthManager] Backend server offline or unreachable, initiating seamless local fallback:', _e);
-      const isLawyer = window.location.pathname.includes('/lawyer');
-      const email = String(emailOrPhone || '').trim();
-      const isPadam = email.toLowerCase().includes('padam') || email.toLowerCase() === 'padamkishore90@gmail.com';
-
-      const fallbackUser = {
-        id: isPadam ? (isLawyer ? 'law_adv_padam' : 'usr_mtlac008z0vvsq') : ('usr_' + Date.now().toString(36)),
-        email: email || 'padamkishore90@gmail.com',
-        fullName: isPadam ? (isLawyer ? 'Adv. Padam Kishore' : 'Padam Kishore') : (email.split('@')[0] || (isLawyer ? 'Advocate' : 'Citizen')),
-        role: isLawyer ? 'lawyer' : 'user',
-        city: 'Jaipur',
-        state: 'Rajasthan',
-        phone: '9876543210',
-        specialization: isLawyer ? 'Corporate & Constitutional Law' : undefined,
-        barCouncil: isLawyer ? 'DL/4521/2016' : undefined,
-        isVerified: true,
-        offlineMode: true
-      };
-
-      this.clearPendingOTP();
-      this.setSession(fallbackUser, 'offline_sess_' + Date.now());
-      if (window.Store) await Store.refreshFromServer().catch(() => {});
-      if (window.UserStore) UserStore.setUser(fallbackUser);
-
-      return {
-        success: true,
-        directLogin: true,
-        requires2FA: false,
-        user: fallbackUser,
-        offlineMode: true
-      };
+      return { success: false, error: 'Could not connect to sign-in. Check that the backend is running, then retry.' };
     }
   },
 
   /** Registration phase 1 — email + password triggers the verification email. */
   async registerInitiate(email, password, role = 'user') {
     try {
-      const res = await fetch(this.getApiUrl('/api/auth/register-initiate'), {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role })
-      });
-      const data = await res.json();
+      const { response: res, data } = await this.authRequest('/api/auth/register-initiate', { email, password, role });
 
       if (!res.ok) {
         return { success: false, error: data.error || 'Registration failed.', fieldErrors: data.fieldErrors || {}, reason: data.reason, retryAfterMs: data.retryAfterMs };
       }
 
+      if (!data.challengeId) return { success: false, error: 'The server did not start registration. Please retry.' };
       this._pendingOTPChallenge = {
         id: data.challengeId,
         email: data.email || email,
@@ -292,44 +280,35 @@ const AuthManager = {
 
       return { success: true, maskedEmail: data.maskedEmail, expiresAt: data.expiresAt };
     } catch (_e) {
-      console.warn('[AuthManager] registerInitiate backend offline, staging offline challenge:', _e);
-      this._pendingOTPChallenge = {
-        id: 'chal_offline_' + Date.now(),
-        email: email,
-        maskedEmail: this.maskEmail(email),
-        maskedPhone: '',
-        isNewDevice: false,
-        purpose: 'registration',
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-        resendAvailableAt: new Date(Date.now() + 60 * 1000).toISOString(),
-        offlineMode: true
-      };
-      this.storePendingOTP();
-      return { success: true, maskedEmail: this.maskEmail(email), expiresAt: this._pendingOTPChallenge.expiresAt, offlineMode: true };
+      return { success: false, error: 'Could not start registration. Check the backend connection and retry; no verification code was confirmed as sent.' };
     }
   },
 
   /** Registration phase 2 — professional credentials after email verification. */
   async registerComplete(formData) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
     try {
       const payload = { ...formData };
-      delete payload.profilePhotoData; // photo syncs via profile PATCH after sign-in
       delete payload.confirmPassword;
       delete payload.password;         // set during register-initiate
       delete payload.email;            // immutable once verified
 
       const res = await fetch(this.getApiUrl('/api/auth/register-complete'), {
         method: 'POST',
+        credentials: 'include', // Live Server (:5501) must send the OTP session to :3000.
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller.signal
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        if (window.ApiClient && ApiClient.handleAuthFailure(res)) return { success: false, error: 'Your session ended. Please sign in again.' };
         return {
           success: false,
-          error: data.error || 'Registration failed.',
+          error: res.status === 401
+            ? 'Your verification session has expired or is unavailable. Sign in again to finish registration. Your entered details are still on this form.'
+            : data.error || 'Registration could not be saved. Please try again.',
           fieldErrors: data.fieldErrors || {}
         };
       }
@@ -338,18 +317,26 @@ const AuthManager = {
         return { success: false, underInvestigation: true, error: data.message };
       }
 
+      if (data.status !== 'profile_complete' || !data.user) {
+        return { success: false, error: 'The server did not confirm registration. Your details are retained; please retry.' };
+      }
+
       // Refresh the local snapshot with the completed profile
       if (data.user) {
         const s = this.getSession();
         if (s) this.setSession(data.user, s.sessionId);
+        if (typeof Store !== 'undefined') await Store.refreshFromServer().catch(() => {});
       }
       return { success: true, lawyerId: data.lawyerId, message: data.message };
-    } catch (_e) {
-      const s = this.getSession() || {};
-      const updated = { ...s, ...formData };
-      this.setSession(updated, s.sessionId || 'sess_' + Date.now());
-      if (window.UserStore) UserStore.setUser(updated);
-      return { success: true, message: 'Profile completed successfully.' };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.name === 'AbortError'
+          ? 'Saving registration took too long. Your details are retained; please retry.'
+          : 'Could not connect to the registration server. Check that the backend is running on port 3000, then retry. Your details are retained.'
+      };
+    } finally {
+      clearTimeout(timeout);
     }
   },
 
@@ -368,13 +355,7 @@ const AuthManager = {
         otp: code,
         code
       };
-      const res = await fetch(this.getApiUrl('/api/auth/verify-otp'), {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
+      const { response: res, data } = await this.authRequest('/api/auth/verify-otp', payload);
 
       if (!res.ok) {
         return {
@@ -386,6 +367,7 @@ const AuthManager = {
         };
       }
 
+      if (!data.user?.id || !data.sessionId) return { success: false, error: 'The server did not confirm verification. Please retry.' };
       this.clearPendingOTP();
 
       // Persist the UI snapshot (the real credential is the cookie).
@@ -393,7 +375,7 @@ const AuthManager = {
       this._deviceConfirmationRequired = !!data.requiresDeviceConfirmation;
 
       // Hydrate workspace for this account immediately
-      if (window.Store) await Store.refreshFromServer().catch(() => {});
+      if (typeof Store !== 'undefined') await Store.refreshFromServer().catch(() => {});
 
       return {
         success: true,
@@ -403,38 +385,7 @@ const AuthManager = {
         purpose: data.purpose
       };
     } catch (_e) {
-      console.warn('[AuthManager] verifyOTP connection error, validating in offline mode:', _e);
-      const isLawyer = window.location.pathname.includes('/lawyer');
-      const email = (this._pendingOTPChallenge && this._pendingOTPChallenge.email) || 'padamkishore90@gmail.com';
-      const isPadam = email.toLowerCase().includes('padam') || email.toLowerCase() === 'padamkishore90@gmail.com';
-
-      const verifiedUser = {
-        id: isPadam ? (isLawyer ? 'law_adv_padam' : 'usr_mtlac008z0vvsq') : ('usr_' + Date.now().toString(36)),
-        email: email,
-        fullName: isPadam ? (isLawyer ? 'Adv. Padam Kishore' : 'Padam Kishore') : (email.split('@')[0] || (isLawyer ? 'Advocate' : 'Citizen')),
-        role: isLawyer ? 'lawyer' : 'user',
-        city: 'Jaipur',
-        state: 'Rajasthan',
-        phone: '9876543210',
-        specialization: isLawyer ? 'Corporate & Constitutional Law' : undefined,
-        barCouncil: isLawyer ? 'DL/4521/2016' : undefined,
-        isVerified: true,
-        offlineMode: true
-      };
-
-      this.clearPendingOTP();
-      this.setSession(verifiedUser, 'offline_sess_' + Date.now());
-      if (window.Store) await Store.refreshFromServer().catch(() => {});
-      if (window.UserStore) UserStore.setUser(verifiedUser);
-
-      return {
-        success: true,
-        session: this.getSession(),
-        requiresDeviceConfirmation: false,
-        needsProfileCompletion: false,
-        purpose: 'registration',
-        offlineMode: true
-      };
+      return { success: false, error: 'Verification could not reach the server. Your challenge is retained; check the connection and retry.' };
     }
   },
 
@@ -445,13 +396,7 @@ const AuthManager = {
         challengeId: this._pendingOTPChallenge.id,
         email: this._pendingOTPChallenge.email
       };
-      const res = await fetch(this.getApiUrl('/api/auth/resend-otp'), {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
+      const { response: res, data } = await this.authRequest('/api/auth/resend-otp', payload);
       if (!res.ok) {
         return { success: false, message: data.error || 'Could not resend code.', reason: data.reason, retryAfterMs: data.retryAfterMs };
       }
@@ -460,19 +405,7 @@ const AuthManager = {
       this.storePendingOTP();
       return { success: true, message: 'A fresh 6-digit code was sent to your email.', expiresAt: data.expiresAt, resendAvailableAt: data.resendAvailableAt };
     } catch (_e) {
-      console.warn('[AuthManager] resendOTP backend offline, extending offline timer:', _e);
-      if (this._pendingOTPChallenge) {
-        this._pendingOTPChallenge.expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-        this._pendingOTPChallenge.resendAvailableAt = new Date(Date.now() + 60 * 1000).toISOString();
-        this.storePendingOTP();
-      }
-      return {
-        success: true,
-        message: 'A fresh 6-digit code has been regenerated (Offline Mode: enter any 6 digits).',
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-        resendAvailableAt: new Date(Date.now() + 60 * 1000).toISOString(),
-        offlineMode: true
-      };
+      return { success: false, message: 'Could not resend the verification code. Check your connection and retry.' };
     }
   },
 
@@ -509,7 +442,7 @@ const AuthManager = {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) return { success: false, error: data.error || 'Reset failed.' };
       this.clearSession();
-      if (window.Store) Store.resetLocal();
+      if (typeof Store !== 'undefined') Store.resetLocal();
       return { success: true };
     } catch (_e) {
       this.clearSession();
@@ -637,7 +570,7 @@ const AuthManager = {
       const res = await fetch(this.getApiUrl('/api/auth/incident/unrecognized-login'), { method: 'POST', credentials: 'include' });
       const data = await res.json();
       this.clearSession();
-      if (window.Store) Store.resetLocal();
+      if (typeof Store !== 'undefined') Store.resetLocal();
       return { ok: res.ok, message: data.message || 'All sessions were terminated for your safety.' };
     } catch {
       this.clearSession();
@@ -672,7 +605,7 @@ const AuthManager = {
     this.clearSession();
     this.clearPendingOTP();
     this._deviceConfirmationRequired = false;
-    if (window.Store) Store.resetLocal();
+    if (typeof Store !== 'undefined') Store.resetLocal();
     window.location.hash = '#/login';
   },
 
@@ -693,8 +626,9 @@ const AuthManager = {
 
   /** Current lawyer record — live profile from server, falling back to session snapshot. */
   currentLawyer() {
-    if (window.Store && Store.getState('lawyerProfile')) return Store.getState('lawyerProfile');
-    return this.getSession() || {};
+    const session = this.getSession() || {};
+    const profile = typeof Store !== 'undefined' ? Store.getState('lawyerProfile') : null;
+    return profile?.id === session.id ? { ...session, ...profile } : session;
   }
 };
 

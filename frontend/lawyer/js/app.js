@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   // 1. Initialize state store (hydrates cache instantly, then server)
-  Store.init();
+  await Store.init();
 
   // 2. Seed demo data for presentation (remove for production)
   if (typeof LawyerDemoData !== 'undefined') LawyerDemoData.seed();
@@ -38,7 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   Router.register('/verification', () => VerificationPage.render(), {
     title: 'Credential Verification',
-    onEnter: () => VerificationPage.onEnter()
+    requiresAuth: true,
+    onEnter: () => VerificationPage.onEnter(),
+    onLeave: () => VerificationPage.onLeave()
   });
 
   /* ---------------- Portal pages (auth-protected) ---------------- */
@@ -65,8 +67,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   Router.register('/court/simulate/:msgId', (params) => {
-    if (typeof VirtualCourtSimulator !== 'undefined' && params && params.msgId) {
-      VirtualCourtSimulator.launchFromChat(params.msgId);
+    if (params && params.msgId) {
+      AdvocateRehearsal.launch(params.msgId);
     }
     return AdvocateCourtPage.renderSimulator();
   }, {
@@ -168,7 +170,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* ---------------- Boot ---------------- */
   Router.init();
-  Store.refreshFromServer().catch(() => {});
 
   // Start appointment reminder engine once signed in
   if (AuthManager.isLoggedIn()) {

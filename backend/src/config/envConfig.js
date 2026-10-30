@@ -26,6 +26,7 @@ const DEFAULT_JWT_SECRET = 'Nyay Setu-dev-secret-change-me';
 const config = {
   env: isProd ? 'production' : 'development',
   isProd,
+  demoRegistrationEnabled: String(env.DEMO_REGISTRATION_ENABLED || (isProd ? 'false' : 'true')) === 'true',
   port: parseInt(env.PORT || '3000', 10),
   host: env.HOST || '0.0.0.0',
 

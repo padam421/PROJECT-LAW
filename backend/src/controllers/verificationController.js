@@ -44,7 +44,7 @@ exports.uploadDocument = (req, res) => {
     .update(fs.readFileSync(req.file.path)).digest('hex').slice(0, 16);
   if (verificationService.isDuplicateUpload(req.user.id, checksum)) {
     try { fs.unlinkSync(req.file.path); } catch (_) {}
-    return res.status(409).json({ error: 'This exact document was already uploaded previously.' });
+    return res.status(409).json({ error: 'This exact file was already uploaded. Choose the correct separate file for this credential.' });
   }
 
   const doc = verificationService.saveUploadedDocument(req.user, req.file, {
@@ -74,13 +74,25 @@ exports.deleteDocument = (req, res) => {
   try { fs.unlinkSync(path.join(config.uploadsDir, doc.storedName)); } catch (_) {}
   const data = db.get();
   data.documents = data.documents.filter(d => d.id !== doc.id);
+  const record = data.verificationRecords.find(v => v.lawyerId === req.user.id);
+  if (record) {
+    const remaining = data.documents.filter(d => d.lawyerId === req.user.id);
+    record.stages.documents.docsSubmitted = remaining.length;
+    if (['bar_enrollment','cop','llb_degree','govt_id','identity_selfie'].includes(doc.category)) {
+      record.stages.identity = { status: 'not_started' };
+      record.stages.documents.status = 'manual_verification_required';
+      record.overallStatus = 'pending';
+    }
+  }
   db.save();
   res.json({ ok: true });
 };
 
-exports.submitIdentityCheck = (req, res) => {
-  const identity = verificationService.submitIdentityCheck(req.user, req.body || {});
-  res.json({ ok: true, identity });
+exports.submitIdentityCheck = (req, res, next) => {
+  try {
+    const identity = verificationService.submitIdentityCheck(req.user, req.body || {});
+    res.json({ ok: true, identity });
+  } catch (error) { next(error); }
 };
 
 exports.summary = (req, res) => {
@@ -95,7 +107,7 @@ exports.adminQueue = (req, res) => {
     // still mid-signup (email verified, profile not yet submitted) are
     // excluded. Restricted/investigation accounts remain visible with
     // their accountStatus flag so the desk can act on them.
-    .filter(u => u.role === 'lawyer' &&
+    .filter(u => u.role === 'lawyer' && !u.demoMode &&
                  u.verificationStatus !== 'verified' &&
                  u.registrationStage === 'complete')
     .map(u => {

@@ -49,6 +49,7 @@ router.get('/health', (req, res) => {
    Registration: initiate (email+password → OTP email) → verify-otp
    (marks email verified + HttpOnly session cookie) → complete profile. */
 router.post('/auth/register-initiate', auth.registerInitiate);
+router.post('/auth/demo-lawyer', auth.startLawyerDemo);
 router.post('/auth/register-complete', authenticate, auth.registerComplete);
 router.post('/auth/login', auth.login);
 router.post('/auth/forgot-password', auth.forgotPassword);
@@ -78,6 +79,8 @@ router.post(
 /* ---------------- Workspace state sync ---------------- */
 router.get('/state', authenticate, state.getWorkspace);
 router.put('/state/:collection', authenticate, state.putCollection);
+router.use('/assistant', require('./assistant'));
+router.use('/advocate', require('./advocate'));
 
 /* ---------------- Verification & documents ---------------- */
 router.post(
@@ -142,8 +145,11 @@ router.patch('/lawyer/profile', authenticate, (req, res) => {
     }
     user.profilePhoto = req.body.profilePhotoData;
   }
+  if (user.demoMode && typeof req.body.barCouncil === 'string') {
+    user.barCouncil = req.body.barCouncil.trim().slice(0, 250);
+  }
   if (
-    req.body.barCouncil &&
+    !user.demoMode && req.body.barCouncil &&
     String(req.body.barCouncil).trim().toUpperCase() !==
       String(user.barCouncil).toUpperCase()
   ) {
@@ -434,8 +440,10 @@ router.post('/ai/court', async (req, res) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body),
+      signal: AbortSignal.timeout(70000),
     });
     const data = await aiResp.json();
+    if (aiResp.headers.get('retry-after')) res.set('Retry-After', aiResp.headers.get('retry-after'));
     res.status(aiResp.status).json(data);
   } catch (err) {
     console.error('AI Court Proxy Error:', err.message);

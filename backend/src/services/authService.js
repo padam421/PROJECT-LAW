@@ -30,7 +30,7 @@ const {
 
 function publicUser(user) {
   if (!user) return null;
-  const { passwordHash, emailHash, phoneHash, barNumberHash, resetTokenHash, ...safe } = user;
+  const { passwordHash, password_hash, emailHash, phoneHash, barNumberHash, resetTokenHash, resetTokenExpiresAt, ...safe } = user;
   return safe;
 }
 
@@ -119,7 +119,7 @@ function createSession(user, device) {
   };
   data.sessions.push(sessionObj);
   db.save();
-  DbService.saveSession(sessionObj).catch(err => {
+  if (!user.demoMode) DbService.saveSession(sessionObj).catch(err => {
     console.error('[authService] saveSession MySQL error:', err.message);
   });
   return { token, sessionId };
@@ -458,7 +458,28 @@ async function registerInitiate(emailRaw, password, req, role = 'user') {
  */
 async function registerComplete(user, payload) {
   const data = db.get();
-  const isClient = user.role === 'user' || payload.role === 'user';
+  if (user.demoMode === true) {
+    if (typeof payload.profilePhotoData === 'string' && payload.profilePhotoData.length > 1_500_000) {
+      return { ok: false, code: 413, error: 'Photo too large. Please choose an image under 1 MB.' };
+    }
+    const textFields = ['fullName','professionalName','dob','gender','phone','address','city','state','barCouncil','stateBarCouncil',
+      'enrollmentDate','qualification','university','practiceType','primarySpecialization'];
+    for (const field of textFields) if (typeof payload[field] === 'string') user[field] = payload[field].trim().slice(0, 250);
+    user.fullName ||= 'Demo Advocate';
+    for (const field of ['courts','languages','additionalSpecializations']) {
+      user[field] = Array.isArray(payload[field]) ? payload[field].filter(value => typeof value === 'string').slice(0, 30) : [];
+    }
+    user.yearsOfPractice = Number.isFinite(Number(payload.yearsOfPractice)) ? Math.max(0, Math.min(60, Number(payload.yearsOfPractice))) : 0;
+    if (payload.profilePhotoData && typeof payload.profilePhotoData === 'string') {
+      if (/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/=\r\n]+$/.test(payload.profilePhotoData)) user.profilePhoto = payload.profilePhotoData;
+    }
+    user.registrationStage = 'complete';
+    user.verificationStatus = 'demo_not_verified';
+    user.updatedAt = nowIso();
+    db.save();
+    return { ok: true, lawyerId: user.id, demoMode: true };
+  }
+  const isClient = user.role === 'user';
 
   if (isClient) {
     user.fullName = String(payload.fullName || '').trim();
@@ -1078,6 +1099,22 @@ function notifyUser(lawyerId, type, title, message, link = null) {
 }
 
 module.exports = {
+  async startLawyerDemo(req) {
+    if (!config.demoRegistrationEnabled) return { ok: false, code: 403, error: 'Demo registration is disabled on this server.' };
+    const user = blankUser('', '', 'lawyer');
+    user.email = `${user.id}@demo.example.invalid`;
+    user.fullName = 'Demo Advocate';
+    user.demoMode = true;
+    user.isVerified = false;
+    user.verificationStatus = 'demo_not_verified';
+    user.registrationStage = 'awaiting_profile';
+    db.get().users.push(user);
+    const ws = db.workspaceFor(user.id);
+    for (const key of ['clients','cases','appointments','transactions','reviews','notifications','conversations']) ws[key] = [];
+    const session = createSession(user, getDeviceProfile(req));
+    db.save();
+    return { ok: true, ...session, user: publicUser(user) };
+  },
   publicUser,
   getDeviceProfile,
   logActivity,

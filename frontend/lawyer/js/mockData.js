@@ -7,7 +7,7 @@
    ============================================================ */
 
 const LawyerDemoData = {
-  DEMO_ACTIVE: true, // ← Enabled: populates rich prototype data for presentations
+  DEMO_ACTIVE: false, // New real accounts must not receive synthetic clients or earnings.
 
   /** Call after Store.init() to seed demo collections */
   seed() {

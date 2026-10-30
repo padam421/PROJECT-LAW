@@ -11,7 +11,8 @@ const UserCourtPage = {
     const content = typeof VirtualCourtSimulator !== 'undefined'
       ? VirtualCourtSimulator.renderLanding()
       : '<div style="padding:40px;text-align:center">Loading Virtual Court Simulator...</div>';
-    return UserComponents.AppLayout(content, 'court', 'Virtual Court Hub');
+    const saved = typeof SavedCourtSessions !== 'undefined' ? SavedCourtSessions.render() : '';
+    return UserComponents.AppLayout(saved + content, 'court', 'Virtual Court Hub');
   },
 
   /* ==================== 2. VIRTUAL COURTROOM SIMULATOR ==================== */
