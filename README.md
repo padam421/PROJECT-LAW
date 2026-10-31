@@ -4,6 +4,9 @@ AI-Powered Advocate Portal & Virtual Court Platform — a legal-tech
 platform where verified advocates manage clients, cases,
 consultations and earnings.
 
+Live website: **[nyay-setu-4aik.onrender.com](https://nyay-setu-4aik.onrender.com/)**.
+Free Render hosting setup and operating limits: [deployment guide](docs/render-deployment.md).
+
 ## Repository layout
 
 | Path | Purpose |

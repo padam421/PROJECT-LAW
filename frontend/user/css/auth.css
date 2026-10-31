@@ -475,14 +475,3 @@
 .u-forgot-link:hover {
   text-decoration: underline;
 }
-
-.u-google-signin {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 40px;
-  width: 100%;
-  text-align: center;
-  color: var(--u-text-disabled);
-  font-size: 0.8rem;
-}
