@@ -33,6 +33,7 @@ test('both portals render the explicit Google chooser without auto-selecting an 
     assert.equal(f.config().ux_mode, 'popup');
     assert.equal(f.config().auto_select, false);
     assert.equal(f.config().button_auto_select, false);
+    assert.equal(f.config().use_fedcm_for_button, false);
     const credential = { credential: 'synthetic-response-not-an-actual-token' };
     f.config().callback(credential);
     assert.equal(f.calls[0][0], credential);

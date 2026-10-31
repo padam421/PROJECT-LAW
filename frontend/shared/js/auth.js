@@ -212,7 +212,7 @@ const AuthManager = {
       if (!googleClientId) throw new Error('Google sign-in is not configured');
       window.google.accounts.id.initialize({
         client_id: googleClientId, ux_mode: 'popup', auto_select: false,
-        button_auto_select: false, use_fedcm_for_button: true,
+        button_auto_select: false, use_fedcm_for_button: false,
         callback: credential => this.handleGoogleSignIn(credential, this.portalRole() === 'lawyer' ? 'lawyer' : 'user')
       });
     })();
