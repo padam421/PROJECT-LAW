@@ -167,5 +167,8 @@ created by this repository's Blueprint.
 The client login and registration routes render Google's supported button after the
 SDK and public configuration load. The popup sends its signed credential to the
 server for verification; optional One Tap suppression does not report a failed login.
+Only the client portal uses `Cross-Origin-Opener-Policy: same-origin-allow-popups`
+and `Referrer-Policy: strict-origin-when-cross-origin`, as required for Google's
+popup fallback. Other portals retain the stricter default opener policy.
 An existing password account must use its password unless an explicit account-linking
 flow is implemented. The administrator's email belongs to the separate admin portal.

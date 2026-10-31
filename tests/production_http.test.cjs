@@ -38,6 +38,12 @@ test('production rejects cross-site mutations and never reports unsaved writes a
     method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body: JSON.stringify({ value })
   });
   try {
+    const client = await fetch(base + '/frontend/user/index.html');
+    assert.equal(client.status, 200);
+    assert.equal(client.headers.get('cross-origin-opener-policy'), 'same-origin-allow-popups');
+    assert.equal(client.headers.get('referrer-policy'), 'strict-origin-when-cross-origin');
+    const otherPortal = await fetch(base + '/frontend/lawyer/index.html');
+    assert.equal(otherPortal.headers.get('cross-origin-opener-policy'), 'same-origin');
     assert.equal((await send('cross-site', 'https://untrusted.example')).status, 403);
     assert.equal(saved, undefined);
     assert.equal((await send('durable')).status, 200);

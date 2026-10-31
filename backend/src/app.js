@@ -28,6 +28,12 @@ app.use(helmet({
   contentSecurityPolicy: false,      // SPA loads Google Fonts/Material Symbols
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
+// Google's explicit popup needs an opener reference when FedCM is unavailable.
+// Scope these provider-required headers to the portal that offers Google sign-in.
+app.use('/frontend/user',
+  helmet.crossOriginOpenerPolicy({ policy: 'same-origin-allow-popups' }),
+  helmet.referrerPolicy({ policy: 'strict-origin-when-cross-origin' })
+);
 app.use(cors({
   origin: (origin, callback) => {
     if (!config.isProd || !origin || origin === new URL(config.appBaseUrl).origin) return callback(null, true);
