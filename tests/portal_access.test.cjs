@@ -12,6 +12,7 @@ process.env.ADMIN_PASSWORD = 'SyntheticAdmin123';
 process.env.BCRYPT_ROUNDS = '4';
 process.env.OTP_BCRYPT_ROUNDS = '4';
 process.env.COOKIE_SECURE = 'false';
+process.env.JWT_EXPIRES_IN = '30d';
 const express = require('../backend/node_modules/express');
 const bcrypt = require('../backend/node_modules/bcryptjs');
 const db = require('../backend/src/config/dbConfig');
@@ -77,15 +78,21 @@ async function request(endpoint, role, body) {
   return { status: response.status, data: await response.json() };
 }
 
-test('client/admin accounts can sign in through the lawyer portal with the same email', async () => {
+test('verified accounts sign directly into either public workspace without another email OTP', async () => {
   const beforeEmails = emails;
-  for (const role of ['user', 'admin']) {
-    const response = await request('/api/auth/login', null,
-      { email: role + '@example.invalid', password: 'SyntheticPassword123', role: 'lawyer' });
+  for (const portal of ['user', 'lawyer']) for (const role of ['user', 'lawyer', 'admin']) {
+    const raw = await fetch(base + '/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: role + '@example.invalid', password: 'SyntheticPassword123', role: portal }) });
+    const response = { status: raw.status, data: await raw.json() };
     assert.equal(response.status, 200);
-    assert.equal(response.data.requires2FA, true);
+    assert.equal(response.data.directLogin, true);
+    assert.equal(response.data.requires2FA, false);
+    assert.equal(response.data.user.role, role);
+    assert.equal(response.data.token, undefined);
+    assert.match(raw.headers.get('set-cookie'), /HttpOnly/);
+    assert.match(raw.headers.get('set-cookie'), /Max-Age=2592000/);
   }
-  assert.equal(emails, beforeEmails + 2);
+  assert.equal(emails, beforeEmails);
 });
 
 test('public signup cannot request an administrator role', async () => {
@@ -117,13 +124,63 @@ test('ordinary email signup unlocks lawyer tools after email verification withou
   assert.equal(response.status, 200);
 });
 
-test('a matching lawyer sign-in starts normal OTP verification, without changing account roles', async () => {
+test('administrator console retains email OTP while verified lawyer tools use direct sign-in', async () => {
   const response = await request('/api/auth/login', null,
     { email: 'lawyer@example.invalid', password: 'SyntheticPassword123', role: 'lawyer' });
   assert.equal(response.status, 200);
-  assert.equal(response.data.requires2FA, true);
-  assert.ok(response.data.challengeId);
+  assert.equal(response.data.requires2FA, false);
+  const admin = await request('/api/auth/login', null,
+    { email: 'admin@example.invalid', password: 'SyntheticPassword123', role: 'admin' });
+  assert.equal(admin.data.requires2FA, true);
+  assert.ok(admin.data.challengeId);
   assert.equal(db.get().users.find(u => u.id === 'synthetic-lawyer').role, 'lawyer');
+});
+
+test('incorrect passwords do not start sessions and unverified emails still require ownership verification', async () => {
+  const count = db.get().sessions.length;
+  const wrong = await fetch(base + '/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'user@example.invalid', password: 'WrongPassword123', role: 'user' }) });
+  assert.equal(wrong.status, 401);
+  assert.equal(wrong.headers.get('set-cookie'), null);
+  assert.equal(db.get().sessions.length, count);
+  const user = db.get().users.find(u => u.id === 'synthetic-user');
+  user.isVerified = false;
+  const verify = await request('/api/auth/login', null,
+    { email: user.email, password: 'SyntheticPassword123', role: 'user' });
+  assert.equal(verify.data.requires2FA, true);
+  assert.ok(verify.data.challengeId);
+  assert.equal(db.get().sessions.length, count);
+  user.isVerified = true;
+});
+
+test('Remember Me, active-session renewal and logout preserve account data while revoking access', async () => {
+  const jwt = require('../backend/node_modules/jsonwebtoken');
+  const user = db.get().users.find(u => u.id === 'synthetic-user');
+  const session = auth.createSession(user, {});
+  const iat = Math.floor(Date.now() / 1000) - 2 * 86400;
+  const old = jwt.sign({ sub: user.id, role: user.role, sid: session.sessionId, iat }, process.env.JWT_SECRET, { expiresIn: '30d' });
+  const refresh = await fetch(base + '/api/auth/session', { headers: { Cookie: 'lc_session=' + old } });
+  assert.equal(refresh.status, 200);
+  const cookie = refresh.headers.get('set-cookie');
+  assert.match(cookie, /Max-Age=2592000/);
+  const renewed = decodeURIComponent(cookie.split(';')[0].slice('lc_session='.length));
+  const claims = jwt.verify(renewed, process.env.JWT_SECRET);
+  assert.equal(claims.sid, session.sessionId);
+  assert.ok(claims.iat > iat);
+  const sessionOnly = await fetch(base + '/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: user.email, password: 'SyntheticPassword123', role: 'lawyer', rememberMe: false }) });
+  assert.equal(sessionOnly.status, 200);
+  assert.doesNotMatch(sessionOnly.headers.get('set-cookie'), /Max-Age|Expires=/);
+  db.workspaceFor(user.id).cases = [{ id: 'retained-case', title: 'Private saved work' }];
+  const signedOut = await fetch(base + '/api/auth/logout', { method: 'POST', headers: { Cookie: 'lc_session=' + renewed } });
+  assert.equal(signedOut.status, 200);
+  assert.equal((await fetch(base + '/api/auth/session', { headers: { Cookie: 'lc_session=' + renewed } })).status, 401);
+  assert.equal(db.workspaceFor(user.id).cases[0].id, 'retained-case');
+  const signedIn = await fetch(base + '/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: user.email, password: 'SyntheticPassword123', role: 'user' }) });
+  assert.equal(signedIn.status, 200);
+  const reopened = await fetch(base + '/api/state', { headers: { Cookie: signedIn.headers.get('set-cookie').split(';')[0] } });
+  assert.equal((await reopened.json()).workspace.cases[0].id, 'retained-case');
 });
 
 test('unsigned requests stay blocked and every signed-in account can use the advocate tools', async () => {

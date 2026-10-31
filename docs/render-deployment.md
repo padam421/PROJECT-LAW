@@ -34,9 +34,20 @@ Sources: [Render free-service limits](https://render.com/docs/free),
 4. **Gemini API key:** Use your existing key in Render's secret environment variables.
    Check that the Google project enables the models used by this app and has quota.
 5. **Google sign-in:** Set the web OAuth client ID and add the actual Render HTTPS origin
-   to that client's authorized JavaScript origins in Google Cloud. Existing password
-   accounts continue to use email/password; automatic linking to Google is intentionally refused.
+   to that client's authorized JavaScript origins in Google Cloud. Both public portals offer
+   Google's explicit account chooser. A verified Gmail/Workspace identity can link to its
+   existing password account without replacing its password, role or saved work. Other
+   providers' existing email accounts still require password ownership verification.
 6. **Admin:** Choose the verification-desk email and a strong new admin password.
+
+Verified email/password accounts enter either public workspace directly after a correct
+password; new email registrations still verify ownership once. Google login needs no
+separate site password or email OTP. Remember Me defaults to a persistent 30-day cookie,
+renewed during active use; signing out revokes that session. Thirty days of inactivity,
+cookie deletion, account suspension or a security revocation can require another login.
+An explicit `JWT_EXPIRES_IN` environment setting overrides the default. Logout flushes
+pending lawyer workspace writes and retains private account-scoped caches for a later
+login. Chats retain their existing account-owned server history and offline-save rules.
 
 Database reference: [TiDB Starter quotas](https://docs.pingcap.com/tidbcloud/serverless-limitations/).
 Google reference: [Verify ID tokens on the server](https://developers.google.com/identity/gsi/web/guides/verify-google-id-token).

@@ -249,8 +249,7 @@ const UserComponents = {
       { confirmText: 'Sign Out', type: 'danger' }
     );
     if (confirmed) {
-      await AuthManager.logout();
-      Utils.showToast('Session securely ended.', 'info');
+      if (await AuthManager.logout()) Utils.showToast('Signed out. Your saved work stays in your account.', 'info');
     }
   },
 };

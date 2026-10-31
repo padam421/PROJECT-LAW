@@ -28,6 +28,15 @@ app.use(helmet({
   contentSecurityPolicy: false,      // SPA loads Google Fonts/Material Symbols
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
+// The Google account chooser popup needs to communicate with either public portal.
+// Keep Helmet's default isolation on other pages and APIs.
+app.use((req, res, next) => {
+  if (req.method === 'GET' && /^\/frontend\/(user|lawyer)\/(index\.html)?$/.test(req.path)) {
+    res.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    res.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  }
+  next();
+});
 app.use(cors({
   origin: (origin, callback) => {
     if (!config.isProd || !origin || origin === new URL(config.appBaseUrl).origin) return callback(null, true);

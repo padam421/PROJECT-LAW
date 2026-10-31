@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   /* ---------------- Authentication flow ---------------- */
-  Router.register('/login', () => AuthPage.renderLogin(), { title: 'Advocate Sign In' });
+  Router.register('/login', () => AuthPage.renderLogin(), { title: 'Advocate Sign In', onEnter: () => AuthManager.enterLogin() });
   Router.register('/forgot-password', () => AuthPage.renderForgotPassword(), { title: 'Password Recovery' });
   Router.register('/reset-password', () => AuthPage.renderResetPassword(), { title: 'Set New Password' });
   Router.register('/otp', () => OTPPage.render(), {

@@ -37,6 +37,7 @@ const RegisterPage = {
 
   /* ---------------- Route entry ---------------- */
   onEnter() {
+    AuthManager.mountGoogleSignIn();
     // Signed-in advocates with finished profiles don't belong here.
     const session = AuthManager.getSession();
     if (AuthManager.isLoggedIn() && session && (session.role !== 'lawyer' || session.registrationStage === 'complete')) {
@@ -179,7 +180,8 @@ const RegisterPage = {
               ${this._submitting ? '<div class="loading-dots"><span></span><span></span><span></span></div>' : 'Continue → Email Verification'}
             </button>
           </div>
-        </form>`
+        </form>
+        <div style="margin-top:20px">${AuthManager.googleButtonMarkup()}</div>`
     });
   },
 

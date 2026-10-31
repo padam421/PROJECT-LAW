@@ -100,6 +100,9 @@ const AuthPage = {
             </button>
           </form>
 
+          <p class="text-muted text-body-sm">Use your Nyay Setu password, or choose your Gmail account below.</p>
+          ${AuthManager.googleButtonMarkup()}
+
           <div class="login-divider">
             <span>New to Nyay Setu?</span>
           </div>

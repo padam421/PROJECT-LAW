@@ -22,7 +22,7 @@ const DashboardPage = {
       <!-- Greeting Banner -->
       <div class="dashboard-greeting">
         <div class="greeting-left">
-          <h2 class="greeting-text">${greeting}, <span>${Utils.escapeHtml(lawyer.professionalName || lawyer.fullName || 'Advocate')}</span></h2>
+          <h2 class="greeting-text">${greeting}, <span>${Utils.escapeHtml(AuthManager.displayName(AuthManager.getSession() || lawyer))}</span></h2>
           <div class="d-flex items-center gap-3 flex-wrap">
             <span class="greeting-badge ${isVerified ? '' : 'pending'}">
               ${lawyer.workspaceOnly ? 'Client &amp; Lawyer workspace access' : isVerified

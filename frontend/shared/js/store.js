@@ -14,6 +14,7 @@ const Store = {
   _listeners: {},
   STORAGE_KEY: 'lc_store_cache',
   _pendingSync: {},       // collection -> timer
+  _syncing: {},
   _online: false,
   _owner: null,
 
@@ -79,25 +80,52 @@ const Store = {
   queueServerSync(collection) {
     if (!this.SYNCED_COLLECTIONS.includes(collection)) return;
     if (typeof AuthManager === 'undefined' || !AuthManager.isLoggedIn()) return;
-    const owner = AuthManager.getSession().id;
+    this._state.__pendingSync = [...new Set([...(this._state.__pendingSync || []), collection])];
+    this.persistCache();
     clearTimeout(this._pendingSync[collection]);
-    this._pendingSync[collection] = setTimeout(async () => {
-      if (AuthManager.getSession()?.id !== owner) return;
+    this._pendingSync[collection] = setTimeout(() => this.syncCollection(collection), 600);
+  },
+
+  async syncCollection(collection) {
+    const owner = this._owner;
+    if (!owner || AuthManager.getSession()?.id !== owner) return false;
+    if (this._syncing[collection]) await this._syncing[collection];
+    if (AuthManager.getSession()?.id !== owner || this._owner !== owner) return false;
+    const value = JSON.stringify(this._state[collection]);
+    const pending = (async () => {
       try {
         const url = AuthManager.getApiUrl(`/api/state/${collection}`);
         const res = await fetch(url, {
           method: 'PUT',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ value: this._state[collection] })
+          body: '{"value":' + value + '}'
         });
-        if (AuthManager.getSession()?.id !== owner) return;
+        if (AuthManager.getSession()?.id !== owner || this._owner !== owner) return false;
         if (res.status === 401) AuthManager.clearSession();
         this._online = res.ok;
+        if (res.ok && JSON.stringify(this._state[collection]) === value) {
+          this._state.__pendingSync = (this._state.__pendingSync || []).filter(key => key !== collection);
+          this.persistCache();
+        }
+        return res.ok;
       } catch (_e) {
         this._online = false; // offline — will retry on next mutation
+        return false;
       }
-    }, 600);
+    })();
+    this._syncing[collection] = pending;
+    try { return await pending; }
+    finally { if (this._syncing[collection] === pending) delete this._syncing[collection]; }
+  },
+
+  async flushPendingSync() {
+    Object.values(this._pendingSync).forEach(clearTimeout);
+    this._pendingSync = {};
+    await Promise.all(Object.values(this._syncing));
+    await Promise.all((this._state.__pendingSync || []).filter(key => this.SYNCED_COLLECTIONS.includes(key))
+      .map(key => this.syncCollection(key)));
+    this.persistCache();
   },
 
   /** Boot-time hydration: cached paint first, then authoritative server fetch. */
@@ -105,9 +133,9 @@ const Store = {
     // 1. Instant paint from cache
     try {
       const cached = localStorage.getItem(this.storageKey());
-      if (cached) this._state = JSON.parse(cached);
+      this._state = cached ? JSON.parse(cached) : {};
       this._owner = typeof AuthManager !== 'undefined' ? AuthManager.getSession()?.id : null;
-    } catch (_e) { /* ignore corrupt cache */ }
+    } catch (_e) { this._state = {}; }
 
     // 2. Authoritative refresh from API
     if (typeof AuthManager !== 'undefined' && AuthManager.isLoggedIn()) {
@@ -166,10 +194,11 @@ const Store = {
 
     this._state.lawyerProfile = data.lawyer;
     for (const [key, val] of Object.entries(data.workspace || {})) {
-      this._state[key] = val;
+      if (!(this._state.__pendingSync || []).includes(key)) this._state[key] = val;
     }
     // Merge seeded demo workspace ONLY for the demo advocate (server already provides it)
     this.persistCache();
+    for (const key of this._state.__pendingSync || []) this.queueServerSync(key);
     this.notify('*');
     return true;
   },
@@ -177,6 +206,7 @@ const Store = {
   isOnline() { return this._online; },
 
   persistCache() {
+    if (this._owner && AuthManager.getSession()?.id !== this._owner) return;
     try {
       localStorage.setItem(this.storageKey(), JSON.stringify(this._state));
     } catch (e) {
@@ -188,8 +218,14 @@ const Store = {
   resetLocal() {
     const owner = this._owner || (typeof AuthManager !== 'undefined' ? AuthManager.getSession()?.id : null);
     localStorage.removeItem(this.STORAGE_KEY + '_' + encodeURIComponent(owner || 'signed-out'));
+    this.detach();
+  },
+
+  /** Leave private saved work under its account key; clear only the current view. */
+  detach() {
     Object.values(this._pendingSync).forEach(clearTimeout);
     this._pendingSync = {};
+    this._syncing = {};
     this._state = {};
     this._owner = null;
     this._online = false;

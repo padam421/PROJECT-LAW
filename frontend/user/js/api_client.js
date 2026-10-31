@@ -27,7 +27,10 @@ const UserStore = {
 
   /* ---- User ---- */
   getUser() {
-    return this._state.userProfile || AuthManager.getSession() || {};
+    const session = AuthManager.getSession();
+    if (!session) return {};
+    const saved = this._state.userProfile;
+    return saved?.id === session.id ? { ...saved, ...session } : session;
   },
 
   setUser(data) {

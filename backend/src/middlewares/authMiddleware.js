@@ -34,7 +34,7 @@ async function authenticate(req, res, next) {
   if (!session) {
     session = await DbService.findSession(payload.sid).catch(() => null);
   }
-  if (!session || session.revoked) {
+  if (!session || session.revoked || session.userId !== payload.sub) {
     return res.status(401).json({ error: 'This session was terminated. Please sign in again.', code: 'session_terminated' });
   }
 
@@ -50,6 +50,15 @@ async function authenticate(req, res, next) {
   req.session = session;
   session.lastSeenAt = new Date().toISOString();
   db.save();
+  // Keep an active browser signed in. Renewal retains the same revocable session,
+  // and never revives an expired, suspended or signed-out identity.
+  const renewAfterMs = Math.min(12 * 60 * 60 * 1000, config.cookie.maxAgeMs / 4);
+  if (!bearer && cookieToken && Number.isFinite(payload.iat) &&
+      Date.now() - payload.iat * 1000 >= renewAfterMs) {
+    const renewed = jwt.sign({ sub: user.id, role: user.role, sid: session.id },
+      config.jwtSecret, { expiresIn: config.jwtExpiresIn });
+    require('../services/authService').setAuthCookie(res, renewed, session.rememberMe !== false);
+  }
   next();
 }
 

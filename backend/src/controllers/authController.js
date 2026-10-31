@@ -171,13 +171,12 @@ exports.login = async (req, res) => {
 
   // Direct login when verified and 2FA not required
   if (result.directLogin) {
-    authService.setAuthCookie(res, result.token);
+    authService.setAuthCookie(res, result.token, result.rememberMe);
     return res.json({
       ok: true,
       directLogin: true,
       requires2FA: false,
       sessionId: result.sessionId,
-      token: result.token,
       user: result.user
     });
   }
@@ -226,7 +225,6 @@ exports.verifyOTP = async (req, res) => {
     ok: true,
     message: 'Email verified successfully',
     sessionId: result.sessionId,
-    token: result.token,
     purpose: result.purpose,
     requiresDeviceConfirmation: result.requiresDeviceConfirmation,
     needsProfileCompletion: result.needsProfileCompletion,

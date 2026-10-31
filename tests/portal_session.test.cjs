@@ -45,6 +45,39 @@ test('a real lawyer cookie restores a missing browser snapshot and opens the das
   assert.deepEqual(f.rendered, ['/dashboard']);
 });
 
+test('an old browser snapshot does not end a valid persistent cookie session', async () => {
+  const f = fixture();
+  f.auth.setSession({ id: 'lawyer', role: 'lawyer', loginTime: 1 }, 'lawyer-session');
+  const cached = f.auth.getSession();
+  cached.loginTime = Date.now() - 10 * 86400000;
+  f.context.localStorage.setItem(f.auth.SESSION_KEY, JSON.stringify(cached));
+  assert.equal(f.auth.isLoggedIn(), true);
+  await f.router.navigate('/dashboard');
+  assert.deepEqual(f.rendered, ['/dashboard']);
+});
+
+test('Google/password session hydration restores each user cache before updating the current name', async () => {
+  const f = fixture('/frontend/user/index.html');
+  vm.runInContext(fs.readFileSync('frontend/user/js/api_client.js', 'utf8') + '\nthis.userStore = UserStore;', f.context);
+  const original = { id: 'owner', email: 'owner@example.invalid', role: 'user', fullName: 'Verification Desk' };
+  f.auth.setSession(original, 'old-session');
+  f.context.userStore.init();
+  f.context.userStore.set('cases', [{ id: 'saved-user-case' }]);
+  f.context.userStore.set('conversations', [{ id: 'saved-user-chat' }]);
+  assert.equal(await f.auth.logout(), true);
+  assert.equal(f.auth.getSession(), null);
+  assert.equal(f.context.userStore.getUser().id, undefined);
+  const current = { ...original, googleName: 'Synthetic Owner', fullName: 'Synthetic Owner' };
+  await f.auth.acceptSession(current, 'new-session');
+  assert.equal(f.context.userStore.getCases()[0].id, 'saved-user-case');
+  assert.equal(f.context.userStore.get('conversations')[0].id, 'saved-user-chat');
+  assert.equal(f.auth.displayName(f.context.userStore.getUser()), 'Synthetic Owner');
+  await f.auth.acceptSession({ id: 'other-owner', email: 'other@example.invalid', role: 'user' }, 'other-session');
+  assert.equal(f.context.userStore.getCases().length, 0);
+  await f.auth.acceptSession(current, 'returning-session');
+  assert.equal(f.context.userStore.getCases()[0].id, 'saved-user-case');
+});
+
 test('an expired cookie goes to sign-in and a network failure retains cached work', async () => {
   const f = fixture();
   f.auth.setSession({ id: 'lawyer', role: 'lawyer' }, 'old');

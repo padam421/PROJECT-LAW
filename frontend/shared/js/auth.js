@@ -1,7 +1,7 @@
 /* ============================================================
    Nyay Setu — AUTHENTICATION MANAGER
    auth.js — Registration (email+password → 6-digit email OTP),
-   login with mandatory OTP 2FA, logout, device trust, incident
+   verified password/Google login, logout, device trust, incident
    reporting. Backed by the Nyay Setu API:
      • bcrypt-hashed passwords & OTPs
      • HttpOnly Secure session cookie (JWT never touches JS)
@@ -65,13 +65,9 @@ const AuthManager = {
      the server; this local snapshot only personalises the UI.
      -------------------------------------------------------- */
   checkSession() {
-    const session = this.getSession();
-    if (!session) return null;
-    if (Date.now() - session.loginTime > 24 * 60 * 60 * 1000) {
-      this.clearSession();
-      return null;
-    }
-    return session;
+    // The cookie session is checked by the server, including expiry/revocation.
+    // A UI cache age must never sign an otherwise valid account out.
+    return this.getSession();
   },
 
   getSession() {
@@ -111,6 +107,23 @@ const AuthManager = {
     localStorage.removeItem(this.SESSION_KEY);
   },
 
+  displayName(user = this.getSession()) {
+    if (!user) return 'User';
+    return user.googleName || (user.fullName && user.fullName !== 'Verification Desk' ? user.fullName : '') ||
+      String(user.email || '').split('@')[0] || 'User';
+  },
+
+  async acceptSession(user, sessionId) {
+    if (typeof Store !== 'undefined' && Store._owner && Store._owner !== user.id) Store.detach();
+    this.clearPendingOTP();
+    this.setSession(user, sessionId);
+    if (typeof UserStore !== 'undefined') {
+      UserStore.init();
+      UserStore.setUser(user);
+    }
+    if (typeof Store !== 'undefined') await Store.init();
+  },
+
   portalRole() {
     const path = window.location.pathname || window.location.href || '';
     if (/\/lawyer\//.test(path)) return 'lawyer';
@@ -134,7 +147,7 @@ const AuthManager = {
     const previousOwner = this.getSession()?.id;
     const previousSessionId = this.getSession()?.sessionId;
     const response = await fetch(this.getApiUrl('/api/auth/session'), {
-      credentials: 'include', signal: AbortSignal.timeout(15000)
+      credentials: 'include', signal: AbortSignal.timeout(90000)
     });
     const data = await response.json().catch(() => ({}));
     if (this.getSession()?.sessionId !== previousSessionId) return this.getSession();
@@ -147,17 +160,83 @@ const AuthManager = {
     }
     // The HttpOnly cookie identifies the account. A cached local role is never authoritative.
     this.setSession(data.user, data.sessionId);
-    if (previousOwner !== data.user.id && (!this.portalRole() || this.canUsePortal(data.user.role))) {
+    if (!this.portalRole() || this.canUsePortal(data.user.role)) {
       if (typeof UserStore !== 'undefined') {
-        UserStore.init();
+        if (previousOwner !== data.user.id) UserStore.init();
         UserStore.setUser(data.user);
       }
-      if (typeof Store !== 'undefined') await Store.init();
+      if (previousOwner !== data.user.id && typeof Store !== 'undefined') await Store.init();
     }
     return data.user;
   },
 
   GOOGLE_CLIENT_ID: '508760219507-8pn77gjn77ifanpno18tcaoa3qt7klv0.apps.googleusercontent.com',
+
+  googleButtonMarkup() {
+    return '<div id="google-signin" style="display:flex;justify-content:center;min-height:44px;max-width:100%"><span role="status">Loading Google sign-in…</span></div>';
+  },
+
+  async enterLogin() {
+    this.mountGoogleSignIn();
+    try {
+      const user = await this.refreshSession();
+      if (user && this.canUsePortal(user.role) && Router.getPathFromHash() === '/login') {
+        Router.navigate(this.portalRole() === 'lawyer' ? '/dashboard' : '/home');
+      }
+    } catch (_) { /* A connection failure does not remove saved account state. */ }
+  },
+
+  async prepareGoogleSignIn() {
+    if (!this._googleReady) this._googleReady = (async () => {
+      const [response] = await Promise.all([
+        fetch(this.getApiUrl('/api/public-config'), { signal: AbortSignal.timeout(90000) }),
+        new Promise((resolve, reject) => {
+          if (window.google?.accounts?.id) { resolve(); return; }
+          const script = document.querySelector('script[src^="https://accounts.google.com/gsi/client"]');
+          const finish = (error) => {
+            clearTimeout(timer);
+            script?.removeEventListener('load', loaded);
+            script?.removeEventListener('error', failed);
+            if (error) reject(error); else resolve();
+          };
+          const loaded = () => finish(window.google?.accounts?.id ? null : new Error('Google unavailable'));
+          const failed = () => finish(new Error('Google could not load'));
+          const timer = setTimeout(failed, 15000);
+          if (!script) { failed(); return; }
+          script.addEventListener('load', loaded, { once: true });
+          script.addEventListener('error', failed, { once: true });
+        })
+      ]);
+      if (!response.ok) throw new Error('Sign-in configuration unavailable');
+      const { googleClientId } = await response.json();
+      if (!googleClientId) throw new Error('Google sign-in is not configured');
+      window.google.accounts.id.initialize({
+        client_id: googleClientId, ux_mode: 'popup', auto_select: false,
+        button_auto_select: false, use_fedcm_for_button: true,
+        callback: credential => this.handleGoogleSignIn(credential, this.portalRole() === 'lawyer' ? 'lawyer' : 'user')
+      });
+    })();
+    try { await this._googleReady; }
+    catch (error) { this._googleReady = null; throw error; }
+  },
+
+  async mountGoogleSignIn() {
+    const host = document.getElementById('google-signin');
+    if (!host) return;
+    try {
+      await this.prepareGoogleSignIn();
+      if (!host.isConnected || document.getElementById('google-signin') !== host) return;
+      host.replaceChildren();
+      window.google.accounts.id.renderButton(host, {
+        type: 'standard', theme: 'outline', size: 'large', text: 'continue_with',
+        shape: 'pill', width: String(Math.max(200, Math.min(400, Math.floor(host.getBoundingClientRect().width))))
+      });
+    } catch (_) {
+      if (!host.isConnected || document.getElementById('google-signin') !== host) return;
+      host.innerHTML = '<div role="status">Google could not load. Check your connection. ' +
+        '<button type="button" onclick="AuthManager.mountGoogleSignIn()">Retry Google sign-in</button></div>';
+    }
+  },
 
   getApiUrl(endpoint) {
     if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
@@ -172,7 +251,7 @@ const AuthManager = {
 
   async authRequest(endpoint, payload, headers = {}) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    const timeout = setTimeout(() => controller.abort(), 90000);
     try {
       const response = await fetch(this.getApiUrl(endpoint), {
         method: 'POST', credentials: 'include',
@@ -213,16 +292,9 @@ const AuthManager = {
       }
       const user = data.user;
 
-      this.clearPendingOTP();
-      this.setSession(user, data.sessionId);
+      await this.acceptSession(user, data.sessionId);
 
-      if (window.UserStore) {
-        UserStore.setUser(user);
-        UserStore.set('securitySetupDone', true);
-        UserStore.set('privacyConsentDone', true);
-      }
-
-      Utils.showToast(`Signed in as ${user.fullName} via Google!`, 'success');
+      Utils.showToast(`Signed in as ${this.displayName(user)}.`, 'success');
 
       if (role === 'lawyer' || window.location.href.includes('/lawyer/')) {
         Router.navigate('/dashboard');
@@ -240,10 +312,10 @@ const AuthManager = {
   /* --------------------------------------------------------
      LOGIN (server round-trip) → direct login or OTP challenge
      -------------------------------------------------------- */
-  async login(emailOrPhone, password /* rememberMe kept for UX parity */) {
+  async login(emailOrPhone, password, rememberMe = true) {
     try {
       const { response: res, data } = await this.authRequest('/api/auth/login',
-        { identifier: emailOrPhone, email: emailOrPhone, password, role: this.portalRole() || undefined }, { 'X-LC-Device': this.getDeviceId() });
+        { identifier: emailOrPhone, email: emailOrPhone, password, rememberMe, role: this.portalRole() || undefined }, { 'X-LC-Device': this.getDeviceId() });
 
       if (!res.ok) {
         return { success: false, error: data.error || 'Sign-in failed. Please try again.', reason: data.reason, retryAfterMs: data.retryAfterMs };
@@ -251,9 +323,7 @@ const AuthManager = {
 
       // Direct login when verified and 2FA not required
       if (data.directLogin && data.user?.id && data.sessionId) {
-        this.clearPendingOTP();
-        this.setSession(data.user, data.sessionId);
-        if (typeof Store !== 'undefined') await Store.refreshFromServer().catch(() => {});
+        await this.acceptSession(data.user, data.sessionId);
         return {
           success: true,
           directLogin: true,
@@ -632,14 +702,24 @@ const AuthManager = {
      LOGOUT
      -------------------------------------------------------- */
   async logout() {
+    if (typeof Store !== 'undefined' && Store.flushPendingSync) await Store.flushPendingSync();
     try {
-      await fetch(this.getApiUrl('/api/auth/logout'), { method: 'POST', credentials: 'include' }); // server clears the cookie too
-    } catch { /* best-effort */ }
+      const response = await fetch(this.getApiUrl('/api/auth/logout'), {
+        method: 'POST', credentials: 'include', signal: AbortSignal.timeout(15000)
+      });
+      if (!response.ok && response.status !== 401) throw new Error('Sign-out failed');
+    } catch {
+      Utils.showToast('Could not finish signing out. Your saved work is retained; reconnect and retry.', 'error');
+      return false;
+    }
+    window.google?.accounts?.id?.disableAutoSelect();
+    if (typeof Store !== 'undefined') Store.detach();
+    if (typeof UserStore !== 'undefined') UserStore._state = {};
     this.clearSession();
     this.clearPendingOTP();
     this._deviceConfirmationRequired = false;
-    if (typeof Store !== 'undefined') Store.resetLocal();
     window.location.hash = '#/login';
+    return true;
   },
 
   /* --------------------------------------------------------

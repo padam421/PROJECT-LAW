@@ -1,7 +1,7 @@
 /* ============================================================
    Nyay Setu — AUTHENTICATION & ACCOUNT SECURITY SERVICE
    authService.js — Registration (email+password → email OTP),
-   login with mandatory 6-digit email OTP 2FA, device trust,
+   verified password/Google login, email verification, device trust,
    sessions, lockout, profile-completion screening.
    ------------------------------------------------------------
    Security contract (production-grade):
@@ -101,7 +101,7 @@ function isTrustedDevice(user, device) {
   return db.get().trustedDevices.some(d => d.userId === user.id && d.deviceId === device.deviceId);
 }
 
-function createSession(user, device) {
+function createSession(user, device, rememberMe = true) {
   const data = db.get();
   const sessionId = db.uid('sess');
   const token = jwt.sign(
@@ -117,6 +117,7 @@ function createSession(user, device) {
     lastSeenAt: nowIso(),
     revoked: false
   };
+  sessionObj.rememberMe = rememberMe;
   data.sessions.push(sessionObj);
   db.save();
   if (!user.demoMode) DbService.saveSession(sessionObj).catch(err => {
@@ -127,14 +128,14 @@ function createSession(user, device) {
 
 /* ---------------- Session cookie (HttpOnly) ---------------- */
 
-function authCookieOptions() {
+function authCookieOptions(rememberMe = true) {
   return {
     name: config.cookie.name,
     options: {
       httpOnly: config.cookie.httpOnly,           // invisible to JavaScript (XSS-safe)
       secure: config.cookie.secure,               // HTTPS-only in production
       sameSite: config.cookie.sameSite,           // CSRF-hardened default
-      maxAge: config.cookie.maxAgeMs,
+      maxAge: rememberMe ? config.cookie.maxAgeMs : undefined,
       path: '/'
     }
   };
@@ -145,8 +146,8 @@ function clearAuthCookie(res) {
   res.clearCookie(name, { ...options, maxAge: undefined });
 }
 
-function setAuthCookie(res, token) {
-  const { name, options } = authCookieOptions();
+function setAuthCookie(res, token, rememberMe = true) {
+  const { name, options } = authCookieOptions(rememberMe);
   res.cookie(name, token, options);
 }
 
@@ -673,7 +674,16 @@ async function login(identifierRaw, password, req, expectedRole = null) {
         (labels[expectedRole] || 'matching') + ' account to sign in here.' };
   }
 
-  // Always issue secure 2FA Email OTP on login
+  // Email is verified once during signup. Normal workspace sign-in then uses
+  // the correct password directly; the administrator console retains its OTP.
+  if (user.isVerified && expectedRole !== 'admin') {
+    const rememberMe = req.body?.rememberMe !== false;
+    const session = createSession(user, getDeviceProfile(req), rememberMe);
+    logActivity('login', 'Password verified; workspace session started', user, req);
+    return { ok: true, directLogin: true, requires2FA: false, rememberMe, ...session, user: publicUser(user) };
+  }
+
+  // Unverified email and administrator-console sign-in still require email OTP.
   const issued = await issueOTPChallenge(user, user.isVerified ? 'login' : 'registration', req);
   if (!issued.ok) {
     logActivity('login_blocked', `OTP send blocked (${issued.reason})`, user, req, issued.reason);
@@ -1149,6 +1159,12 @@ async function loginGoogle(profile, role, req) {
       registrationStage: role === 'lawyer' ? 'awaiting_profile' : 'complete' });
     await DbService.createUser(user);
     if (role === 'user') await DbService.saveUserProfile({ userId: user.id, fullName: user.fullName });
+  }
+  const googleName = String(profile.name || '').trim().slice(0, 120);
+  if (googleName) {
+    user.googleName = googleName;
+    if (!user.fullName || user.fullName === 'Verification Desk') user.fullName = googleName;
+    await DbService.createUser(user);
   }
   const session = createSession(user, getDeviceProfile(req));
   logActivity('login', 'Google identity verified by server', user, req);

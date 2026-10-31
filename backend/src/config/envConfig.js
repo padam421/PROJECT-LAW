@@ -32,7 +32,7 @@ const config = {
 
   // Auth / crypto
   jwtSecret: env.JWT_SECRET || DEFAULT_JWT_SECRET,
-  jwtExpiresIn: env.JWT_EXPIRES_IN || '24h',
+  jwtExpiresIn: env.JWT_EXPIRES_IN || '30d',
   bcryptRounds: parseInt(env.BCRYPT_ROUNDS || '10', 10),
   otpBcryptRounds: parseInt(env.OTP_BCRYPT_ROUNDS || '10', 10),
 
@@ -43,7 +43,7 @@ const config = {
     secure: String(env.COOKIE_SECURE || (isProd ? 'true' : 'false')) === 'true',
     httpOnly: true,
     sameSite: env.COOKIE_SAMESITE || 'lax',
-    maxAgeMs: parseDurationMs(env.JWT_EXPIRES_IN || '24h', 24 * 60 * 60 * 1000)
+    maxAgeMs: parseDurationMs(env.JWT_EXPIRES_IN || '30d', 30 * 24 * 60 * 60 * 1000)
   },
 
   // Data layer (stored in user home directory to prevent Live Server from reloading the SPA)

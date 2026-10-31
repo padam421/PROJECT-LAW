@@ -340,8 +340,7 @@ const Components = {
     );
     if (confirmed) {
       ApiClient.stopReminderEngine();
-      await AuthManager.logout();
-      Utils.showToast('Session securely ended.', 'info');
+      if (await AuthManager.logout()) Utils.showToast('Signed out. Your saved work stays in your account.', 'info');
     }
   },
 };

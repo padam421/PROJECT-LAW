@@ -48,6 +48,7 @@ test('verified Gmail links an existing password/admin account without replacing 
   assert.equal(stored.passwordHash, existing.passwordHash);
   assert.equal(stored.googleSubject, profile.sub);
   assert.equal(stored.isGoogleAuth, true);
+  assert.equal(stored.googleName, 'Google Name');
   assert.equal(db.get().users.filter(u => u.email.toLowerCase() === existing.email).length, 1);
   assert.deepEqual(db.workspaceFor(existing.id).cases, [{ id: 'private-existing-case' }]);
   // Re-open persisted state in a fresh process, as happens on a hosted restart.
@@ -63,6 +64,16 @@ test('verified Gmail links an existing password/admin account without replacing 
     assert.equal(db.workspaceFor(user.id).cases[0].id, 'private-existing-case');
   `], { encoding: 'utf8' });
   assert.equal(child.status, 0, child.stderr);
+});
+test('Google supplies the real name for a provisioned Verification Desk account', async () => {
+  await DbService.createUser({ id: 'named-owner', email: 'synthetic-named-owner@gmail.com', role: 'admin',
+    fullName: 'Verification Desk', passwordHash: 'preserved', accountStatus: 'active', isVerified: true });
+  const result = await auth.loginGoogle({ sub: 'named-owner-sub', email: 'synthetic-named-owner@gmail.com',
+    name: 'Synthetic Person', email_verified: true }, 'user', req);
+  assert.equal(result.ok, true);
+  assert.equal(result.user.fullName, 'Synthetic Person');
+  assert.equal(result.user.googleName, 'Synthetic Person');
+  assert.equal(result.user.role, 'admin');
 });
 test('Google subject remains the identity when a Workspace address changes', async () => {
   const original = { sub: 'workspace-sub', email: 'original@example.invalid', email_verified: true, hd: 'example.invalid' };

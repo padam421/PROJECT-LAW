@@ -7,7 +7,7 @@
 const UserHomePage = {
   render() {
     const user = UserStore.getUser();
-    const firstName = (user.fullName || 'User').split(' ')[0];
+    const firstName = AuthManager.displayName(user).split(' ')[0];
     const activeCase = UserStore.getActiveCase();
     const hearing = UserStore.getUpcomingHearing();
     const myLawyer = UserStore.getLawyer();

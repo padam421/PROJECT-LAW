@@ -5,7 +5,7 @@ const fs=require('node:fs'),vm=require('node:vm');
 function fixture(){
   const local=new Map(),session=new Map();
   const storage=values=>({getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)});
-  const context=vm.createContext({console,AbortController,setTimeout,clearTimeout,
+  const context=vm.createContext({console,AbortController,AbortSignal,setTimeout,clearTimeout,
     localStorage:storage(local),sessionStorage:storage(session),
     window:{location:{protocol:'http:',hostname:'127.0.0.1',port:'5501'}},
     document:{addEventListener(){}},
@@ -26,6 +26,48 @@ test('a blank demo workspace renders its dashboard and portfolio without a verif
   assert.match(dashboard,/Hackathon demo account/);assert.match(dashboard,/Demo profile — not verified/);
   assert.match(profile,/Demo profile — not verified/);assert.doesNotMatch(profile,/Badge Awaiting Verification/);
   assert.doesNotMatch(dashboard,/Verified Advocate &bull; Bar ID/);
+});
+
+test('logout flushes pending lawyer work and switching accounts retains isolated saved caches', async () => {
+  const { context, store, auth, local } = fixture();
+  const saved = new Map();
+  context.fetch = async (url, options = {}) => {
+    if (options.method === 'PUT') {
+      saved.set('demo', JSON.parse(options.body).value);
+      return { ok: true, status: 200 };
+    }
+    if (url.includes('/logout')) return { ok: true, status: 200 };
+    const id = auth.getSession().id;
+    return { ok: true, json: async () => ({ lawyer: { id }, workspace: { cases: saved.get(id) || [] } }) };
+  };
+  await store.init();
+  store.setState('cases', [{ id: 'saved-lawyer-case' }]);
+  assert.equal(await auth.logout(), true);
+  assert.equal(saved.get('demo')[0].id, 'saved-lawyer-case');
+  assert.equal(store.getState('cases'), undefined);
+  assert.ok(local.has('lc_store_cache_demo'));
+  await auth.acceptSession({ id: 'other', role: 'user' }, 'other-session');
+  assert.equal(store.getState('cases').length, 0);
+  await auth.acceptSession({ id: 'demo', role: 'lawyer' }, 'returning-session');
+  assert.equal(store.getState('cases')[0].id, 'saved-lawyer-case');
+});
+
+test('unsynced lawyer changes survive an offline sign-out attempt and later server hydration', async () => {
+  const { context, store, auth, local } = fixture();
+  await store.init();
+  store.setState('cases', [{ id: 'offline-case' }]);
+  context.fetch = async () => { throw new TypeError('Synthetic offline'); };
+  context.Utils.showToast = () => {};
+  assert.equal(await auth.logout(), false);
+  assert.equal(auth.getSession().id, 'demo');
+  assert.equal(JSON.parse(local.get('lc_store_cache_demo')).cases[0].id, 'offline-case');
+  context.fetch = async (url, options = {}) => options.method === 'PUT'
+    ? { ok: true, status: 200 }
+    : { ok: true, json: async () => ({ lawyer: { id: 'demo' }, workspace: { cases: [] } }) };
+  await store.init();
+  assert.equal(store.getState('cases')[0].id, 'offline-case');
+  await store.flushPendingSync();
+  assert.equal(store.getState('__pendingSync').length, 0);
 });
 
 test('client/admin workspace access does not claim professional advocate verification', async () => {
