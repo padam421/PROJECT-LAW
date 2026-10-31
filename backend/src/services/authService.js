@@ -399,6 +399,9 @@ function blankUser(email, passwordHash, role = 'user') {
  * 6-digit OTP that must be verified before the account exists fully.
  */
 async function registerInitiate(emailRaw, password, req, role = 'user') {
+  if (!['user', 'lawyer'].includes(role)) {
+    return { ok: false, code: 400, error: 'Choose User / Client or Lawyer / Advocate for registration.' };
+  }
   const email = String(emailRaw || '').toLowerCase().trim();
   if (!validateEmail(email)) {
     return { ok: false, code: 400, error: 'Enter a valid email address.', fieldErrors: { email: 'Enter a valid email address' } };

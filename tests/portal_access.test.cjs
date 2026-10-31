@@ -88,6 +88,15 @@ test('client/admin credentials cannot start lawyer sign-in or send an unnecessar
   assert.equal(emails, beforeEmails);
 });
 
+test('public signup cannot request an administrator role', async () => {
+  const beforeEmails = emails;
+  const response = await request('/api/auth/register-initiate', null,
+    { email: 'public-admin-attempt@example.invalid', password: 'SyntheticPassword123', role: 'admin' });
+  assert.equal(response.status, 400);
+  assert.equal(emails, beforeEmails);
+  assert.equal(db.get().users.some(u => u.email === 'public-admin-attempt@example.invalid'), false);
+});
+
 test('a matching lawyer sign-in starts normal OTP verification, without changing account roles', async () => {
   const response = await request('/api/auth/login', null,
     { email: 'lawyer@example.invalid', password: 'SyntheticPassword123', role: 'lawyer' });
