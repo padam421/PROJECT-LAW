@@ -9,6 +9,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const apiRoutes = require('./routes');
 const { notFoundHandler, errorMiddleware } = require('./middlewares/errorMiddleware');
@@ -40,6 +41,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Refuse cross-site mutations even when a browser sends cookies with its request.
 app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
   const origin = req.get('origin');
   if (config.isProd && !['GET', 'HEAD', 'OPTIONS'].includes(req.method) &&
       ((origin && origin !== new URL(config.appBaseUrl).origin) || req.get('sec-fetch-site') === 'cross-site')) {
@@ -74,9 +76,16 @@ app.use('/api', apiRoutes);
 
 /* Static SPA (lawyer portal + shared design system + admin console) */
 const frontendRoot = path.join(__dirname, '..', '..', 'frontend');
-app.use('/frontend', express.static(frontendRoot, {
+app.use('/frontend', compression({
+  filter: (req, res) => /\.(?:html?|js|css|json|svg|txt)$/i.test(req.path) && compression.filter(req, res)
+}), express.static(frontendRoot, {
   maxAge: 0,
-  setHeaders: (res) => {
+  setHeaders: (res, filePath) => {
+    // Reuse large courtroom models and artwork while keeping application code fresh.
+    if (config.isProd && /\.(?:glb|gltf|png|jpe?g|webp|gif|svg|ico|woff2?|mp3|wav)$/i.test(filePath)) {
+      res.set('Cache-Control', 'public, max-age=86400');
+      return;
+    }
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
