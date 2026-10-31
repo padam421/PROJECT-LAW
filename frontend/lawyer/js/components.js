@@ -261,6 +261,7 @@ const Components = {
           <main class="app-content" id="main-content">
             ${focused ? '<button class="adv-mobile-nav" onclick="Components.toggleSidebar()" aria-label="Toggle navigation menu"><span class="material-symbols-rounded" aria-hidden="true">menu</span> Menu</button>' : ''}
             ${AuthManager.getSession()?.demoMode ? '<div class="doc-comparison-banner mb-4"><span class="material-symbols-rounded">science</span><span><strong>Hackathon demo account</strong> — sample information only; not a professionally verified advocate.</span></div>' : ''}
+            ${Store.getState('sampleDataset') && !focused ? '<div class="doc-comparison-banner mb-4" role="note"><span class="material-symbols-rounded">science</span><span><strong>Private sample workspace</strong> · Fictional clients, chats, cases, payments and reviews.</span></div>' : ''}
             ${contentHtml}
           </main>
         </div>

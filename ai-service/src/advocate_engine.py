@@ -18,6 +18,10 @@ CHECKS = ('facts_match', 'legal_support', 'no_invented_authorities', 'date_appli
 REPORT_PARTS = ('facts', 'issues', 'provisions', 'precedents', 'strategy', 'opposition', 'evidence', 'next_steps')
 
 
+class ResearchReviewError(ValueError):
+    """Generated legal analysis was withheld; the saved record is still usable."""
+
+
 def input_language(engine, message, fallback=''):
     """Lawyer responses follow this turn, never a saved language preference or AI text."""
     sample = str(message or '').strip() or str(fallback or '').strip()
@@ -214,6 +218,10 @@ Use ONLY the exact passage IDs provided with each source. Never generate, shorte
 No citation IDs inside paragraph text. Facts/conditional strategy may have no citations but must not smuggle in
 an exact section, statutory rule, decided case, penalty or deadline. Mark reported allegations as reported facts.
 If a legal claim cannot be supported, remove it, explain the missing authority and propose a verification task.
+The checks audit the claims actually retained, not whether unavailable external research was completed.
+date_applicability may be true when an unknown incident date or amendment position is explicitly identified
+and every application is conditional; it must never imply that current consolidation was independently verified.
+legal_support may be true for a record-preparation question that makes no unsupported legal proposition.
 """
 
 
@@ -492,8 +500,98 @@ Keep at least the original useful depth. Set both paragraph flags true ONLY afte
         supported = retain_supported_analysis(result, sources, payload, language)
         if supported and not validate(supported, sources) and not record_checks(supported, payload):
             return supported
-        raise ValueError('The analysis could not pass the source and case-facts checks. Your brief is saved. Retry or add the missing case papers/authorities.')
+        raise ResearchReviewError('The analysis could not pass the source and case-facts checks. Your brief is saved. Retry or add the missing case papers/authorities.')
     return result
+
+
+def preparation_only(sources, language, in_scope=True):
+    """A review failure may return record work, never the rejected model draft.
+
+    Guidance here is deterministic. Source passages are copied verbatim, without
+    a model's legal interpretation, applicability claim or invented authority.
+    """
+    lang = 'Hinglish' if language.startswith('Hinglish') else language
+    templates = {
+        'English': (
+            'Record preparation — legal analysis awaiting verification',
+            'The generated legal conclusions could not be fully verified and have been withheld. Your brief is saved. The preparation tasks and verbatim source extracts below remain available; they are not a verified bail opinion or a prediction of the outcome.',
+            'Check the original case papers',
+            ['Compare the FIR, seizure memo and dated incident chronology. Distinguish reported allegations from what each document records.',
+             'Confirm the recorded substance, weight, sampling, seal and laboratory records; record which papers are available and which are still awaited.',
+             'Compare the search record, location, notices, witness accounts and the recorded link between the person, vehicle and bag.',
+             'Prepare the arrest and custody dates, remand orders, previous applications and the next hearing date.'],
+            'Prepare a conditional hearing outline',
+            ['For each disputed issue, list your proposed submission, the supporting document, the opposing version and the unanswered factual question.',
+             'Keep factual discrepancies separate from legal consequences. Obtain the applicable wording and complete judgments before asserting a legal entitlement; missing papers alone should not be treated as a guaranteed result.'],
+            'Questions to continue the review',
+            ['Which side and procedural stage are you preparing for, and what relief is requested?',
+             'What are the incident date, next hearing date and the exact records currently available?',
+             'Add the relevant papers or ask one narrower issue to recheck against the preserved brief.'],
+            'Verbatim available source extract — applicability remains to be checked',
+            'This workspace currently covers NDPS research. Share the NDPS brief, your side and the stage to begin.'),
+        'Hindi': (
+            'मामले की तैयारी — कानूनी विश्लेषण का सत्यापन शेष',
+            'तैयार किए गए कानूनी निष्कर्ष पूरी तरह सत्यापित नहीं हो पाए, इसलिए उन्हें रोक दिया गया है। आपका विवरण सुरक्षित है। नीचे तैयारी के कार्य और स्रोत के मूल उद्धरण हैं; यह सत्यापित जमानत राय या परिणाम की भविष्यवाणी नहीं है।',
+            'मूल दस्तावेज़ों की जाँच करें',
+            ['एफआईआर, जब्ती विवरण और तारीखवार घटनाक्रम मिलाएँ। बताए गए आरोप और दस्तावेज़ में दर्ज तथ्य अलग रखें।',
+             'दर्ज पदार्थ, वजन, नमूने, सील और प्रयोगशाला रिकॉर्ड की जाँच करें; उपलब्ध और प्रतीक्षित कागज़ों की सूची बनाएँ।',
+             'तलाशी का स्थान, नोटिस, गवाहों के बयान तथा व्यक्ति, वाहन और बैग के बीच दर्ज संबंध की तुलना करें।',
+             'गिरफ्तारी और हिरासत की तारीखें, रिमांड आदेश, पिछली अर्जियाँ और अगली सुनवाई की तारीख तैयार रखें।'],
+            'सुनवाई की सशर्त रूपरेखा बनाएँ',
+            ['हर विवादित मुद्दे पर प्रस्तावित तर्क, सहायक दस्तावेज़, दूसरे पक्ष का कथन और अनुत्तरित तथ्यात्मक प्रश्न लिखें।',
+             'तथ्यात्मक अंतर और कानूनी परिणाम अलग रखें। अधिकार का दावा करने से पहले लागू कानूनी पाठ और पूरे निर्णय जाँचें; केवल दस्तावेज़ की कमी को निश्चित परिणाम न मानें।'],
+            'आगे की जाँच के लिए प्रश्न',
+            ['आप किस पक्ष और किस चरण की तैयारी कर रहे हैं तथा कौन सी राहत चाहते हैं?',
+             'घटना और अगली सुनवाई की तारीख क्या है तथा कौन से मूल रिकॉर्ड उपलब्ध हैं?',
+             'संबंधित दस्तावेज़ जोड़ें या सुरक्षित विवरण पर एक विशिष्ट मुद्दे की दोबारा जाँच पूछें।'],
+            'उपलब्ध स्रोत का मूल उद्धरण — लागू होने की जाँच शेष',
+            'यह कार्यक्षेत्र अभी एनडीपीएस शोध के लिए है। शुरुआत के लिए मामले का विवरण, अपना पक्ष और चरण बताएँ।'),
+        'Hinglish': (
+            'Case ki taiyari — legal analysis ka verification baaki hai',
+            'Generated legal nateeje poori tarah verify nahi ho paaye, isliye unhe rok diya gaya hai. Aapka brief saved hai. Neeche preparation tasks aur source ke seedhe excerpts diye hain; yeh verified bail opinion ya outcome ki prediction nahi hai.',
+            'Original case papers check karein',
+            ['FIR, seizure memo aur date-wise incident chronology ko milayein. Bataye gaye allegations aur har document mein recorded facts ko alag rakhein.',
+             'Recorded substance, weight, sampling, seal aur laboratory records confirm karein; kaunse papers available hain aur kaunse awaited hain, list banayein.',
+             'Search record, jagah, notices, witness accounts aur person, vehicle aur bag ke beech recorded link ko compare karein.',
+             'Arrest aur custody dates, remand orders, pichhli applications aur next hearing ki date taiyar rakhein.'],
+            'Conditional hearing outline banayein',
+            ['Har disputed issue ke liye proposed submission, supporting document, doosre paksh ka version aur unanswered factual question likhein.',
+             'Factual differences aur legal consequences ko alag rakhein. Legal entitlement assert karne se pehle applicable wording aur complete judgments verify karein; sirf missing papers se guaranteed result na maanein.'],
+            'Review aage badhane ke liye sawal',
+            ['Aap kis side aur procedural stage ki preparation kar rahe hain, aur kaunsi relief chahiye?',
+             'Incident date, next hearing date aur abhi available exact records kya hain?',
+             'Relevant papers add karein ya saved brief par ek narrower issue ko dobara check karne ke liye poochhein.'],
+            'Available source ka seedha excerpt — applicability check karni baaki hai',
+            'Yeh workspace abhi NDPS research ke liye hai. NDPS brief, apni side aur case ka stage batayein.')
+    }
+    copy = templates.get(lang)
+    if not copy:
+        # Never add English or a different script to an unsupported language.
+        notice = WITHHELD_NOTICES.get(lang)
+        if not notice:
+            return None
+        sections = [{'key': 'next_steps', 'title': notice.split('।')[0],
+                     'paragraphs': [{'text': notice, 'kind': 'analysis', 'citations': []}]}]
+    else:
+        title, notice, documents_title, documents, outline_title, outline, questions_title, questions, source_title, scope = copy
+        def part(key, heading, paragraphs, kind='analysis'):
+            return {'key': key, 'title': heading, 'paragraphs': [
+                {'text': text, 'kind': kind, 'citations': []} for text in paragraphs]}
+        sections = [part('review_status', title, [notice if in_scope else scope])]
+        if in_scope:
+            sections += [part('evidence', documents_title, documents), part('strategy', outline_title, outline),
+                         part('next_steps', questions_title, questions, 'question')]
+    if in_scope:
+        for source in [s for s in with_passages(sources) if s.get('kind') == 'statute' and s.get('passages')][:2]:
+            passage = source['passages'][0]
+            if len(passage['text']) < 25:
+                continue
+            sections.append({'key': 'source_extract_' + source['id'],
+                'title': (copy[8] + ' · ' if copy else '') + source['title'],
+                'paragraphs': [{'text': '“' + passage['text'] + '”', 'kind': 'law',
+                    'citations': [{'source_id': source['id'], 'quote': passage['text']}]}]})
+    return {'sections': sections, 'checks': {key: False for key in CHECKS},
+            'limited_analysis': True, 'preparation_only': True}
 
 
 def answer(engine, query, case_context=None, language='auto', chat_history=None, retry=False):
@@ -524,10 +622,18 @@ Do not write simulated courtroom dialogue inside research chat. Retry improves a
 """
     in_scope = bool(NDPS.search(facts) or NDPS.search(info.get('english_translation', '')))
     payload.update(retry=bool(retry), ndps_scope=in_scope, full_analysis=bool(full and in_scope))
-    result = generate(engine, payload, sources, info['language_name'], instructions + response_language_rule(info), full=bool(full and in_scope))
+    try:
+        result = generate(engine, payload, sources, info['language_name'], instructions + response_language_rule(info), full=bool(full and in_scope))
+    except ResearchReviewError:
+        result = preparation_only(sources, info['language_name'], in_scope)
+        if result is None:
+            raise
     message, cited = render(result, sources)
-    info.update(sources=cited, sections=result['sections'], validation={'reviewed': True,
-        'scope': 'Source quotations and independent model review; amendment currency and subsequent case treatment are not confirmed.',
+    preparation = bool(result.get('preparation_only'))
+    info.update(sources=cited, sections=result['sections'], validation={'reviewed': not preparation,
+        'mode': 'preparation_only' if preparation else 'reviewed_analysis',
+        'scope': ('Legal conclusions withheld; deterministic preparation tasks and verbatim supplied statutory extracts only.' if preparation else
+                  'Source quotations and independent model review; amendment currency and subsequent case treatment are not confirmed.'),
         'checks': result['checks'], 'retrieved_count': len(sources),
         'limited_analysis': bool(result.get('limited_analysis'))}, mode='advocate-ndps')
     return message, info

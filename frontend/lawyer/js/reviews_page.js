@@ -19,7 +19,7 @@ const ReviewsPage = {
       <div class="page-header">
         <div class="page-header-left">
           <h2 class="page-title">Client Feedback</h2>
-          <p class="page-subtitle">Verified post-consultation reviews — read-only, cannot be edited by advocates</p>
+          <p class="page-subtitle">${Store.getState('sampleDataset') ? 'Includes clearly labelled fictional sample feedback for this private workspace.' : 'Verified post-consultation reviews — read-only, cannot be edited by advocates'}</p>
         </div>
       </div>
 
@@ -60,7 +60,7 @@ const ReviewsPage = {
                 <div class="avatar avatar-sm">${Utils.escapeHtml((r.clientName || '').split(' ').map(n => n[0]).join('').slice(0, 2))}</div>
                 <div>
                   <div class="review-client-name">${Utils.escapeHtml(r.clientName)}</div>
-                  <div class="review-date">Verified consultation • ${Utils.formatDate(r.date)}</div>
+                  <div class="review-date">${r.isSample ? 'Fictional sample review' : 'Verified consultation'} • ${Utils.formatDate(r.date)}</div>
                 </div>
               </div>
               <div class="star-rating" aria-label="${r.rating} stars">
@@ -72,7 +72,7 @@ const ReviewsPage = {
 
             ${r.wouldRecommend ? `
               <span class="review-recommend-badge">
-                <span class="material-symbols-rounded icon-sm">thumb_up</span> Recommends this advocate
+                <span class="material-symbols-rounded icon-sm">thumb_up</span> ${r.isSample ? 'Sample recommendation' : 'Recommends this advocate'}
               </span>` : ''}
           </div>
         `).join('')}

@@ -364,6 +364,12 @@ async function seedIfEmpty() {
     changed = true;
   }
 
+  // Explicit owner-requested samples are private to the named account's lawyer
+  // workspace. They never enable global demo mode or alter professional status.
+  for (const user of data.users) {
+    if (require('./ownerSampleWorkspace').ensureOwnerSampleWorkspace(user)) changed = true;
+  }
+
   if (changed) {
     db.save();
     db.flushNow();

@@ -6,6 +6,7 @@
 const db = require('../config/dbConfig');
 
 exports.getWorkspace = (req, res) => {
+  require('../data/ownerSampleWorkspace').ensureOwnerSampleWorkspace(req.user);
   const ws = db.workspaceFor(req.user.id);
   res.json({
     workspace: ws,

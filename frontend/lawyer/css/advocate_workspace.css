@@ -95,6 +95,9 @@ body:has(.adv-focus-layout){overflow:hidden}
 .adv-research-layout #adv-files{flex-shrink:0;max-height:90px;overflow-y:auto}
 .adv-research-layout .adv-workspace.adv-conversations-hidden{grid-template-columns:minmax(0,1fr)}
 .adv-conversations-hidden>.adv-sidebar{display:none}
+/* Span every grid track even when an older app wrapper omits the focused layout.
+   Otherwise hiding history places the chat in the narrow first column. */
+.adv-workspace.adv-conversations-hidden>.adv-chat{grid-column:1/-1;width:100%;min-width:0}
 .adv-research-layout .adv-empty{padding:20px 0}
 .adv-research-layout .adv-empty>p{font-size:15px}
 .adv-research-layout .adv-intake-grid p{font-size:13px}

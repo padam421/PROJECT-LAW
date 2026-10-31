@@ -36,6 +36,20 @@ class AdvocateApiTests(unittest.TestCase):
         for data in ([], {'record':{}}, {'stage':'unknown','record':{'facts':'NDPS'}}):
             self.assertEqual(self.client.post('/api/ai/advocate/rehearsal', json=data).status_code, 400)
 
+    def test_failed_legal_review_returns_honest_preparation_instead_of_a_400_error(self):
+        import advocate_engine as research
+        detector = lambda query, preferred_lang=None: {'english_translation': query, 'detected_language_code': 'en'}
+        with patch.object(self.engine, 'detect_and_translate_query', detector, create=True), \
+             patch.object(research, 'evidence', return_value=[]), \
+             patch.object(research, 'generate', side_effect=research.ResearchReviewError('Unverified conclusion')):
+            response = self.client.post('/api/ai/advocate/chat', json={'message': 'Prepare this synthetic NDPS case.'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json['ok'])
+        self.assertEqual(response.json['validation']['mode'], 'preparation_only')
+        self.assertFalse(response.json['validation']['reviewed'])
+        self.assertIn('original case papers', response.json['message'])
+        self.assertNotIn('Unverified conclusion', response.json['message'])
+
     def test_document_route_extracts_text_instead_of_just_metadata(self):
         response = self.client.post('/api/ai/advocate/documents', data={'file':(io.BytesIO(b'Synthetic FIR text: disputed bag ownership.'), 'case.txt')})
         self.assertEqual(response.status_code, 200)

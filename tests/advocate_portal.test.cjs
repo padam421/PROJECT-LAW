@@ -16,6 +16,13 @@ test('actual lawyer HTML loads its own chat and rehearsal, without shared citize
  assert.doesNotMatch(html,/src="[^\"]*(?:assistant_chat|live_court|court_simulator|chat_bot)\.js/);
  const user=fs.readFileSync('frontend/user/index.html','utf8');assert.ok(user.includes('assistant_chat.js'));assert.ok(user.includes('live_court.js'));
 });
+test('a preparation-only recovery is labelled as pending legal verification', () => {
+ const f=fixture();
+ const html=f.run("AdvocateChatBot._renderMessage({id:'limited',sender:'ai',text:'Saved preparation tasks',validation:{mode:'preparation_only',reviewed:false}})");
+ assert.match(html,/LEGAL VERIFICATION PENDING/);
+ assert.doesNotMatch(html,/RESPONSE UNAVAILABLE|verified legal opinion/i);
+ assert.match(html,/Deepen \/ recheck/);
+});
 test('lawyer history uses a separate local key and API namespace, and reload preserves it',()=>{
  const f=fixture();f.run('AssistantThreads.create();AssistantThreads.append(AssistantThreads.active().id,{id:"m1",sender:"user",text:"NDPS case"})');
  assert.ok(f.local.has('nyay_advocate_v2_lawyer-one'));assert.ok(!f.local.has('nyay_assistant_v1_lawyer-one'));

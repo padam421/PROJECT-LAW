@@ -28,7 +28,7 @@ const AdvocateChatBot = {
   _renderMessage(m) {
     const user = m.sender === 'user';
     return '<article class="adv-message ' + (user ? 'adv-message-user' : '') + '" id="msg-row-' + this.e(m.id) + '"><div class="adv-message-label">' +
-      (user ? 'YOUR CASE RECORD' : m.error ? 'RESPONSE UNAVAILABLE' : 'NYAY SETU · ADVOCATE RESEARCH') + '</div>' +
+      (user ? 'YOUR CASE RECORD' : m.error ? 'RESPONSE UNAVAILABLE' : m.validation?.mode === 'preparation_only' ? 'CASE PREPARATION · LEGAL VERIFICATION PENDING' : 'NYAY SETU · ADVOCATE RESEARCH') + '</div>' +
       (m.attachments?.length ? '<div class="adv-file-chips">' + m.attachments.map(f => '<span>📎 ' + this.e(f.name) + '</span>').join('') + '</div>' : '') +
       '<div class="adv-answer" dir="auto">' + this.markdown(m.text) + '</div>' + this.sources(m.sources) +
       (!user ? '<div class="adv-message-actions">' + (m.error ? '<button onclick="AdvocateChatBot.retry(\'' + m.id + '\')">Retry this question</button>' :

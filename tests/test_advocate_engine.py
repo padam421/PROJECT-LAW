@@ -37,6 +37,59 @@ class Engine:
 
 
 class AdvocateResearchTests(unittest.TestCase):
+    def test_failed_source_review_returns_record_preparation_without_releasing_rejected_law(self):
+        class Detector(Engine):
+            def detect_and_translate_query(self, query, preferred_lang=None):
+                return {'english_translation': query, 'detected_language_code': 'en'}
+        unsafe = result('The client is guaranteed bail under Section 999.', kind='law')
+        rejected = audited(unsafe)
+        rejected['checks'] = {key: False for key in research.CHECKS}
+        for row in rejected['paragraph_reviews']:
+            row['evidence_supported'] = False
+        source = {'id': 'A1', 'kind': 'statute', 'title': 'Synthetic source',
+                  'text': 'A complete synthetic source passage used only to test immutable quotation binding.'}
+        for query, expected in [('Which records should I obtain?', 'en'),
+                                ('Mujhe batao ab kaunse documents chahiye?', 'hi-Latn'),
+                                ('मुझे कौन से दस्तावेज़ चाहिए?', 'hi')]:
+            with self.subTest(language=expected):
+                engine = Detector([unsafe, rejected, rejected])
+                with patch.object(research, 'evidence', return_value=[source]):
+                    message, info = research.answer(engine, query, chat_history=[{'sender': 'user', 'text': 'Synthetic NDPS bag case'}])
+                self.assertNotIn('999', message)
+                self.assertNotIn('guaranteed bail', message)
+                self.assertEqual(info['detected_language_code'], expected)
+                self.assertEqual(info['validation']['mode'], 'preparation_only')
+                self.assertFalse(info['validation']['reviewed'])
+                self.assertTrue(info['validation']['limited_analysis'])
+                self.assertTrue(all(value is False for value in info['validation']['checks'].values()))
+                self.assertIn(source['text'], message)
+                self.assertEqual([s['id'] for s in info['sources']], ['A1'])
+                for section in info['sections']:
+                    for paragraph in section['paragraphs']:
+                        for citation in paragraph['citations']:
+                            self.assertIn(citation['quote'], source['text'])
+                if expected != 'hi':
+                    self.assertNotRegex(message, r'[\u0900-\u097f]')
+
+    def test_incomplete_independent_audit_cannot_release_a_draft_but_preserves_preparation(self):
+        class Detector(Engine):
+            def detect_and_translate_query(self, query, preferred_lang=None):
+                return {'english_translation': query, 'detected_language_code': 'en'}
+        draft = result('DO NOT RELEASE THIS UNREVIEWED DRAFT')
+        audit = {'paragraph_reviews': [], 'checks': {key: True for key in research.CHECKS}}
+        with patch.object(research, 'evidence', return_value=[]):
+            message, info = research.answer(Detector([draft, audit, audit]), 'Which records are needed?',
+                chat_history=[{'sender': 'user', 'text': 'Synthetic NDPS case'}])
+        self.assertNotIn('DO NOT RELEASE', message)
+        self.assertIn('original case papers', message)
+        self.assertFalse(info['validation']['reviewed'])
+        self.assertEqual(info['sources'], [])
+
+    def test_recovery_preserves_other_native_languages_and_does_not_invent_a_romanized_translation(self):
+        fallback = research.preparation_only([], 'Marathi')
+        self.assertIn('अपुष्ट', research.render(fallback, [])[0])
+        self.assertIsNone(research.preparation_only([], 'Tamil in Latin script'))
+
     def test_entire_record_retains_middle_turn_corrections_and_documents(self):
         turns = [{'sender': 'user', 'text': 'Fact ' + str(i), 'caseContext': 'Document ' + str(i)} for i in range(40)]
         payload, facts = research.case_record('What about the disputed ownership?', None, turns)
