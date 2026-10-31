@@ -16,7 +16,11 @@ def main():
     for path, expected, method in [('/api/health', 200, 'GET'), ('/api/ready', 200, 'GET'),
             ('/api/ai/health', 200, 'GET'), ('/frontend/index.html', 200, 'GET'),
             ('/frontend/user/index.html', 200, 'GET'), ('/frontend/lawyer/index.html', 200, 'GET'),
-            ('/admin', 200, 'GET'), ('/api/auth/session', 401, 'GET'), ('/api/ai/chat', 401, 'POST')]:
+            ('/admin', 200, 'GET'), ('/api/auth/session', 401, 'GET'), ('/api/ai/chat', 401, 'POST'),
+            ('/frontend/lawyer/js/advocate_chat.js', 200, 'GET'),
+            ('/frontend/lawyer/js/advocate_rehearsal.js', 200, 'GET'),
+            ('/api/advocate/chat', 401, 'POST'), ('/api/advocate/rehearsal', 401, 'POST'),
+            ('/api/advocate/documents', 401, 'POST'), ('/api/advocate/assistant/threads', 401, 'GET')]:
         try:
             request = urllib.request.Request(base + path, method=method,
                 data=b'{}' if method == 'POST' else None,

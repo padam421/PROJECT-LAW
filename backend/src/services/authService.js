@@ -609,7 +609,7 @@ async function registerComplete(user, payload) {
 
 /* ---------------- Login + mandatory email 2FA ---------------- */
 
-async function login(identifierRaw, password, req) {
+async function login(identifierRaw, password, req, expectedRole = null) {
   const data = db.get();
   const identifierEmail = String(identifierRaw || '').toLowerCase().trim();
   const identifierPhone = normalizePhone(identifierRaw);
@@ -661,6 +661,13 @@ async function login(identifierRaw, password, req) {
   if (user.accountStatus === 'suspended') {
     logActivity('login_blocked', 'Suspended account login attempt', user, req, 'suspended');
     return { ok: false, code: 403, error: 'This account has been suspended. Contact support@Nyay Setu.in.' };
+  }
+
+  if (expectedRole && user.role !== expectedRole) {
+    const labels = { user: 'User / Client', lawyer: 'Lawyer / Advocate', admin: 'Admin' };
+    return { ok: false, code: 403, reason: 'wrong_portal',
+      error: 'This is a ' + (labels[user.role] || 'different') + ' account. Open its portal, or use a ' +
+        (labels[expectedRole] || 'matching') + ' account to sign in here.' };
   }
 
   // Always issue secure 2FA Email OTP on login

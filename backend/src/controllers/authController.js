@@ -151,12 +151,15 @@ exports.registerComplete = async (req, res) => {
    LOGIN — credentials then direct login or email OTP 2FA
    ---------------------------------------------------------- */
 exports.login = async (req, res) => {
-  const { identifier, email, password } = req.body || {};
+  const { identifier, email, password, role } = req.body || {};
   const userIdentifier = email || identifier;
   if (!userIdentifier || !password) {
     return res.status(400).json({ error: 'Enter your registered email and password.' });
   }
-  const result = await authService.login(userIdentifier, password, req);
+  if (role != null && !['user', 'lawyer', 'admin'].includes(role)) {
+    return res.status(400).json({ error: 'Choose a valid account portal.' });
+  }
+  const result = await authService.login(userIdentifier, password, req, role);
   if (!result.ok) {
     return res.status(result.code || 401).json({
       error: result.error,

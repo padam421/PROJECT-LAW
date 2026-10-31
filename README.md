@@ -6,6 +6,9 @@ consultations and earnings.
 
 Live website: **[nyay-setu-4aik.onrender.com](https://nyay-setu-4aik.onrender.com/)**.
 Free Render hosting setup and operating limits: [deployment guide](docs/render-deployment.md).
+Both portals use that deployment: [User / Client](https://nyay-setu-4aik.onrender.com/frontend/user/index.html)
+and [Lawyer / Advocate](https://nyay-setu-4aik.onrender.com/frontend/lawyer/index.html).
+Sign in with the matching account role; a client/admin account does not grant advocate API access.
 
 ## Repository layout
 
@@ -13,11 +16,11 @@ Free Render hosting setup and operating limits: [deployment guide](docs/render-d
 |---|---|
 | `frontend/lawyer/` | Advocate portal SPA (vanilla JS + glassmorphism design system) |
 | `frontend/admin/` | Verification desk console for admin reviewers |
-| `frontend/user/` | Client portal (coming soon — holding page) |
+| `frontend/user/` | Client portal, AI assistant and virtual court preparation |
 | `frontend/shared/` | Design tokens, components, router, store, auth manager |
 | `backend/src/` | Express API: auth/2FA, verification pipeline, workspace sync |
-| `database/` | PostgreSQL DDL mirror of the data layer (`schema/`, `migrations/`, `seeders/`) |
-| `ai-service/` | Python microservice skeleton (planned client-side AI features) |
+| `database/` | Hosted MySQL schema plus historical schema/migration mirrors |
+| `ai-service/` | Python AI APIs, packaged precedent search and advocate research/rehearsal |
 
 ## Quick start
 

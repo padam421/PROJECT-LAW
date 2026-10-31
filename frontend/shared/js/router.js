@@ -10,6 +10,7 @@ const Router = {
   previousRoute: null,
   _guards: [],
   _onNavigate: [],
+  _navigationId: 0,
 
   /* --------------------------------------------------------
      REGISTRATION
@@ -61,6 +62,7 @@ const Router = {
      NAVIGATION
      -------------------------------------------------------- */
   async navigate(rawPath, params = {}) {
+    const navigationId = ++this._navigationId;
     let full = String(rawPath || '').replace(/^#/, '').trim();
     let query = '';
     let path = full;
@@ -88,9 +90,24 @@ const Router = {
     const target = resolved.route;
     const mergedParams = Object.keys(params || {}).length ? params : resolved.params;
 
-    if (target.requiresAuth && !AuthManager.isLoggedIn()) {
-      window.location.hash = '#/login';
-      return;
+    if (target.requiresAuth) {
+      try {
+        if (typeof AuthManager.refreshSession === 'function') await AuthManager.refreshSession();
+      } catch (_) {
+        if (navigationId !== this._navigationId) return;
+        const app = document.getElementById('app');
+        if (app) app.innerHTML = '<div class="fullscreen-page"><div class="fullscreen-card"><h2>Connection interrupted</h2>' +
+          '<p>Could not confirm your account with the server. Your saved work is retained.</p>' +
+          '<button type="button" class="btn btn-primary" onclick="window.location.reload()">Reload and retry</button></div></div>';
+        return;
+      }
+      if (navigationId !== this._navigationId) return;
+      if (!AuthManager.isLoggedIn()) return this.navigate('/login');
+      const requiredRole = typeof AuthManager.portalRole === 'function' ? AuthManager.portalRole() : null;
+      if (requiredRole && AuthManager.getSession()?.role !== requiredRole) {
+        Utils.showToast(AuthManager.portalAccessMessage(), 'warning');
+        return this.navigate('/login');
+      }
     }
 
     // Leave hook of current page

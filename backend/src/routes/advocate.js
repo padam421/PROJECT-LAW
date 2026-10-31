@@ -1,10 +1,14 @@
 /* Separate, authenticated advocate research transport. No citizen AI routes are changed. */
 const express = require('express');
 const multer = require('multer');
-const { authenticate, requireRole } = require('../middlewares/authMiddleware');
+const { authenticate } = require('../middlewares/authMiddleware');
 const router = express.Router();
 const base = process.env.AI_SERVICE_URL || 'http://localhost:5000';
-router.use(authenticate, requireRole('lawyer'));
+router.use(authenticate, (req, res, next) => {
+  if (req.user.role === 'lawyer') return next();
+  return res.status(403).json({ ok: false, code: 'wrong_portal',
+    error: 'A Lawyer / Advocate account is required. Your current account belongs to another portal. Sign in with a lawyer account to use research, documents and hearing practice.' });
+});
 // The shared persistence implementation derives a separate namespace from this mount.
 router.use('/assistant', require('./assistant'));
 for (const action of ['chat', 'rehearsal']) {

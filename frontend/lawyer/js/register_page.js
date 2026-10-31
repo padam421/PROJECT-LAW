@@ -39,14 +39,14 @@ const RegisterPage = {
   onEnter() {
     // Signed-in advocates with finished profiles don't belong here.
     const session = AuthManager.getSession();
-    if (AuthManager.isLoggedIn() && session && session.registrationStage === 'complete') {
+    if (AuthManager.isLoggedIn() && session?.role === 'lawyer' && session.registrationStage === 'complete') {
       Router.navigate('/dashboard');
     }
   },
 
   /** Which phase renders? */
   currentPhase() {
-    if (AuthManager.isLoggedIn()) {
+    if (AuthManager.isLoggedIn() && AuthManager.getSession()?.role === 'lawyer') {
       const s = AuthManager.getSession();
       return (s && s.registrationStage && s.registrationStage !== 'complete') ? 'profile' : 'done';
     }

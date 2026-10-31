@@ -111,6 +111,47 @@ const AuthManager = {
     localStorage.removeItem(this.SESSION_KEY);
   },
 
+  portalRole() {
+    const path = window.location.pathname || window.location.href || '';
+    if (/\/lawyer\//.test(path)) return 'lawyer';
+    if (/\/user\//.test(path)) return 'user';
+    if (/\/admin\//.test(path)) return 'admin';
+    return null;
+  },
+
+  portalAccessMessage(role = this.getSession()?.role) {
+    const labels = { user: 'User / Client', lawyer: 'Lawyer / Advocate', admin: 'Admin' };
+    return 'This is a ' + (labels[role] || 'different') + ' account. Open its portal, or sign in with a ' +
+      (labels[this.portalRole()] || 'matching') + ' account to use these tools.';
+  },
+
+  async refreshSession() {
+    const previousOwner = this.getSession()?.id;
+    const previousSessionId = this.getSession()?.sessionId;
+    const response = await fetch(this.getApiUrl('/api/auth/session'), {
+      credentials: 'include', signal: AbortSignal.timeout(15000)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (this.getSession()?.sessionId !== previousSessionId) return this.getSession();
+    if (response.status === 401 || response.status === 403) {
+      this.clearSession();
+      return null;
+    }
+    if (!response.ok || !data.user?.id || !data.sessionId) {
+      throw new Error('Could not confirm your server session. Your saved work is retained; reload and retry.');
+    }
+    // The HttpOnly cookie identifies the account. A cached local role is never authoritative.
+    this.setSession(data.user, data.sessionId);
+    if (previousOwner !== data.user.id && (!this.portalRole() || this.portalRole() === data.user.role)) {
+      if (typeof UserStore !== 'undefined') {
+        UserStore.init();
+        UserStore.setUser(data.user);
+      }
+      if (typeof Store !== 'undefined') await Store.init();
+    }
+    return data.user;
+  },
+
   GOOGLE_CLIENT_ID: '508760219507-8pn77gjn77ifanpno18tcaoa3qt7klv0.apps.googleusercontent.com',
 
   getApiUrl(endpoint) {
@@ -197,7 +238,7 @@ const AuthManager = {
   async login(emailOrPhone, password /* rememberMe kept for UX parity */) {
     try {
       const { response: res, data } = await this.authRequest('/api/auth/login',
-        { identifier: emailOrPhone, email: emailOrPhone, password }, { 'X-LC-Device': this.getDeviceId() });
+        { identifier: emailOrPhone, email: emailOrPhone, password, role: this.portalRole() || undefined }, { 'X-LC-Device': this.getDeviceId() });
 
       if (!res.ok) {
         return { success: false, error: data.error || 'Sign-in failed. Please try again.', reason: data.reason, retryAfterMs: data.retryAfterMs };
