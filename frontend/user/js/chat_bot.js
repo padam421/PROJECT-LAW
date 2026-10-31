@@ -75,7 +75,7 @@ const UserChatBot = {
             <input type="file" id="chat-file-input" style="display:none" accept=".pdf,.doc,.docx,.txt,.csv,image/*" onchange="UserChatBot.handleFileAttach(event)">
             <div class="u-chat-input-wrap">
               <div class="u-chat-toolbar">
-                <select class="u-chat-lang-select" id="chat-lang-select" title="Select Query & Speech Language (22 Indian Languages)" onchange="UserChatBot.handleLanguageChange(event)">
+                <select class="u-chat-lang-select" id="chat-lang-select" title="Voice input language; replies follow the language of your message" onchange="UserChatBot.handleLanguageChange(event)">
                   <option value="auto" selected>🌐 Auto Detect (स्वचालित)</option>
                   <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
                   <option value="mr">🇮🇳 मराठी (Marathi)</option>

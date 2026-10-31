@@ -70,7 +70,9 @@ const AssistantChat = {
     try{
       const history=t.messages.map(m=>({sender:m.sender,text:m.text}));
       if(!retryMessage)history.pop();
-      const result=await AssistantThreads.api('chat',{message:text,role:this.role(),caseContext:context,language:lang,chatHistory:history,retry:!!retryMessage});
+      // The client selector controls speech input; typed replies follow the current message.
+      const responseLanguage=this.role()==='user'?'auto':lang;
+      const result=await AssistantThreads.api('chat',{message:text,role:this.role(),caseContext:context,language:responseLanguage,chatHistory:history,retry:!!retryMessage});
       if(AssistantThreads.owner()!==owner)return;
       AssistantThreads.append(t.id,{id:AssistantThreads.id('msg'),sender:'ai',text:result.message,lang:result.detected_language?.detected_language_code||lang,
         visual:result.visual,sources:result.sources,validation:result.validation,time:new Date().toISOString()});

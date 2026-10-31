@@ -2,10 +2,7 @@
 import json
 import re
 import time
-
-LANGUAGES={'en':'English','hi':'Hindi','te':'Telugu','ta':'Tamil','mr':'Marathi','gu':'Gujarati',
-           'bn':'Bengali','kn':'Kannada','ml':'Malayalam','pa':'Punjabi','ur':'Urdu','or':'Odia',
-           'as':'Assamese','ne':'Nepali','sa':'Sanskrit'}
+from response_language import LANGUAGES, input_language, chat_language_rule
 
 def parse_json(text):
     text=re.sub(r'^```(?:json)?\s*|\s*```$','',str(text).strip())
@@ -91,6 +88,7 @@ def displayed_answer(result):
     return str(result.get('message',''))+'\n'+json.dumps(result.get('visual'),ensure_ascii=False)
 
 CHAT_NOTE={
+ 'hi-Latn':'Yeh aapki jaankari par aadharit aam margdarshan hai; hamare sangrah se is mudde ki pushti nahi mili, isliye lagu kanoon aur kagazaat apne vakil se jaanch lein.',
  'en':'This is general guidance based on your account; a matching precedent was not verified in our collection, so have your lawyer check the applicable law and papers.',
  'hi':'यह आपकी जानकारी पर आधारित सामान्य मार्गदर्शन है; हमारे संग्रह से इस मुद्दे की पुष्टि नहीं मिली है, इसलिए लागू कानून और कागज़ात अपने वकील से जाँच लें।',
  'te':'ఇది మీరు తెలిపిన వివరాల ఆధారంగా సాధారణ మార్గదర్శకం; మా సేకరణలో నేరుగా ధృవీకరణ దొరకలేదు, కాబట్టి చట్టం, పత్రాలను మీ న్యాయవాదితో పరిశీలించండి.',
@@ -112,6 +110,14 @@ def safe_chat_guidance(query, code):
     """Last resort if a model repeatedly insists on an unverified section/year.
     It keeps useful next steps instead of returning only a database-absence notice.
     """
+    if code=='hi-Latn':
+        return ('Aapne bataya: “'+query[:350]+'”\n\n'
+            'Pakka kanooni nateeja nikalne se pehle kuch baatein jaanchni hongi. Abhi aap ye kadam le sakte hain:\n\n'
+            '1. Ghatnaon ki tareekhein aur kisne kya kaha ya kiya, kram se likhein. Jo khud dekha aur jo kisi se suna, unhe alag rakhein.\n'
+            '2. Kagazaat, messages, payment ke saboot aur sambandhit records ki copies sambhal kar rakhein. Asli records na badlein.\n'
+            '3. Kisi notice ya adhikarik kagaz par di samay-seema ko nazarandaaz na karein; uski copy lekar sthaniya vakil se salah lein.\n'
+            '4. Turant dhamki ya khatra ho toh pehle apni suraksha aur sthaniya madad ko prathmikta dein.\n\n'
+            'Aap kis shehar/rajya mein hain, ghatna kab hui aur aapke paas kaunse kagazaat hain?')
     if code=='hi':
         return ('आपने बताया: “'+query[:350]+'”\n\n'
             'इसमें कोई पक्का कानूनी निष्कर्ष देने से पहले कुछ बातें जाँचनी होंगी। अभी आप ये कदम ले सकते हैं:\n\n'
@@ -125,8 +131,15 @@ def safe_chat_guidance(query, code):
     return None
 
 def answer(engine,query,user_role='user',case_context=None,language='auto',chat_history=None,retry=False):
-    info=language_info(engine,query,language,chat_history)
-    sources,excerpts=grounding(engine,info.get('english_translation') or query)
+    earlier='\n'.join(str(m.get('text',''))[:6000] for m in (chat_history or [])
+                      if isinstance(m,dict) and m.get('sender',m.get('role'))=='user')
+    # Detect this turn alone. Old messages remain available as case facts, not language commands.
+    latest_human=next((str(m.get('text','')) for m in reversed(chat_history or [])
+                       if isinstance(m,dict) and m.get('sender',m.get('role'))=='user'
+                       and not m.get('documentOnly')), '')
+    info=input_language(engine,query,latest_human or case_context or '')
+    retrieval='\n'.join(filter(None,[info.get('english_translation') or query,earlier[:18000],str(case_context or '')[:18000]]))
+    sources,excerpts=grounding(engine,retrieval)
     substantive=len(query)>180 or bool(case_context)
     length_instruction=('For this substantive problem aim for about 450–650 words, with at least 350 meaningful words. '
         'Explain how the supplied facts affect the options, immediate priorities, which documents to obtain and why, '
@@ -156,9 +169,9 @@ never change facts or manufacture a different legal strategy just to differ.
 When a visual/graph/diagram is requested, include a useful process flow or comparison; never invent numerical data.
 Return JSON {{"message":"natural Markdown answer","visual":null OR {{"title":"...","nodes":[{{"title":"...","detail":"..."}}]}},
 "source_ids":["S1"],"unknowns":["..."]}}. At most 8 visual nodes. No HTML or executable code.
-"""
+"""+chat_language_rule(info)
     if not sources:system+='\n'+UNVERIFIED_LAW
-    prompt=json.dumps({'latest_request':query,'role':user_role,'attachment_context':case_context,
+    prompt=json.dumps({'latest_request':query,'language_reference':info['language_reference'],'role':user_role,'attachment_context':case_context,
                        'conversation':history_context(chat_history),'retrieved_excerpts':excerpts,
                        'retrieval_note':'No relevant indexed precedent found' if not sources else ''},ensure_ascii=False)
     draft=parse_json(engine.call_gemini(prompt,system,.2,True))
@@ -184,15 +197,15 @@ No refusal just because local retrieval is empty; give practical conditional gui
 a database-limitation paragraph; the application appends a brief note separately.
 This is a consistency review against supplied evidence,
 not independent current-law verification.
-"""+('\n'+UNVERIFIED_LAW if not sources else '')
-    review=parse_json(engine.call_gemini(json.dumps({'request':query,'history':history_context(chat_history),
+"""+chat_language_rule(info)+('\n'+UNVERIFIED_LAW if not sources else '')
+    review=parse_json(engine.call_gemini(json.dumps({'request':query,'language_reference':info['language_reference'],'history':history_context(chat_history),
         'attachment_context':case_context,'evidence':excerpts,'draft':draft},ensure_ascii=False),review_system,.1,True))
     if not isinstance(review,dict):raise ValueError('Answer review did not complete. Please retry.')
     checks=review.get('checks') if isinstance(review.get('checks'),dict) else {}
     needs_repair=(not sources and chat_specifics(displayed_answer(review))) or any(value is False for value in checks.values())
     needs_repair=needs_repair or (substantive and len(str(review.get('message','')).split())<350)
     if needs_repair:
-        review=parse_json(engine.call_gemini(json.dumps({'request':query,'history':history_context(chat_history),
+        review=parse_json(engine.call_gemini(json.dumps({'request':query,'language_reference':info['language_reference'],'history':history_context(chat_history),
             'attachment_context':case_context,'evidence':excerpts,'answer_to_correct':review},ensure_ascii=False),
             review_system+'\nCorrect the failed checks and insufficient detail. If there are no verified excerpts, remove unverified statutory numbers/years; still give useful, case-specific practical guidance. Return corrected JSON.',0,True))
         if not isinstance(review,dict):raise ValueError('Answer review did not complete. Please retry.')
