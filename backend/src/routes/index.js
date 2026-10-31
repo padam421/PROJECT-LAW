@@ -413,6 +413,28 @@ router.patch('/notifications/:id/read', optionalAuth, async (req, res) => {
 // ============================================================
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:5000';
 
+// POST keeps answer text out of browser URLs and access logs.
+router.post('/ai/tts', authenticate, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const { text, language } = req.body || {};
+  if (typeof text !== 'string' || !text.trim() || text.length > 300 ||
+      !['hi','en','mr','gu','bn','ta','te','kn','ml','pa','ur','or','as','ne','sa'].includes(language)) {
+    return res.status(400).json({ ok: false, error: 'Invalid speech text or language.' });
+  }
+  try {
+    const response = await fetch(`${AI_SERVICE_URL}/api/ai/tts`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, language }), signal: AbortSignal.timeout(12000)
+    });
+    if (!response.ok || !response.headers.get('content-type')?.includes('audio/')) {
+      return res.status(502).json({ ok: false, error: 'Speech service is unavailable. Please retry.' });
+    }
+    res.type('audio/mpeg').send(Buffer.from(await response.arrayBuffer()));
+  } catch (_) {
+    res.status(502).json({ ok: false, error: 'Speech service is unavailable. Please retry.' });
+  }
+});
+
 router.post('/ai/chat', async (req, res) => {
   try {
     const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/chat`, {

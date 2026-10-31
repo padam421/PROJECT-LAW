@@ -101,8 +101,9 @@ const AssistantChat = {
       AssistantThreads.hydrate();return template.innerHTML;
     };
     c.sendMessage=()=>this.send();
-    c.startNewChat=()=>{if(typeof LiveCourt!=='undefined')LiveCourt.detach();window.speechSynthesis?.cancel();AssistantThreads.create();this.refresh();};
-    c.selectConversation=id=>{if(typeof LiveCourt!=='undefined')LiveCourt.detach();window.speechSynthesis?.cancel();AssistantThreads.select(id);this.refresh();};
+    const stopReadout=()=>{if(typeof NyaySetuTTS!=='undefined')NyaySetuTTS.stop();else window.speechSynthesis?.cancel();};
+    c.startNewChat=()=>{if(typeof LiveCourt!=='undefined')LiveCourt.detach();stopReadout();AssistantThreads.create();this.refresh();};
+    c.selectConversation=id=>{if(typeof LiveCourt!=='undefined')LiveCourt.detach();stopReadout();AssistantThreads.select(id);this.refresh();};
     c.handleFeedback=(id,status)=>{
       const t=AssistantThreads.active(),index=t.messages.findIndex(m=>m.id===id);if(index<0)return;
       AssistantThreads.change(t.id,t=>{t.messages[index].feedback=status;});
@@ -111,10 +112,13 @@ const AssistantChat = {
     };
     c.toggleSpeak=id=>{
       const message=AssistantThreads.active()?.messages.find(m=>m.id===id);if(!message)return;
-      if(window.speechSynthesis?.speaking){window.speechSynthesis.cancel();return;}
-      const language=message.lang||'en',voices=window.speechSynthesis?.getVoices()||[],voice=voices.find(v=>v.lang.split('-')[0]===language);
-      if(!voice){AssistantThreads.notify('Install a matching browser voice to listen in this language. Case text stays on your device.','info');return;}
-      const utterance=new SpeechSynthesisUtterance(message.text.replace(/[#*`]/g,''));utterance.lang=voice.lang;utterance.voice=voice;window.speechSynthesis.speak(utterance);
+      if(typeof NyaySetuTTS==='undefined'){AssistantThreads.notify('Audio controller load nahi hua. Page refresh karke dobara try karein.','warning');return;}
+      NyaySetuTTS.speak(id,message.text,message.lang||'auto',{
+        onState:(id,state)=>{c._updateTTSButton(id,true);const label=document.getElementById('tts-label-'+id);if(label&&state==='loading')label.textContent='तैयार हो रहा है… (Stop)';},
+        onEnd:id=>c._updateTTSButton(id,false),
+        onError:(id,error)=>{c._updateTTSButton(id,false);AssistantThreads.notify(error,'warning');},
+        requestOnline:()=>Utils.showConfirm('Online voice use karein?','Is language ki browser voice available nahi hai ya playback fail hua hai. Online playback ke liye is answer ka text Google ki speech service ko bheja jayega. Sirf is answer ke liye allow karein?',{confirmText:'Allow & Listen',cancelText:'Cancel'})
+      });
     };
     c.onEnter=()=>{this.refresh();AssistantThreads.hydrate();};
     c.launchCourtSimulator=id=>LiveCourt.launch(id);
