@@ -10,6 +10,7 @@ const Components = {
      -------------------------------------------------------- */
   VerifiedBadge(size = 'sm') {
     const lawyer = Store.getState('lawyerProfile') || {};
+    if (lawyer.workspaceOnly) return '<span class="badge badge-neutral" title="Client and lawyer workspace access">Workspace</span>';
     if (lawyer.demoMode) return '<span class="badge badge-neutral" title="Demo profile; not professionally verified">Demo</span>';
     if (lawyer.verificationStatus === 'verified') {
       return `<span class="verified-tick" title="Verified Advocate"><span class="material-symbols-rounded">check</span></span>`;

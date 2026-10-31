@@ -125,6 +125,11 @@ const AuthManager = {
       (labels[this.portalRole()] || 'matching') + ' account to use these tools.';
   },
 
+  canUsePortal(role = this.getSession()?.role) {
+    if (this.portalRole() === 'admin') return role === 'admin';
+    return ['user', 'lawyer', 'admin'].includes(role);
+  },
+
   async refreshSession() {
     const previousOwner = this.getSession()?.id;
     const previousSessionId = this.getSession()?.sessionId;
@@ -142,7 +147,7 @@ const AuthManager = {
     }
     // The HttpOnly cookie identifies the account. A cached local role is never authoritative.
     this.setSession(data.user, data.sessionId);
-    if (previousOwner !== data.user.id && (!this.portalRole() || this.portalRole() === data.user.role)) {
+    if (previousOwner !== data.user.id && (!this.portalRole() || this.canUsePortal(data.user.role))) {
       if (typeof UserStore !== 'undefined') {
         UserStore.init();
         UserStore.setUser(data.user);
@@ -220,7 +225,7 @@ const AuthManager = {
       Utils.showToast(`Signed in as ${user.fullName} via Google!`, 'success');
 
       if (role === 'lawyer' || window.location.href.includes('/lawyer/')) {
-        Router.navigate(user.registrationStage === 'complete' ? '/dashboard' : '/register');
+        Router.navigate('/dashboard');
       } else {
         Router.navigate('/home');
       }

@@ -32,8 +32,8 @@ test('the lawyer portal checks the cookie account instead of a stale locally cac
   f.reply({ status: 200, user: { id: 'actual-client', role: 'user' }, sessionId: 'client-session' });
   await f.router.navigate('/dashboard');
   assert.equal(f.auth.getSession().role, 'user');
-  assert.deepEqual(f.rendered, ['/login']);
-  assert.match(f.feedback[0][0], /User \/ Client.*Lawyer \/ Advocate/);
+  assert.deepEqual(f.rendered, ['/dashboard']);
+  assert.equal(f.feedback.length, 0);
   assert.equal(f.requests[0].options.credentials, 'include');
   assert.equal(f.requests[0].url, '/api/auth/session');
 });
@@ -83,9 +83,39 @@ test('both portals send the selected account role during password login', async 
   }
 });
 
-test('a client account does not make advocate registration appear already completed', () => {
+test('an existing client account can enter lawyer tools without registering another email', () => {
   const f = fixture();
   f.auth.setSession({ id: 'client', role: 'user', registrationStage: 'complete' }, 'client-session');
   vm.runInContext(fs.readFileSync('frontend/lawyer/js/register_page.js', 'utf8') + '\nthis.registration = RegisterPage;', f.context);
-  assert.equal(f.context.registration.currentPhase(), 'credentials');
+  assert.equal(f.context.registration.currentPhase(), 'done');
+});
+
+test('one account can open either workspace while the admin portal stays role-restricted', async () => {
+  for (const portal of ['user', 'lawyer']) for (const role of ['user', 'lawyer', 'admin']) {
+    const f = fixture('/frontend/' + portal + '/index.html');
+    f.reply({ status: 200, user: { id: 'same-account', role }, sessionId: 'same-session' });
+    await f.router.navigate('/dashboard');
+    assert.deepEqual(f.rendered, ['/dashboard']);
+    assert.equal(f.auth.getSession().role, role);
+  }
+  const f = fixture('/frontend/admin/index.html');
+  f.reply({ status: 200, user: { id: 'client', role: 'user' }, sessionId: 'client-session' });
+  await f.router.navigate('/dashboard');
+  assert.deepEqual(f.rendered, ['/login']);
+});
+
+test('verified new accounts reach lawyer tools without a mandatory professional-profile redirect', async () => {
+  const f = fixture();
+  f.auth.setSession({ id: 'lawyer', role: 'lawyer', registrationStage: 'awaiting_profile' }, 'lawyer-session');
+  f.auth.verifyOTP = async () => ({ success: true, needsProfileCompletion: true });
+  f.context.ApiClient = { startReminderEngine() {} };
+  vm.runInContext(fs.readFileSync('frontend/lawyer/js/otp_page.js', 'utf8') + '\nthis.otp = OTPPage;', f.context);
+  Object.assign(f.context.otp, { _submitting: false, _locked: false, _deadline: Date.now() + 60000,
+    readCode: () => '123456', setBusy() {}, onLeave() {} });
+  const navigate = f.router.navigate.bind(f.router);
+  let navigation;
+  f.router.navigate = (...args) => (navigation = navigate(...args));
+  await f.context.otp.handleVerify();
+  await navigation;
+  assert.deepEqual(f.rendered, ['/dashboard']);
 });

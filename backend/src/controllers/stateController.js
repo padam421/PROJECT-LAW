@@ -11,6 +11,8 @@ exports.getWorkspace = (req, res) => {
     workspace: ws,
     lawyer: {
       id: req.user.id,
+      role: req.user.role,
+      workspaceOnly: req.user.role !== 'lawyer',
       demoMode: req.user.demoMode === true,
       registrationStage: req.user.registrationStage,
       fullName: req.user.fullName,
@@ -30,7 +32,7 @@ exports.getWorkspace = (req, res) => {
       university: req.user.university,
       bio: req.user.bio || '',
       profilePhoto: req.user.profilePhoto || null,
-      verificationStatus: req.user.verificationStatus,
+      verificationStatus: req.user.role === 'lawyer' ? req.user.verificationStatus : 'not_applicable',
       verificationId: req.user.verificationId,
       verificationDate: req.user.verificationDate,
       profileDeactivated: !!req.user.profileDeactivated,

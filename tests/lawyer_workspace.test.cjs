@@ -28,6 +28,21 @@ test('a blank demo workspace renders its dashboard and portfolio without a verif
   assert.doesNotMatch(dashboard,/Verified Advocate &bull; Bar ID/);
 });
 
+test('client/admin workspace access does not claim professional advocate verification', async () => {
+  for (const role of ['user', 'admin']) {
+    const { context, store, auth } = fixture();
+    await store.init();
+    auth.setSession({ id: 'demo', role }, 'shared-session');
+    store._state.lawyerProfile = { id: 'demo', role, workspaceOnly: true, fullName: 'Synthetic Account', verificationStatus: 'not_applicable' };
+    for (const name of ['components', 'dashboard', 'profile_page']) vm.runInContext(fs.readFileSync('frontend/lawyer/js/' + name + '.js', 'utf8'), context);
+    const dashboard = vm.runInContext('DashboardPage.render()', context);
+    const profile = vm.runInContext('ProfilePage.render()', context);
+    assert.match(dashboard, /Client &amp; Lawyer workspace access/);
+    assert.match(profile, /Workspace account/);
+    assert.doesNotMatch(profile, /Verified Advocate|Trust Badge Active/);
+  }
+});
+
 test('a workspace response from a departed account cannot overwrite the new account',async()=>{
   const {context,store,auth}=fixture();let resolve;
   context.fetch=()=>new Promise(r=>{resolve=r;});const pending=store.refreshFromServer();

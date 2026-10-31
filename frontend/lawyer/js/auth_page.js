@@ -131,7 +131,7 @@ const AuthPage = {
 
     if (result.success) {
       if (result.directLogin) {
-        Utils.showToast('Welcome back, Advocate! Signed in successfully.', 'success');
+        Utils.showToast('Signed in successfully. Your workspace is ready.', 'success');
         ApiClient.startReminderEngine();
         Router.navigate('/dashboard');
         return;

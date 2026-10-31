@@ -666,7 +666,7 @@ async function login(identifierRaw, password, req, expectedRole = null) {
     return { ok: false, code: 403, error: 'This account has been suspended. Contact support@Nyay Setu.in.' };
   }
 
-  if (expectedRole && user.role !== expectedRole) {
+  if (expectedRole === 'admin' && user.role !== 'admin') {
     const labels = { user: 'User / Client', lawyer: 'Lawyer / Advocate', admin: 'Admin' };
     return { ok: false, code: 403, reason: 'wrong_portal',
       error: 'This is a ' + (labels[user.role] || 'different') + ' account. Open its portal, or use a ' +
@@ -1112,7 +1112,7 @@ async function loginGoogle(profile, role, req) {
   const email = String(profile.email || '').toLowerCase().trim();
   let user = db.get().users.find(u => u.email === email) || await DbService.findUserByEmail(email);
   if (user) {
-    if (user.role !== role || user.role === 'admin' || user.accountStatus === 'suspended') {
+    if (user.role === 'admin' || user.accountStatus === 'suspended') {
       return { ok: false, code: 403, error: 'This account cannot sign in to the selected portal.' };
     }
     if (user.googleSubject !== profile.sub) {

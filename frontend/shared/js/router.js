@@ -104,7 +104,9 @@ const Router = {
       if (navigationId !== this._navigationId) return;
       if (!AuthManager.isLoggedIn()) return this.navigate('/login');
       const requiredRole = typeof AuthManager.portalRole === 'function' ? AuthManager.portalRole() : null;
-      if (requiredRole && AuthManager.getSession()?.role !== requiredRole) {
+      const allowed = typeof AuthManager.canUsePortal === 'function'
+        ? AuthManager.canUsePortal() : AuthManager.getSession()?.role === requiredRole;
+      if (requiredRole && !allowed) {
         Utils.showToast(AuthManager.portalAccessMessage(), 'warning');
         return this.navigate('/login');
       }

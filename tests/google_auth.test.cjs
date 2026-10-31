@@ -10,7 +10,7 @@ process.env.GOOGLE_CLIENT_ID = 'synthetic-client-id';
 process.env.BCRYPT_ROUNDS = '4';
 const db = require('../backend/src/config/dbConfig');
 const auth = require('../backend/src/services/authService');
-test('verified Google accounts receive real revocable sessions and cannot claim another account or role', async () => {
+test('verified Google accounts can switch workspaces without claiming another identity or role', async () => {
   const req = { headers: {}, get: () => '', ip: '127.0.0.1' };
   const profile = { sub: 'synthetic-subject', email: 'google@example.invalid', name: 'Synthetic User' };
   const first = await auth.loginGoogle(profile, 'user', req);
@@ -20,7 +20,10 @@ test('verified Google accounts receive real revocable sessions and cannot claim 
   const repeated = await auth.loginGoogle(profile, 'user', req);
   assert.equal(repeated.user.id, first.user.id);
   assert.equal((await auth.loginGoogle({ ...profile, sub: 'different-subject' }, 'user', req)).code, 409);
-  assert.equal((await auth.loginGoogle(profile, 'lawyer', req)).code, 403);
+  const switched = await auth.loginGoogle(profile, 'lawyer', req);
+  assert.equal(switched.ok, true);
+  assert.equal(switched.user.id, first.user.id);
+  assert.equal(switched.user.role, 'user');
   db.get().users.find(u => u.id === first.user.id).accountStatus = 'suspended';
   assert.equal((await auth.loginGoogle(profile, 'user', req)).code, 403);
 });

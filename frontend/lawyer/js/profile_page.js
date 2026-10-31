@@ -41,7 +41,7 @@ const ProfilePage = {
           <div class="profile-hero-info">
             <div class="profile-name-row">
               <h2 class="profile-hero-title">${Utils.escapeHtml(lawyer.fullName || 'Advocate')}</h2>
-              ${lawyer.demoMode ? '<span class="badge badge-neutral">Demo profile — not verified</span>' : isVerified
+              ${lawyer.workspaceOnly ? '<span class="badge badge-neutral">Workspace account</span>' : lawyer.demoMode ? '<span class="badge badge-neutral">Demo profile — not verified</span>' : isVerified
                 ? `<span class="badge badge-verified"><span class="material-symbols-rounded icon-sm">verified</span> Verified Advocate</span>`
                 : `<span class="badge badge-warning"><span class="material-symbols-rounded icon-sm">hourglass_top</span> Verification in progress</span>`}
             </div>
@@ -112,7 +112,7 @@ const ProfilePage = {
           <h3 class="card-title mb-3">Practice Snapshot</h3>
           <div class="data-table">
             <table><tbody>
-              <tr><td><strong>Bar Registration:</strong></td><td class="font-mono">${Utils.escapeHtml(lawyer.barCouncil || '—')} ${lawyer.demoMode ? '(Demo sample — not verified)' : lawyer.verificationStatus === 'verified' ? '(Verified)' : '(Verification pending)'}</td></tr>
+              <tr><td><strong>Bar Registration:</strong></td><td class="font-mono">${Utils.escapeHtml(lawyer.barCouncil || '—')} ${lawyer.workspaceOnly ? '(Not professionally verified)' : lawyer.demoMode ? '(Demo sample — not verified)' : lawyer.verificationStatus === 'verified' ? '(Verified)' : '(Verification pending)'}</td></tr>
               <tr><td><strong>State Bar Council:</strong></td><td>${Utils.escapeHtml(lawyer.stateBarCouncil || '—')}</td></tr>
               <tr><td><strong>Primary Focus:</strong></td><td>${Utils.escapeHtml(lawyer.primarySpecialization || '—')}</td></tr>
               <tr><td><strong>Location:</strong></td><td>${Utils.escapeHtml([lawyer.city, lawyer.state].filter(Boolean).join(', ') || '—')}</td></tr>
@@ -124,11 +124,11 @@ const ProfilePage = {
             <div class="d-flex items-center gap-2">
               <span class="material-symbols-rounded" style="color:${lawyer.verificationStatus === 'verified' ? 'var(--color-accent)' : 'var(--color-gold-dark)'}">${lawyer.verificationStatus === 'verified' ? 'verified' : 'hourglass_top'}</span>
               <strong style="color:${lawyer.verificationStatus === 'verified' ? 'var(--color-accent-dark)' : 'var(--color-gold-dark)'}">
-                ${lawyer.demoMode ? 'Demo Profile — No Professional Verification' : lawyer.verificationStatus === 'verified' ? 'Trust Badge Active' : 'Badge Awaiting Verification'}
+                ${lawyer.workspaceOnly ? 'Client &amp; Lawyer Tools Available' : lawyer.demoMode ? 'Demo Profile — No Professional Verification' : lawyer.verificationStatus === 'verified' ? 'Trust Badge Active' : 'Badge Awaiting Verification'}
               </strong>
             </div>
             <span class="text-body-sm text-muted">
-              ${lawyer.demoMode ? 'Sample information for the hackathon. This profile is excluded from the real advocate approval queue.' : lawyer.verificationStatus === 'verified'
+              ${lawyer.workspaceOnly ? 'Your account can use both workspaces. Professional credentials have not been verified.' : lawyer.demoMode ? 'Sample information for the hackathon. This profile is excluded from the real advocate approval queue.' : lawyer.verificationStatus === 'verified'
                 ? 'Your profile is publicly discoverable and open for consultation bookings.'
                 : 'Clients can find you once credential verification completes. Check progress in the Verification wizard.'}
             </span>

@@ -39,15 +39,16 @@ const RegisterPage = {
   onEnter() {
     // Signed-in advocates with finished profiles don't belong here.
     const session = AuthManager.getSession();
-    if (AuthManager.isLoggedIn() && session?.role === 'lawyer' && session.registrationStage === 'complete') {
+    if (AuthManager.isLoggedIn() && session && (session.role !== 'lawyer' || session.registrationStage === 'complete')) {
       Router.navigate('/dashboard');
     }
   },
 
   /** Which phase renders? */
   currentPhase() {
-    if (AuthManager.isLoggedIn() && AuthManager.getSession()?.role === 'lawyer') {
+    if (AuthManager.isLoggedIn()) {
       const s = AuthManager.getSession();
+      if (s?.role !== 'lawyer') return 'done';
       return (s && s.registrationStage && s.registrationStage !== 'complete') ? 'profile' : 'done';
     }
     // Mid-signup: an email verification is pending → point at the OTP screen.
@@ -102,7 +103,7 @@ const RegisterPage = {
         <div class="register-step-line"></div>
         <div class="register-step ${step >= 2 ? 'active' : ''}" role="listitem">
           <div class="register-step-circle">2</div>
-          <div class="register-step-label">Professional Details</div>
+          <div class="register-step-label">Professional Details (optional)</div>
         </div>
       </div>
     `;

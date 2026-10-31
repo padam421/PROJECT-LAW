@@ -245,14 +245,9 @@ const OTPPage = {
         Router.navigate('/device-check');
         return;
       }
-      if (res.needsProfileCompletion) {
-        // Registration (or resumed signup): email verified, profile still pending.
-        Utils.showToast('Email verified successfully! Complete your advocate profile.', 'success');
-        Router.navigate('/register');
-        return;
-      }
+      // Email verification unlocks the tools; professional details can be completed later.
       ApiClient.startReminderEngine();
-      Utils.showToast('Identity verified. Welcome back, Advocate!', 'success');
+      Utils.showToast('Account verified. Your workspace is ready.', 'success');
       Router.navigate('/dashboard');
       return;
     }

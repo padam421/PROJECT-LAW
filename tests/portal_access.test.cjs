@@ -16,10 +16,11 @@ const express = require('../backend/node_modules/express');
 const bcrypt = require('../backend/node_modules/bcryptjs');
 const db = require('../backend/src/config/dbConfig');
 let emails = 0, upstreamCalls = [], upstream, server, base;
+const capturedCodes = new Map();
 const mailPath = require.resolve('../backend/src/services/mailService');
 require.cache[mailPath] = { id: mailPath, filename: mailPath, loaded: true, exports: {
   isConfigured: () => true, otpEmailHtml: () => '',
-  send: async () => { emails++; return { sent: true, provider: 'synthetic-capture' }; }
+  send: async message => { emails++; capturedCodes.set(message.to, message.text.match(/\b\d{6}\b/)[0]); return { sent: true, provider: 'synthetic-capture' }; }
 } };
 const auth = require('../backend/src/services/authService');
 const cookies = {};
@@ -76,16 +77,15 @@ async function request(endpoint, role, body) {
   return { status: response.status, data: await response.json() };
 }
 
-test('client/admin credentials cannot start lawyer sign-in or send an unnecessary OTP', async () => {
+test('client/admin accounts can sign in through the lawyer portal with the same email', async () => {
   const beforeEmails = emails;
   for (const role of ['user', 'admin']) {
     const response = await request('/api/auth/login', null,
       { email: role + '@example.invalid', password: 'SyntheticPassword123', role: 'lawyer' });
-    assert.equal(response.status, 403);
-    assert.equal(response.data.reason, 'wrong_portal');
-    assert.match(response.data.error, /Lawyer \/ Advocate/);
+    assert.equal(response.status, 200);
+    assert.equal(response.data.requires2FA, true);
   }
-  assert.equal(emails, beforeEmails);
+  assert.equal(emails, beforeEmails + 2);
 });
 
 test('public signup cannot request an administrator role', async () => {
@@ -97,6 +97,26 @@ test('public signup cannot request an administrator role', async () => {
   assert.equal(db.get().users.some(u => u.email === 'public-admin-attempt@example.invalid'), false);
 });
 
+test('ordinary email signup unlocks lawyer tools after email verification without professional details', async () => {
+  const email = 'ordinary-account@example.invalid';
+  const registration = await request('/api/auth/register-initiate', null,
+    { email, password: 'SyntheticPassword123', role: 'lawyer' });
+  assert.equal(registration.status, 200);
+  const verified = await fetch(base + '/api/auth/verify-otp', { method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ challengeId: registration.data.challengeId, code: capturedCodes.get(email) })
+  });
+  assert.equal(verified.status, 200);
+  const result = await verified.json();
+  assert.equal(result.user.registrationStage, 'awaiting_profile');
+  assert.equal(result.user.barCouncil, '');
+  const response = await fetch(base + '/api/advocate/chat', { method: 'POST',
+    headers: { 'Content-Type': 'application/json', Cookie: verified.headers.get('set-cookie').split(';')[0] },
+    body: JSON.stringify({ message: 'Synthetic preparation query' })
+  });
+  assert.equal(response.status, 200);
+});
+
 test('a matching lawyer sign-in starts normal OTP verification, without changing account roles', async () => {
   const response = await request('/api/auth/login', null,
     { email: 'lawyer@example.invalid', password: 'SyntheticPassword123', role: 'lawyer' });
@@ -106,16 +126,32 @@ test('a matching lawyer sign-in starts normal OTP verification, without changing
   assert.equal(db.get().users.find(u => u.id === 'synthetic-lawyer').role, 'lawyer');
 });
 
-test('unauthenticated and cross-role AI/history calls never reach the provider', async () => {
+test('unsigned requests stay blocked and every signed-in account can use the advocate tools', async () => {
   const count = upstreamCalls.length;
   assert.equal((await request('/api/advocate/chat', null, { message: 'Synthetic' })).status, 401);
   for (const role of ['user', 'admin']) {
     const response = await request('/api/advocate/chat', role, { message: 'Synthetic' });
-    assert.equal(response.status, 403);
-    assert.equal(response.data.code, 'wrong_portal');
-    assert.equal((await request('/api/advocate/assistant/threads', role)).status, 403);
+    assert.equal(response.status, 200);
+    assert.equal(response.data.ok, true);
+    assert.equal((await request('/api/advocate/rehearsal', role, { message: 'Synthetic' })).status, 200);
+    assert.equal((await request('/api/advocate/assistant/threads', role)).status, 200);
   }
-  assert.equal(upstreamCalls.length, count);
+  assert.equal(upstreamCalls.length, count + 4);
+});
+
+test('workspace access does not promote clients to admins or mix another account history', async () => {
+  assert.equal((await request('/api/admin/queue', 'user')).status, 403);
+  const workspace = await request('/api/state', 'admin');
+  assert.equal(workspace.data.lawyer.workspaceOnly, true);
+  assert.equal(workspace.data.lawyer.verificationStatus, 'not_applicable');
+  assert.equal(db.get().users.find(u => u.id === 'synthetic-user').role, 'user');
+  const thread = { id: 'private-record', title: 'Private', messages: [{ id: 'm-private', sender: 'user', text: 'Only this account' }] };
+  await fetch(base + '/api/advocate/assistant/threads/' + thread.id, {
+    method: 'PUT', headers: { Cookie: cookies.user, 'Content-Type': 'application/json' }, body: JSON.stringify({ thread })
+  });
+  assert.equal((await request('/api/advocate/assistant/threads', 'user')).data.threads.length, 1);
+  assert.equal((await request('/api/advocate/assistant/threads', 'admin')).data.threads.length, 0);
+  assert.equal((await request('/api/assistant/threads', 'user')).data.threads.length, 0);
 });
 
 test('a real lawyer cookie reaches research, rehearsal, document extraction and saved history', async () => {
@@ -141,6 +177,6 @@ test('a real lawyer cookie reaches research, rehearsal, document extraction and 
   const history = await request('/api/advocate/assistant/threads', 'lawyer');
   assert.equal(history.status, 200);
   assert.equal(history.data.threads[0].messages[0].text, 'Synthetic facts');
-  assert.equal(threadRows.values().next().value.owner, 'advocate:synthetic-lawyer');
+  assert.equal(threadRows.get('advocate:synthetic-lawyer:' + thread.id).owner, 'advocate:synthetic-lawyer');
   assert.deepEqual(upstreamCalls.slice(-3), ['chat', 'rehearsal', 'documents']);
 });

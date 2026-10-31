@@ -25,7 +25,7 @@ const DashboardPage = {
           <h2 class="greeting-text">${greeting}, <span>${Utils.escapeHtml(lawyer.professionalName || lawyer.fullName || 'Advocate')}</span></h2>
           <div class="d-flex items-center gap-3 flex-wrap">
             <span class="greeting-badge ${isVerified ? '' : 'pending'}">
-              ${isVerified
+              ${lawyer.workspaceOnly ? 'Client &amp; Lawyer workspace access' : isVerified
                 ? `<span class="verified-tick"><span class="material-symbols-rounded">check</span></span> Verified Advocate &bull; Bar ID ${Utils.escapeHtml(lawyer.barCouncil || '')}`
                 : lawyer.demoMode ? 'Demo profile — not verified' : `<span class="material-symbols-rounded icon-sm">hourglass_top</span> Verification in progress`}
             </span>

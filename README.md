@@ -8,7 +8,10 @@ Live website: **[nyay-setu-4aik.onrender.com](https://nyay-setu-4aik.onrender.co
 Free Render hosting setup and operating limits: [deployment guide](docs/render-deployment.md).
 Both portals use that deployment: [User / Client](https://nyay-setu-4aik.onrender.com/frontend/user/index.html)
 and [Lawyer / Advocate](https://nyay-setu-4aik.onrender.com/frontend/lawyer/index.html).
-Sign in with the matching account role; a client/admin account does not grant advocate API access.
+The same signed-in account can use both workspaces. Chats and files stay scoped to that
+account; tool access does not grant administrator powers or professional verification.
+New accounts can use research and hearing practice after email verification; professional
+profile completion is optional for using those tools.
 
 ## Repository layout
 

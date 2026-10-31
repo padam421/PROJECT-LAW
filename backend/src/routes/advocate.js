@@ -4,11 +4,8 @@ const multer = require('multer');
 const { authenticate } = require('../middlewares/authMiddleware');
 const router = express.Router();
 const base = process.env.AI_SERVICE_URL || 'http://localhost:5000';
-router.use(authenticate, (req, res, next) => {
-  if (req.user.role === 'lawyer') return next();
-  return res.status(403).json({ ok: false, code: 'wrong_portal',
-    error: 'A Lawyer / Advocate account is required. Your current account belongs to another portal. Sign in with a lawyer account to use research, documents and hearing practice.' });
-});
+// Research/practice is available to every signed-in account. History stays owner-scoped.
+router.use(authenticate);
 // The shared persistence implementation derives a separate namespace from this mount.
 router.use('/assistant', require('./assistant'));
 for (const action of ['chat', 'rehearsal']) {

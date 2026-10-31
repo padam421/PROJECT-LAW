@@ -159,7 +159,7 @@ necessary before announcing the site as ready.
 | Saved data reports unavailable | Check external DB quotas/connectivity; do not switch to ephemeral file mode |
 | AI returns 429/503 | Check actual Gemini project/model quota and retry after the stated interval |
 | Google sign-in rejected | Authorize the deployed origin and use the matching web client ID |
-| Advocate chat/history returns 403 | Use a Lawyer / Advocate account. Client/Admin sessions do not authorize advocate tools; both portals already use the same deployed server |
+| Switching between client and lawyer tools | The same signed-in account can use both portals. Refresh an older tab after deployment; private histories remain scoped to the account and workspace |
 | First visit is slow after inactivity | Expected free Render cold start; always-on behavior requires a paid plan |
 | My other Render apps consume free hours | Review workspace-wide usage and plan within the shared allowance |
 
