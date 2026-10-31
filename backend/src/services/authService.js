@@ -1109,14 +1109,36 @@ function notifyUser(lawyerId, type, title, message, link = null) {
 }
 
 async function loginGoogle(profile, role, req) {
+  // Only the controller's signature-verified Google payload may reach this service.
+  if (!['user', 'lawyer'].includes(role) || !profile ||
+      typeof profile.sub !== 'string' || !profile.sub ||
+      profile.email_verified !== true || !validateEmail(profile.email)) {
+    return { ok: false, code: 400, error: 'Provide a verified Google identity and a valid portal.' };
+  }
   const email = String(profile.email || '').toLowerCase().trim();
-  let user = db.get().users.find(u => u.email === email) || await DbService.findUserByEmail(email);
+  // Google's subject is stable even when a Workspace email address changes.
+  let user = db.get().users.find(u => u.googleSubject === profile.sub) ||
+    db.get().users.find(u => String(u.email).toLowerCase() === email) || await DbService.findUserByEmail(email);
   if (user) {
-    if (user.role === 'admin' || user.accountStatus === 'suspended') {
-      return { ok: false, code: 403, error: 'This account cannot sign in to the selected portal.' };
+    if (user.accountStatus === 'suspended') {
+      return { ok: false, code: 403, error: 'This account is suspended. Contact support.' };
     }
-    if (user.googleSubject !== profile.sub) {
-      return { ok: false, code: 409, error: 'This email already has a password account. Sign in using email and password.' };
+    if (user.googleSubject && user.googleSubject !== profile.sub) {
+      return { ok: false, code: 409, error: 'This account is linked to a different Google identity. Sign in using email and password.' };
+    }
+    if (!user.googleSubject) {
+      // A verified Gmail/Workspace identity proves current email ownership.
+      // For other email providers Google may only have verified ownership in the past.
+      const authoritativeEmail = email.endsWith('@gmail.com') ||
+        (typeof profile.hd === 'string' && profile.hd.trim().length > 0);
+      if (!authoritativeEmail) {
+        return { ok: false, code: 409, error: 'To protect your existing account, sign in using email and password for this email provider.' };
+      }
+      Object.assign(user, { googleSubject: profile.sub, isGoogleAuth: true,
+        isVerified: true, updatedAt: nowIso() });
+      // Preserve the existing ID, password, role, workspace and professional status.
+      await DbService.createUser(user);
+      logActivity('account_linked', 'Verified Google identity linked to existing account', user, req);
     }
   } else {
     // Google proves email ownership. Professional verification still follows the normal flow.

@@ -25,6 +25,16 @@ test('hosted accounts, lockouts, uploads and AI history survive a fresh Node pro
     db.save(); await db.flushDurable();
     await sql.createUser(user);
     assert.equal((await sql.getMySQLPool().query('SELECT id FROM users WHERE id=?',[user.id]))[0].length,1);
+    const auth=require('./backend/src/services/authService');
+    const googleLogin=await auth.loginGoogle({sub:'hosted-google-sub',email:user.email,email_verified:true,hd:'example.invalid'},'lawyer',
+      {headers:{},get:()=>'',ip:'127.0.0.1'});
+    assert.equal(googleLogin.ok,true);
+    assert.equal(googleLogin.user.id,user.id);
+    assert.equal(googleLogin.user.role,'user');
+    const linked=(await sql.getMySQLPool().query('SELECT is_google_auth,password_hash FROM users WHERE id=?',[user.id]))[0][0];
+    assert.equal(linked.is_google_auth,1);
+    assert.equal(linked.password_hash,'synthetic');
+    await db.flushDurable();
     const bytes=Buffer.alloc(1100000,7);await files.saveFile('credential_qa.pdf',bytes);
     assert.deepEqual(await files.readFile('credential_qa.pdf'),bytes);
     const saved=await repo.put(user.id,{id:'chat_qa',title:'Saved case',messages:[],courtSessions:{}},0);
@@ -44,7 +54,14 @@ test('hosted accounts, lockouts, uploads and AI history survive a fresh Node pro
     await db.initialize();
     assert.equal(db.get().users[0].id,'hosted_qa');
     assert.equal(db.get().sessions[0].revoked,true);
-    assert.equal(db.get().loginActivity[0].type,'login_failed');
+    assert.ok(db.get().loginActivity.some(entry=>entry.type==='login_failed'));
+    assert.equal(db.get().users[0].googleSubject,'hosted-google-sub');
+    assert.equal((await sql.findUserByEmail('qa@example.invalid')).isGoogleAuth,true);
+    const repeat=await require('./backend/src/services/authService').loginGoogle(
+      {sub:'hosted-google-sub',email:'qa@example.invalid',email_verified:true,hd:'example.invalid'},'user',
+      {headers:{},get:()=>'',ip:'127.0.0.1'});
+    assert.equal(repeat.ok,true);
+    assert.equal(repeat.user.id,'hosted_qa');
     assert.equal(db.get().workspace.hosted_qa.settings.language,'hi');
     assert.equal((await files.readFile('credential_qa.pdf')).length,1100000);
     assert.equal((await repo.list('hosted_qa'))[0].title,'Saved case');

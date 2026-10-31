@@ -201,6 +201,7 @@ const DbService = {
              phone = VALUES(phone),
              password_hash = VALUES(password_hash),
              is_verified = VALUES(is_verified),
+             is_google_auth = VALUES(is_google_auth),
              account_status = VALUES(account_status),
              updated_at = NOW()`,
           [
