@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* ---------------- Lawyer Discovery & Consultation ---------------- */
   Router.register('/lawyers', () => UserLawyerPage.renderLawyers(), {
-    title: 'Find Verified Lawyers',
+    title: 'Find Lawyers',
     requiresAuth: true
   });
 
@@ -127,6 +127,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   Router.register('/lawyers/compare', () => UserLawyerPage.renderCompare(), {
     title: 'Compare Lawyers',
     requiresAuth: true
+  });
+
+  Router.register('/lawyers/bookings', () => LawyerDirectory.bookings(), {
+    title: 'My Demo Bookings', requiresAuth: true
+  });
+  Router.register('/lawyers/session/:id', params => LawyerDirectory.session(params.id), {
+    title: 'Demo Consultation', requiresAuth: true
   });
 
   Router.register('/lawyer/:id', (params) => UserLawyerPage.renderLawyerProfile(params.id), {
