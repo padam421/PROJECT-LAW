@@ -157,8 +157,15 @@ necessary before announcing the site as ready.
 | Saved data reports unavailable | Check external DB quotas/connectivity; do not switch to ephemeral file mode |
 | AI returns 429/503 | Check actual Gemini project/model quota and retry after the stated interval |
 | Google sign-in rejected | Authorize the deployed origin and use the matching web client ID |
+| Google One Tap is suppressed by the browser | Use the rendered Continue with Google button; explicit sign-in must not depend on `prompt()` |
 | First visit is slow after inactivity | Expected free Render cold start; always-on behavior requires a paid plan |
 | My other Render apps consume free hours | Review workspace-wide usage and plan within the shared allowance |
 
 No payment, uptime monitor subscription, paid service or automatic billing upgrade is
 created by this repository's Blueprint.
+
+The client login and registration routes render Google's supported button after the
+SDK and public configuration load. The popup sends its signed credential to the
+server for verification; optional One Tap suppression does not report a failed login.
+An existing password account must use its password unless an explicit account-linking
+flow is implemented. The administrator's email belongs to the separate admin portal.

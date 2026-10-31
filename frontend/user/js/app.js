@@ -28,11 +28,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* ---------------- Authentication Flow ---------------- */
   Router.register('/login', () => UserAuthPage.renderLogin(), {
-    title: 'Sign In'
+    title: 'Sign In',
+    onEnter: () => UserAuthPage.mountGoogleSignIn()
   });
 
   Router.register('/register', () => UserAuthPage.renderRegister(), {
-    title: 'Create Account'
+    title: 'Create Account',
+    onEnter: () => UserAuthPage.mountGoogleSignIn()
   });
 
   Router.register('/otp', () => UserAuthPage.renderOTP(), {
