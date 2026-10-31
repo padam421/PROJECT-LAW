@@ -31,6 +31,14 @@ test('hosted accounts, lockouts, uploads and AI history survive a fresh Node pro
     assert.equal(saved.revision,1);
     await assert.rejects(repo.put(user.id,{id:'chat_qa',title:'Stale'},0),{status:409});
     assert.deepEqual(await repo.list('other_account'),[]);
+    await sql.getMySQLPool().query('INSERT INTO notifications(id,user_id,type,message) VALUES(?,?,?,?),(?,?,?,?)',
+      ['notification_own_qa',user.id,'lawyer','Own update','notification_other_qa','other_account','lawyer','Private update']);
+    const notifications=await sql.getUserNotifications(user.id,'lawyer');
+    assert.equal(notifications.length,1);
+    assert.equal(notifications[0].id,'notification_own_qa');
+    assert.equal(await sql.markNotificationRead('notification_other_qa',user.id),false);
+    assert.equal((await sql.getMySQLPool().query('SELECT is_read FROM notifications WHERE id=?',['notification_other_qa']))[0][0].is_read,0);
+    assert.equal(await sql.markNotificationRead('notification_own_qa',user.id),true);
   `;
   const second = `
     await db.initialize();

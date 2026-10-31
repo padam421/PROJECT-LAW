@@ -154,6 +154,23 @@ test('workspace access does not promote clients to admins or mix another account
   assert.equal((await request('/api/assistant/threads', 'user')).data.threads.length, 0);
 });
 
+test('either workspace reads the signed-in account notifications and bookings, ignoring supplied owner IDs', async () => {
+  const service = require('../backend/src/services/dbService');
+  const original = { getLawyerConsultations: service.getLawyerConsultations, getUserConsultations: service.getUserConsultations,
+    getUserNotifications: service.getUserNotifications };
+  service.getLawyerConsultations = async owner => [{ owner }];
+  service.getUserConsultations = async owner => [{ owner }];
+  service.getUserNotifications = async owner => [{ owner }];
+  try {
+    for (const role of ['user', 'lawyer', 'admin']) {
+      assert.equal((await request('/api/consultations/lawyer?lawyerId=another-person', role)).data.consultations[0].owner, 'synthetic-' + role);
+      assert.equal((await request('/api/consultations/user?userId=another-person', role)).data.consultations[0].owner, 'synthetic-' + role);
+      assert.equal((await request('/api/notifications?role=lawyer&userId=another-person', role)).data.notifications[0].owner, 'synthetic-' + role);
+    }
+    assert.equal((await request('/api/notifications?role=lawyer')).status, 401);
+  } finally { Object.assign(service, original); }
+});
+
 test('a real lawyer cookie reaches research, rehearsal, document extraction and saved history', async () => {
   for (const feature of ['chat', 'rehearsal']) {
     const response = await request('/api/advocate/' + feature, 'lawyer', { message: 'Synthetic' });

@@ -1220,16 +1220,12 @@ const DbService = {
 
   /* ---------------- Notifications Operations ---------------- */
   async getUserNotifications(userId, role = null) {
-    if (!userId && !role) return [];
+    if (!userId) return [];
     const pool = getMySQLPool();
     if (pool) {
       try {
-        let query = 'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50';
-        let params = [userId];
-        if (role === 'lawyer' || (userId && String(userId).startsWith('law_'))) {
-          query = 'SELECT * FROM notifications WHERE user_id = ? OR type = "lawyer" ORDER BY created_at DESC LIMIT 50';
-          params = [userId || 'law_adv_padam'];
-        }
+        const query = 'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50';
+        const params = [userId];
         const [rows] = await pool.query(query, params);
         return rows.map(r => ({
           id: r.id,
@@ -1249,17 +1245,18 @@ const DbService = {
     return [];
   },
 
-  async markNotificationRead(notifId) {
-    if (!notifId) return;
+  async markNotificationRead(notifId, userId) {
+    if (!notifId || !userId) return false;
     const pool = getMySQLPool();
     if (pool) {
       try {
-        await pool.query('UPDATE notifications SET is_read = 1 WHERE id = ?', [notifId]);
+        const [result] = await pool.query('UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?', [notifId, userId]);
+        return result.affectedRows > 0;
       } catch (err) {
         console.error('[dbService] markNotificationRead MySQL error:', err.message);
       }
     }
-    return true;
+    return false;
   },
 
   async markAllNotificationsRead(userId) {

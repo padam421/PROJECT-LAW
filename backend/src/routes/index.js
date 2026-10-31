@@ -321,12 +321,9 @@ router.post('/consultations/book', optionalAuth, async (req, res) => {
   }
 });
 
-router.get('/consultations/lawyer', optionalAuth, async (req, res) => {
+router.get('/consultations/lawyer', authenticate, async (req, res) => {
   try {
-    const lawyerId =
-      (req.user && req.user.role === 'lawyer' ? req.user.id : null) ||
-      req.query.lawyerId ||
-      'law_adv_padam';
+    const lawyerId = req.user.id;
     const consultations = await DbService.getLawyerConsultations(lawyerId);
     res.json({ ok: true, consultations });
   } catch (err) {
@@ -334,12 +331,9 @@ router.get('/consultations/lawyer', optionalAuth, async (req, res) => {
   }
 });
 
-router.get('/consultations/user', optionalAuth, async (req, res) => {
+router.get('/consultations/user', authenticate, async (req, res) => {
   try {
-    const userId =
-      (req.user ? req.user.id : null) ||
-      req.query.userId ||
-      'usr_mtlac008z0vvsq';
+    const userId = req.user.id;
     const consultations = await DbService.getUserConsultations(userId);
     res.json({ ok: true, consultations });
   } catch (err) {
@@ -377,21 +371,10 @@ router.put('/users/profile', optionalAuth, async (req, res) => {
 });
 
 /* ---------------- Notifications ---------------- */
-router.get('/notifications', optionalAuth, async (req, res) => {
+router.get('/notifications', authenticate, async (req, res) => {
   try {
     const role = req.query.role || (req.user ? req.user.role : null);
-    let userId;
-    if (role === 'lawyer') {
-      userId =
-        (req.user && req.user.role === 'lawyer' ? req.user.id : null) ||
-        req.query.userId ||
-        'law_adv_padam';
-    } else {
-      userId =
-        (req.user && req.user.role !== 'lawyer' ? req.user.id : null) ||
-        req.query.userId ||
-        'usr_mtlac008z0vvsq';
-    }
+    const userId = req.user.id;
     const notifications = await DbService.getUserNotifications(userId, role);
     res.json({ ok: true, notifications });
   } catch (err) {
@@ -399,12 +382,9 @@ router.get('/notifications', optionalAuth, async (req, res) => {
   }
 });
 
-router.patch('/notifications/read-all', optionalAuth, async (req, res) => {
+router.patch('/notifications/read-all', authenticate, async (req, res) => {
   try {
-    const userId =
-      (req.user ? req.user.id : null) ||
-      req.body.userId ||
-      (req.query.role === 'lawyer' ? 'law_adv_padam' : 'usr_mtlac008z0vvsq');
+    const userId = req.user.id;
     await DbService.markAllNotificationsRead(userId);
     res.json({ ok: true, message: 'All notifications marked as read.' });
   } catch (err) {
@@ -412,9 +392,10 @@ router.patch('/notifications/read-all', optionalAuth, async (req, res) => {
   }
 });
 
-router.patch('/notifications/:id/read', optionalAuth, async (req, res) => {
+router.patch('/notifications/:id/read', authenticate, async (req, res) => {
   try {
-    await DbService.markNotificationRead(req.params.id);
+    const updated = await DbService.markNotificationRead(req.params.id, req.user.id);
+    if (!updated) return res.status(404).json({ error: 'Notification not found.' });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
