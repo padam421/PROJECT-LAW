@@ -32,6 +32,11 @@ const AuthManager = {
       const raw = sessionStorage.getItem(this.PENDING_OTP_KEY);
       if (raw) this._pendingOTPChallenge = JSON.parse(raw);
     } catch { /* ignore corrupt state */ }
+    // Older local servers created an OTP on every normal login. Do not trap a
+    // returning user on that obsolete screen after updating the application.
+    if (this._pendingOTPChallenge?.purpose === 'login' && ['user', 'lawyer'].includes(this.portalRole())) {
+      this.clearPendingOTP();
+    }
   },
 
   storePendingRegistrant() {
@@ -259,6 +264,9 @@ const AuthManager = {
         body: JSON.stringify(payload), signal: controller.signal
       });
       const data = await response.json();
+      if (data.reason === 'email_delivery_failed' || /535[ -]|BadCredentials|Username and Password not accepted/i.test(data.error || '')) {
+        data.error = 'The email service could not send the verification code. Retry later, or use Continue with Google.';
+      }
       return { response, data };
     } finally { clearTimeout(timeout); }
   },
@@ -314,6 +322,16 @@ const AuthManager = {
      -------------------------------------------------------- */
   async login(emailOrPhone, password, rememberMe = true) {
     try {
+      const local = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      if (local && !this._localServerChecked) {
+        const configuration = await fetch(this.getApiUrl('/api/public-config'), { signal: AbortSignal.timeout(10000) });
+        if (configuration.status === 404) {
+          return { success: false, reason: 'local_server_update_required',
+            error: 'The local backend is still running the old sign-in flow. Restart the backend to apply the update, then sign in again. Your saved data stays intact.' };
+        }
+        if (!configuration.ok) throw new Error('Local server unavailable');
+        this._localServerChecked = true;
+      }
       const { response: res, data } = await this.authRequest('/api/auth/login',
         { identifier: emailOrPhone, email: emailOrPhone, password, rememberMe, role: this.portalRole() || undefined }, { 'X-LC-Device': this.getDeviceId() });
 

@@ -478,6 +478,7 @@ const UserAuthPage = {
   },
 
   onOTPEnter() {
+    if (!AuthManager._pendingOTPChallenge?.id) { Router.navigate('/login'); return; }
     const first = document.getElementById('otp-1');
     if (first) setTimeout(() => first.focus(), 200);
   },

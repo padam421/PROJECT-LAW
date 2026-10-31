@@ -163,10 +163,11 @@ function checkSendAllowance(emailKey, { respectCooldown }) {
   const data = db.get();
   data.otpSends = data.otpSends || [];
   const cutoff = Date.now() - config.otpRateWindowMs;
-  data.otpSends = data.otpSends.filter(s => s.emailKey === emailKey && new Date(s.sentAt).getTime() > cutoff);
+  data.otpSends = data.otpSends.filter(s => new Date(s.sentAt).getTime() > cutoff);
+  const emailSends = data.otpSends.filter(s => s.emailKey === emailKey);
 
-  if (data.otpSends.length >= config.otpMaxSendsPerWindow) {
-    const oldest = Math.min(...data.otpSends.map(s => new Date(s.sentAt).getTime()));
+  if (emailSends.length >= config.otpMaxSendsPerWindow) {
+    const oldest = Math.min(...emailSends.map(s => new Date(s.sentAt).getTime()));
     const retryAfterMs = Math.max(1000, oldest + config.otpRateWindowMs - Date.now());
     return {
       allowed: false,
@@ -176,8 +177,8 @@ function checkSendAllowance(emailKey, { respectCooldown }) {
     };
   }
 
-  if (respectCooldown && data.otpSends.length) {
-    const last = Math.max(...data.otpSends.map(s => new Date(s.sentAt).getTime()));
+  if (respectCooldown && emailSends.length) {
+    const last = Math.max(...emailSends.map(s => new Date(s.sentAt).getTime()));
     const elapsed = Date.now() - last;
     if (elapsed < config.otpResendCooldownMs) {
       return {
@@ -205,20 +206,15 @@ async function deliverOTP(user, otp, purpose) {
   const minutes = Math.round(config.otpExpiryMs / 60000);
   const mailed = await mailer.send({
     to: user.email,
-    subject: `[${otp}] Your Nyay Setu Verification Code`,
+    subject: 'Your Nyay Setu Verification Code',
     html: mailer.otpEmailHtml(otp, minutes),
     text: `Your Nyay Setu verification code is ${otp}. It expires in ${minutes} minutes. Never share this code with anyone.`
   });
 
   if (mailed.sent) {
-    console.log(`[auth] OTP for ${maskEmail(user.email)} (${purpose}): delivered via ${mailed.provider} (${otp})`);
+    console.log(`[auth] Verification email for ${maskEmail(user.email)} (${purpose}): accepted by ${mailed.provider}`);
   } else {
     console.error(`[auth] OTP delivery FAILED for ${maskEmail(user.email)}: ${mailed.error}`);
-    console.log('\n──────────────────────────────────────────────');
-    console.log(`  [ALERT] Could not deliver email to ${user.email}!`);
-    console.log(`  Reason: ${mailed.error}`);
-    console.log(`  OTP was: ${otp}`);
-    console.log('──────────────────────────────────────────────\n');
   }
   return mailed;
 }
@@ -239,7 +235,7 @@ async function issueOTPChallenge(user, purpose, req) {
   // Hard flood limit: enforced in production; relaxed in dev for testing
   const allowance = checkSendAllowance(emailKey, { respectCooldown: config.isProd });
   if (!allowance.allowed) {
-    if (allowance.reason === 'cooldown' && active) {
+    if (allowance.reason === 'cooldown' && active?.deliveryStatus === 'sent') {
       return {
         ok: true,
         status: 'otp_sent',
@@ -261,7 +257,7 @@ async function issueOTPChallenge(user, purpose, req) {
   let challenge;
   if (active) {
     active.hashedOtp = hashedOtp;
-    active.rawOtp = config.isProd ? undefined : otp;
+    delete active.rawOtp;
     active.attemptsCount = 0;
     active.attempts = 0;
     active.expiresAt = new Date(Date.now() + config.otpExpiryMs).toISOString();
@@ -275,7 +271,6 @@ async function issueOTPChallenge(user, purpose, req) {
       email: user.email,
       purpose,
       hashedOtp,
-      rawOtp: config.isProd ? undefined : otp,
       attemptsCount: 0,
       attempts: 0,
       maxAttempts: config.otpMaxAttempts,
@@ -289,6 +284,7 @@ async function issueOTPChallenge(user, purpose, req) {
     data.otpChallenges.push(challenge);
     if (data.otpChallenges.length > 80) data.otpChallenges.splice(0, data.otpChallenges.length - 80);
   }
+  challenge.deliveryStatus = 'pending';
   recordSend(emailKey);
   db.save();
   await DbService.saveOtpChallenge(challenge).catch(err => {
@@ -296,11 +292,14 @@ async function issueOTPChallenge(user, purpose, req) {
   });
 
   const mailed = await deliverOTP(user, otp, purpose);
+  Object.assign(db.get().otpChallenges.find(c => c.id === challenge.id) || challenge,
+    { deliveryStatus: mailed.sent ? 'sent' : 'failed' });
+  db.save();
   if (!mailed.sent) {
     return {
       ok: false,
       code: 503,
-      error: `Could not send verification email to ${user.email}: ${mailed.error || 'Mail delivery failed'}. Please check your connection or email settings.`,
+      error: 'The verification email could not be sent. Your account is not verified yet. Retry later, or use Continue with Google.',
       reason: 'email_delivery_failed'
     };
   }
@@ -786,11 +785,14 @@ async function resendOTP(target, maybeReq) {
   db.save();
 
   const mailed = await deliverOTP(user, otp, challenge.purpose);
+  Object.assign(db.get().otpChallenges.find(c => c.id === challenge.id) || challenge,
+    { deliveryStatus: mailed.sent ? 'sent' : 'failed' });
+  db.save();
   if (!mailed.sent) {
     return {
       ok: false,
       code: 503,
-      error: `Could not send verification email to ${user.email}: ${mailed.error || 'Mail delivery failed'}. Please check your connection or email settings.`,
+      error: 'The verification email could not be sent. Retry later, or return to sign in and use Continue with Google.',
       reason: 'email_delivery_failed'
     };
   }

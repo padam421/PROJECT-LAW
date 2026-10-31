@@ -25,7 +25,7 @@ const OTPPage = {
     const displayEmail = challenge.email || challenge.maskedEmail || 'your email';
     const subtitle = isRegistration
       ? `We emailed a 6-digit security code to <strong>${Utils.escapeHtml(displayEmail)}</strong>. Enter it below to activate your advocate account.`
-      : `Enter the 6-digit code sent to your registered email <strong>${Utils.escapeHtml(displayEmail)}</strong>${challenge.maskedPhone ? ` and phone <strong>${Utils.escapeHtml(challenge.maskedPhone)}</strong>` : ''}.`;
+      : `Enter the 6-digit code sent to your registered email <strong>${Utils.escapeHtml(displayEmail)}</strong>.`;
 
     return `
       <div class="fullscreen-page">
@@ -57,6 +57,8 @@ const OTPPage = {
               Didn't receive it?
               <button type="button" class="otp-resend-btn" id="btn-resend-otp" onclick="OTPPage.handleResend()" disabled>Resend Code</button>
             </div>
+
+            <p class="text-center"><a href="#/login">Back to sign in</a></p>
 
             <button id="btn-verify-otp" class="btn btn-primary btn-block btn-lg" onclick="OTPPage.handleVerify()">
               Verify Identity

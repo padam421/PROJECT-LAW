@@ -116,6 +116,31 @@ test('both portals send the selected account role during password login', async 
   }
 });
 
+test('an outdated local backend is diagnosed before another password or OTP request', async () => {
+  const f = fixture();
+  Object.assign(f.context.window.location, { hostname: '127.0.0.1', protocol: 'http:', port: '5501' });
+  f.reply({ status: 404 });
+  const result = await f.auth.login('synthetic@example.invalid', 'Synthetic123');
+  assert.equal(result.reason, 'local_server_update_required');
+  assert.equal(f.requests.length, 1);
+  assert.equal(f.requests[0].url, 'http://127.0.0.1:3000/api/public-config');
+  assert.notEqual(f.requests[0].options.method, 'POST');
+});
+
+test('obsolete public-portal login OTP drafts are cleared while signup verification remains available', () => {
+  for (const portal of ['user', 'lawyer']) {
+    const f = fixture('/frontend/' + portal + '/index.html');
+    const draft = new Map();
+    f.context.sessionStorage = { getItem: key => draft.get(key), setItem: (key, value) => draft.set(key, value), removeItem: key => draft.delete(key) };
+    draft.set(f.auth.PENDING_OTP_KEY, JSON.stringify({ id: 'obsolete-login', purpose: 'login' }));
+    f.auth.restorePendingOTP();
+    assert.equal(f.auth._pendingOTPChallenge, null);
+    draft.set(f.auth.PENDING_OTP_KEY, JSON.stringify({ id: 'signup-verification', purpose: 'registration' }));
+    f.auth.restorePendingOTP();
+    assert.equal(f.auth._pendingOTPChallenge.id, 'signup-verification');
+  }
+});
+
 test('an existing client account can enter lawyer tools without registering another email', () => {
   const f = fixture();
   f.auth.setSession({ id: 'client', role: 'user', registrationStage: 'complete' }, 'client-session');
