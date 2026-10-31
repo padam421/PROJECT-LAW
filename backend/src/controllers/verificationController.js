@@ -36,7 +36,7 @@ exports.lookupBarCouncil = (req, res) => {
   res.json(result);
 };
 
-exports.uploadDocument = (req, res) => {
+exports.uploadDocument = async (req, res, next) => {
   if (!req.file) return res.status(400).json({ error: 'No document received.' });
 
   // Duplicate-content detection (same lawyer, same checksum)
@@ -47,6 +47,14 @@ exports.uploadDocument = (req, res) => {
     return res.status(409).json({ error: 'This exact file was already uploaded. Choose the correct separate file for this credential.' });
   }
 
+  if (db.hosted) {
+    try {
+      await require('../services/hostedStore').saveFile(req.file.filename, fs.readFileSync(req.file.path));
+    } catch (error) {
+      try { fs.unlinkSync(req.file.path); } catch (_) {}
+      return next(error);
+    }
+  }
   const doc = verificationService.saveUploadedDocument(req.user, req.file, {
     category: req.body.category,
     label: req.body.label
@@ -60,17 +68,29 @@ exports.listDocuments = (req, res) => {
   res.json({ documents: verificationService.listDocuments(req.user.id) });
 };
 
-exports.downloadDocument = (req, res) => {
+exports.downloadDocument = async (req, res, next) => {
   const doc = verificationService.findDocument(req.params.docId, req.user.id);
   if (!doc) return res.status(404).json({ error: 'Document not found.' });
+  if (db.hosted) {
+    try {
+      const bytes = await require('../services/hostedStore').readFile(doc.storedName);
+      if (!bytes) return res.status(410).json({ error: 'Stored file is missing.' });
+      res.attachment(doc.originalName).send(bytes);
+      return;
+    } catch (error) { return next(error); }
+  }
   const filePath = path.join(config.uploadsDir, doc.storedName);
   if (!fs.existsSync(filePath)) return res.status(410).json({ error: 'Stored file is missing.' });
   res.download(filePath, doc.originalName);
 };
 
-exports.deleteDocument = (req, res) => {
+exports.deleteDocument = async (req, res, next) => {
   const doc = verificationService.findDocument(req.params.docId, req.user.id);
   if (!doc) return res.status(404).json({ error: 'Document not found.' });
+  if (db.hosted) {
+    try { await require('../services/hostedStore').deleteFile(doc.storedName); }
+    catch (error) { return next(error); }
+  }
   try { fs.unlinkSync(path.join(config.uploadsDir, doc.storedName)); } catch (_) {}
   const data = db.get();
   data.documents = data.documents.filter(d => d.id !== doc.id);

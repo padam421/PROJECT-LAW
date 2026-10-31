@@ -189,47 +189,25 @@ const UserAuthPage = {
     `;
   },
 
-  triggerGoogleSignIn(role = 'user') {
+  async triggerGoogleSignIn(role = 'user') {
     if (window.google?.accounts?.id) {
+      let clientId;
+      try {
+        const response = await fetch(AuthManager.getApiUrl('/api/public-config'), { signal: AbortSignal.timeout(10000) });
+        clientId = (await response.json()).googleClientId;
+      } catch (_) {}
+      if (!clientId) { Utils.showToast('Google sign-in is not configured. Use email and password.', 'info'); return; }
       google.accounts.id.initialize({
-        client_id: AuthManager.GOOGLE_CLIENT_ID,
+        client_id: clientId,
         callback: (response) => AuthManager.handleGoogleSignIn(response, role)
       });
       google.accounts.id.prompt((notification) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          // If One-Tap is suppressed by browser, fallback to standard login with profile
-          const email = 'padamkishore90@gmail.com';
-          const user = {
-            id: 'g_' + Date.now(),
-            email: email,
-            fullName: 'Padam Kishore',
-            role: role,
-            city: 'Balotra',
-            state: 'Rajasthan',
-            isGoogleAuth: true
-          };
-          AuthManager.setSession(user, 'g_sess_' + Date.now());
-          UserStore.setUser(user);
-          Utils.showToast('Signed in via Google account (' + email + ')!', 'success');
-          Router.navigate('/home');
+          Utils.showToast('Google sign-in was not completed. Retry or use email and password.', 'info');
         }
       });
     } else {
-      // Direct instant demo fallback if Google GSI script blocked by adblocker
-      const email = 'padamkishore90@gmail.com';
-      const user = {
-        id: 'g_' + Date.now(),
-        email: email,
-        fullName: 'Padam Kishore',
-        role: role,
-        city: 'Balotra',
-        state: 'Rajasthan',
-        isGoogleAuth: true
-      };
-      AuthManager.setSession(user, 'g_sess_' + Date.now());
-      UserStore.setUser(user);
-      Utils.showToast('Signed in via Google account (' + email + ')!', 'success');
-      Router.navigate('/home');
+      Utils.showToast('Google sign-in could not load. Use email and password or retry.', 'info');
     }
   },
 

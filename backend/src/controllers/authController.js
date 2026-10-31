@@ -11,6 +11,29 @@ const db = require('../config/dbConfig');
 const bcrypt = require('bcryptjs');
 const { validateBody, validatePassword, validateEmail } = require('../utils/helpers');
 
+exports.googleLogin = async (req, res) => {
+  const { credential, role = 'user' } = req.body || {};
+  if (!['user', 'lawyer'].includes(role) || typeof credential !== 'string' || credential.length > 10000 || !credential) {
+    return res.status(400).json({ error: 'Provide a valid Google credential and portal.' });
+  }
+  if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).json({ error: 'Google sign-in is not configured. Use email and password.' });
+  let profile;
+  try {
+    const { OAuth2Client } = require('google-auth-library');
+    const client = new OAuth2Client();
+    client.transporter.defaults = { ...client.transporter.defaults, timeout: 10000 };
+    const ticket = await client.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+    profile = ticket.getPayload();
+    if (!profile?.sub || !profile.email || profile.email_verified !== true) throw new Error('Unverified identity');
+  } catch (_) { return res.status(401).json({ error: 'Google could not verify this sign-in. Retry or use email and password.' }); }
+  try {
+    const result = await authService.loginGoogle(profile, role, req);
+    if (!result.ok) return res.status(result.code).json({ error: result.error });
+    authService.setAuthCookie(res, result.token);
+    res.json({ ok: true, user: result.user, sessionId: result.sessionId });
+  } catch (_) { res.status(503).json({ error: 'Sign-in could not be saved. Please retry.' }); }
+};
+
 /* Schema for phase-2 profile completion (professional credentials) */
 const profileSchema = {
   fullName: { required: true, label: 'Full legal name', maxLength: 120 },

@@ -22,6 +22,7 @@ let mysqlPool = null;
 let hasLoggedPoolSuccess = false;
 
 function getMySQLPool() {
+  if (process.env.DB_DISABLED === 'true') return null;
   if (mysqlPool) return mysqlPool;
   try {
     const mysql = require('mysql2/promise');
@@ -31,15 +32,17 @@ function getMySQLPool() {
       user: process.env.DB_USER || 'root',
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_NAME || 'Nyay Setu',
+      ...(process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: true, minVersion: 'TLSv1.2' } } : {}),
+      connectTimeout: 10000,
       waitForConnections: true,
       connectionLimit: 10,
-      queueLimit: 0,
+      queueLimit: 50,
       enableKeepAlive: true,
       keepAliveInitialDelay: 10000
     });
     if (!hasLoggedPoolSuccess) {
       hasLoggedPoolSuccess = true;
-      console.log(`[dbService] Connected to MySQL database "${process.env.DB_NAME || 'Nyay Setu'}" at ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '3306'}`);
+      console.log('[dbService] MySQL connection pool initialized; connectivity is verified at startup in hosted mode.');
     }
     return mysqlPool;
   } catch (e) {

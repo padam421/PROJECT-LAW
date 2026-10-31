@@ -80,6 +80,7 @@ async function send({ to, subject, html, text }) {
 
 async function sendViaResend({ to, subject, html, text }) {
   const res = await fetch('https://api.resend.com/emails', {
+    signal: AbortSignal.timeout(12000),
     method: 'POST',
     headers: {
       Authorization: `Bearer ${config.resendApiKey}`,
@@ -96,6 +97,7 @@ async function sendViaResend({ to, subject, html, text }) {
 
 async function sendViaBrevo({ to, subject, html, text }) {
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    signal: AbortSignal.timeout(12000),
     method: 'POST',
     headers: {
       'api-key': config.brevoApiKey,
@@ -119,6 +121,7 @@ async function sendViaBrevo({ to, subject, html, text }) {
 
 async function sendViaSendGrid({ to, subject, html, text }) {
   const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    signal: AbortSignal.timeout(12000),
     method: 'POST',
     headers: {
       Authorization: `Bearer ${config.sendgridApiKey}`,

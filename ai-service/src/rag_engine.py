@@ -11,8 +11,6 @@ import json
 import time
 import urllib.request
 import urllib.error
-import chromadb
-from chromadb.utils import embedding_functions
 
 # Ensure UTF-8 on Windows
 if sys.platform == "win32":
@@ -110,14 +108,25 @@ GENERAL_LEGAL_TERMS = [
 
 class LegalRAGEngine:
     def __init__(self):
-        self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
         self.clients = {}
         self.collections = {}
         self.total_vectors = 0
-        self._init_collections()
+        self.retrieval_backend = os.environ.get('RAG_BACKEND', 'chroma')
+        self.portable = None
+        if self.retrieval_backend == 'sqlite':
+            from portable_search import PortableSearch
+            self.portable = PortableSearch(os.environ.get('SEARCH_INDEX_DIR', os.path.join(PROJECT_ROOT, 'data', 'search')))
+            self.total_vectors = self.portable.total
+        elif self.retrieval_backend == 'chroma':
+            from chromadb.utils import embedding_functions
+            self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
+            self._init_collections()
+        else:
+            raise RuntimeError('RAG_BACKEND must be chroma or sqlite')
 
     def _init_collections(self):
         """Initializes ChromaDB clients and loads all 5 Supreme Court collections."""
+        import chromadb
         for key, meta in COLLECTIONS_META.items():
             folder_path = os.path.join(CHROMA_DIR, meta["folder"])
             if os.path.exists(folder_path):
@@ -174,6 +183,11 @@ class LegalRAGEngine:
             return []
 
         target_keys = self.route_query(query)
+        if getattr(self, 'portable', None):
+            matches = self.portable.search(query, target_keys, top_k)
+            for match in matches:
+                match['category_name'] = COLLECTIONS_META[match['category']]['name']
+            return matches
         results = []
 
         for key in target_keys:
@@ -277,7 +291,7 @@ class LegalRAGEngine:
             "gemini-flash-lite-latest",
             "gemini-flash-latest"
         ]
-        deadline=(deadline if deadline is not None else time.monotonic()+34) if court else None
+        deadline = deadline if deadline is not None else time.monotonic() + (34 if court else 55)
         if court:
             # Review and testimony have different latency/payloads. A review timeout must
             # never open the circuit for the next witness answer. Use a fixed fallback
@@ -315,7 +329,7 @@ class LegalRAGEngine:
             data_bytes = json.dumps(payload).encode("utf-8")
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             for attempt in range(1 if court else 2):
-                remaining=deadline-time.monotonic() if court else 60
+                remaining=deadline-time.monotonic()
                 if remaining<=0:break
                 attempted.append(model)
                 req = urllib.request.Request(
@@ -324,7 +338,7 @@ class LegalRAGEngine:
                     headers={"Content-Type": "application/json"}
                 )
                 try:
-                    with urllib.request.urlopen(req, timeout=min(10 if profile=='court_review' else 16,remaining) if court else 60) as resp:
+                    with urllib.request.urlopen(req, timeout=min(10 if profile=='court_review' else 16,remaining) if court else min(20, remaining)) as resp:
                         res = json.loads(resp.read().decode("utf-8"))
                         response_candidates = res.get("candidates", [])
                         if response_candidates and "content" in response_candidates[0]:

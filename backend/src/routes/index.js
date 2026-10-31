@@ -41,14 +41,27 @@ router.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     emailChannel:
       require('../services/mailService').activeChannel() || 'console_dev_mode',
-    database: 'mysql+json_dual_engine',
+    database: db.hosted ? 'external_mysql_durable' : 'local_development',
   });
+});
+router.get('/ready', async (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    const [health] = await Promise.all([
+      require('../services/aiSupervisor').checkHealth(),
+      db.hosted ? require('../services/hostedStore').health() : Promise.resolve()
+    ]);
+    const ready = health.ok && db.persistenceHealthy() && (!config.isProd || health.data?.provider_configured === true);
+    res.status(ready ? 200 : 503).json({ ready, ai: health.ok, storage: db.persistenceHealthy() });
+  } catch (_) { res.status(503).json({ ready: false, error: 'A required service is unavailable.' }); }
 });
 
 /* ---------------- Public auth flow ----------------
    Registration: initiate (email+password → OTP email) → verify-otp
    (marks email verified + HttpOnly session cookie) → complete profile. */
 router.post('/auth/register-initiate', auth.registerInitiate);
+router.post('/auth/google', auth.googleLogin);
+router.get('/public-config', (_req, res) => res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || '' }));
 router.post('/auth/demo-lawyer', auth.startLawyerDemo);
 router.post('/auth/register-complete', authenticate, auth.registerComplete);
 router.post('/auth/login', auth.login);
@@ -412,6 +425,7 @@ router.patch('/notifications/:id/read', optionalAuth, async (req, res) => {
 // AI SERVICE PROXY (RAG Chatbot & Virtual Court Simulator)
 // ============================================================
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:5000';
+const aiCapacity = require('../middlewares/aiCapacity');
 
 // POST keeps answer text out of browser URLs and access logs.
 router.post('/ai/tts', authenticate, async (req, res) => {
@@ -435,12 +449,13 @@ router.post('/ai/tts', authenticate, async (req, res) => {
   }
 });
 
-router.post('/ai/chat', async (req, res) => {
+router.post('/ai/chat', authenticate, aiCapacity, async (req, res) => {
   try {
     const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body),
+      signal: AbortSignal.timeout(230000),
     });
     const data = await aiResp.json();
     res.status(aiResp.status).json(data);
@@ -456,7 +471,7 @@ router.post('/ai/chat', async (req, res) => {
   }
 });
 
-router.post('/ai/court', async (req, res) => {
+router.post('/ai/court', authenticate, aiCapacity, async (req, res) => {
   try {
     const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/court`, {
       method: 'POST',
@@ -478,11 +493,11 @@ router.post('/ai/court', async (req, res) => {
 
 router.get('/ai/health', async (_req, res) => {
   try {
-    const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/health`);
+    const aiResp = await fetch(`${AI_SERVICE_URL}/api/ai/health`, { signal: AbortSignal.timeout(2500) });
     const data = await aiResp.json();
-    res.json(data);
+    res.status(aiResp.status).json(data);
   } catch (err) {
-    res.status(502).json({ ok: false, status: 'offline', error: err.message });
+    res.status(502).json({ ok: false, status: 'offline', error: 'AI service is unavailable.' });
   }
 });
 

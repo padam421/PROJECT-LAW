@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "retrieval": "sqlite-fts5-bm25",
+  "collections": {
+    "writ": 0,
+    "murder": 0,
+    "uapa": 0,
+    "pocso": 0,
+    "narcotics": 24776
+  },
+  "documents": 24776,
+  "sha256": "0f74c0a12c8128f8854d2e8cd34b1bff66c681ec5c14d9d84cb5e10386678962"
+}

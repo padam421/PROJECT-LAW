@@ -1098,7 +1098,33 @@ function notifyUser(lawyerId, type, title, message, link = null) {
   db.save();
 }
 
+async function loginGoogle(profile, role, req) {
+  const email = String(profile.email || '').toLowerCase().trim();
+  let user = db.get().users.find(u => u.email === email) || await DbService.findUserByEmail(email);
+  if (user) {
+    if (user.role !== role || user.role === 'admin' || user.accountStatus === 'suspended') {
+      return { ok: false, code: 403, error: 'This account cannot sign in to the selected portal.' };
+    }
+    if (user.googleSubject !== profile.sub) {
+      return { ok: false, code: 409, error: 'This email already has a password account. Sign in using email and password.' };
+    }
+  } else {
+    // Google proves email ownership. Professional verification still follows the normal flow.
+    const randomPassword = require('crypto').randomBytes(48).toString('hex');
+    user = blankUser(email, await bcrypt.hash(randomPassword, config.bcryptRounds), role);
+    Object.assign(user, { fullName: String(profile.name || '').slice(0, 120),
+      isGoogleAuth: true, googleSubject: profile.sub, isVerified: true,
+      registrationStage: role === 'lawyer' ? 'awaiting_profile' : 'complete' });
+    await DbService.createUser(user);
+    if (role === 'user') await DbService.saveUserProfile({ userId: user.id, fullName: user.fullName });
+  }
+  const session = createSession(user, getDeviceProfile(req));
+  logActivity('login', 'Google identity verified by server', user, req);
+  return { ok: true, ...session, user: publicUser(user) };
+}
+
 module.exports = {
+  loginGoogle,
   async startLawyerDemo(req) {
     if (!config.demoRegistrationEnabled) return { ok: false, code: 403, error: 'Demo registration is disabled on this server.' };
     const user = blankUser('', '', 'lawyer');

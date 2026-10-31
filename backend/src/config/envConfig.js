@@ -81,7 +81,7 @@ const config = {
     pass: env.SMTP_PASS || '',
     from: env.MAIL_FROM || ''
   },
-  appBaseUrl: env.APP_BASE_URL || `http://localhost:${parseInt(env.PORT || '3000')}`,
+  appBaseUrl: env.APP_BASE_URL || env.RENDER_EXTERNAL_URL || `http://localhost:${parseInt(env.PORT || '3000')}`,
   resetTokenExpiryMs: 30 * 60 * 1000, // password-reset links
 
   // Platform economics
@@ -110,7 +110,7 @@ function parseDurationMs(value, fallback) {
 function validateForEnvironment() {
   const problems = [];
   if (isProd) {
-    if (!env.JWT_SECRET || config.jwtSecret === DEFAULT_JWT_SECRET) {
+    if (!env.JWT_SECRET || config.jwtSecret.length < 32 || /^(change-me|Nyay Setu-dev)/i.test(config.jwtSecret)) {
       problems.push('JWT_SECRET must be set to a long random value in production.');
     }
     if (String(env.SEED_DEMO_DATA).toLowerCase() === 'true') {
@@ -121,6 +121,17 @@ function validateForEnvironment() {
     }
     if (!env.ADMIN_PASSWORD) {
       problems.push('ADMIN_PASSWORD must be provided in production (no defaults are used).');
+    }
+    if (env.RENDER === 'true') {
+      if (env.STATE_STORE !== 'mysql' || !env.DB_HOST || !env.DB_USER || !env.DB_NAME || !env.DB_PASSWORD) {
+        problems.push('Render requires STATE_STORE=mysql and an external DB_HOST/DB_USER/DB_NAME/DB_PASSWORD. Local files are ephemeral.');
+      }
+      if (env.DB_SSL !== 'true') problems.push('Render external database connections require DB_SSL=true.');
+      if (!config.resendApiKey && !config.brevoApiKey && !config.sendgridApiKey) problems.push('Render free requires an HTTPS email API. SMTP ports are blocked.');
+      if (!env.GEMINI_API_KEY) problems.push('GEMINI_API_KEY is required for the hosted chatbot and courtroom.');
+      if (!/^https:\/\//.test(config.appBaseUrl)) problems.push('APP_BASE_URL or RENDER_EXTERNAL_URL must be an HTTPS URL.');
+      if (!config.cookie.secure) problems.push('Secure cookies must remain enabled on Render.');
+      if (env.DB_DISABLED === 'true') problems.push('DB_DISABLED cannot be true on Render.');
     }
   } else if (config.jwtSecret === DEFAULT_JWT_SECRET) {
     console.warn('[config] WARNING: using the development JWT_SECRET. Set JWT_SECRET in .env before deploying.');

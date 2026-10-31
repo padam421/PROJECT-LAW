@@ -1,0 +1,47 @@
+# One free instance runs the unchanged frontend, Node API and internal Python AI.
+# External MySQL-compatible storage is REQUIRED because free Render disks are ephemeral.
+services:
+  - type: web
+    name: nyay-setu
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/ready
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: STATE_STORE
+        value: mysql
+      - key: DB_SSL
+        value: "true"
+      - key: SEED_DEMO_DATA
+        value: "false"
+      - key: DEMO_REGISTRATION_ENABLED
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "4000"
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: test
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false

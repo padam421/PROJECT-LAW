@@ -11,18 +11,17 @@ let isStarting = false;
 let lastStartAttempt = 0;
 
 async function checkHealth() {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2000);
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
     const resp = await fetch(`${AI_SERVICE_URL}/api/ai/health`, {
       signal: controller.signal,
     });
-    clearTimeout(timeoutId);
     if (resp.ok) {
       const data = await resp.json();
-      return { ok: true, data };
+      return { ok: data.status === 'healthy', data };
     }
-  } catch (_) {}
+  } catch (_) {} finally { clearTimeout(timeoutId); }
   return { ok: false };
 }
 
@@ -30,11 +29,14 @@ async function ensureAIServiceRunning() {
   const health = await checkHealth();
   if (health.ok) {
     console.log(
-      `[AI Supervisor] Supreme Court AI Service is active on ${AI_SERVICE_URL} (${health.data?.total_vectors?.toLocaleString() || '1,000,000+'} vectors)`
+      `[AI Supervisor] AI service is active (${Number(health.data?.total_vectors || 0).toLocaleString()} indexed records)`
     );
     isStarting = false;
     return true;
   }
+  // Production children are managed by start_hosted.py / the hosting platform.
+  // Never spawn duplicate Python interpreters in response to incoming traffic.
+  if (process.env.NODE_ENV === 'production' || process.env.AI_AUTOSTART === 'false') return false;
 
   // Prevent multiple overlapping spawns (cooldown of 25 seconds while ChromaDB loads)
   const now = Date.now();
@@ -58,7 +60,9 @@ async function ensureAIServiceRunning() {
       detached: true,
       stdio: 'ignore',
       shell: true,
+      windowsHide: true,
     });
+    child.on('error', () => { isStarting = false; });
     child.unref();
     console.log(
       '[AI Supervisor] Python AI process spawned in background. Waiting for ChromaDB initialization...'

@@ -18,18 +18,56 @@ const { validateForEnvironment } = require('./config/envConfig');
 validateForEnvironment();
 
 const app = express();
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+const config = require('./config/envConfig');
+const db = require('./config/dbConfig');
 
 app.use(helmet({
   contentSecurityPolicy: false,      // SPA loads Google Fonts/Material Symbols
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
 app.use(cors({
-  origin: true,                      // reflect request origin (static SPA is same-origin in production)
+  origin: (origin, callback) => {
+    if (!config.isProd || !origin || origin === new URL(config.appBaseUrl).origin) return callback(null, true);
+    callback(null, false);
+  },
   credentials: true                  // allow the HttpOnly session cookie
 }));
 app.use(express.json({ limit: '3mb' }));   // room for base64 profile photos
 app.use(cookieParser());                   // parses the lc_session cookie for auth
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// Refuse cross-site mutations even when a browser sends cookies with its request.
+app.use('/api', (req, res, next) => {
+  const origin = req.get('origin');
+  if (config.isProd && !['GET', 'HEAD', 'OPTIONS'].includes(req.method) &&
+      ((origin && origin !== new URL(config.appBaseUrl).origin) || req.get('sec-fetch-site') === 'cross-site')) {
+    return res.status(403).json({ error: 'This request must come from the website.' });
+  }
+  next();
+});
+
+// Never acknowledge a write while its authoritative state exists only in RAM.
+app.use('/api', (req, res, next) => {
+  if (!db.hosted) return next();
+  const end = res.end;
+  let ended = false;
+  res.end = function (...args) {
+    if (ended) return res;
+    ended = true;
+    db.flushDurable().then(() => end.apply(res, args)).catch(() => {
+      if (res.headersSent) return res.destroy();
+      res.statusCode = 503;
+      res.removeHeader('Set-Cookie');
+      res.removeHeader('Content-Length');
+      res.setHeader('Content-Type', 'application/json');
+      end.call(res, JSON.stringify({ ok: false, error: 'Your changes could not be saved. Please retry when storage is available.' }));
+    });
+    return res;
+  };
+  next();
+});
 
 /* API */
 app.use('/api', apiRoutes);

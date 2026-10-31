@@ -493,6 +493,10 @@ const UserApiClient = {
         detectedLang: language !== 'auto' ? language : 'hi',
       };
     } catch (err) {
+      if (!['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.protocol !== 'file:') {
+        return { message: 'Connection interrupted. Your conversation is retained; please retry this turn.',
+          detectedLang: language !== 'auto' ? language : 'hi' };
+      }
       console.warn(
         'Backend proxy unreachable, attempting direct AI service on port 5000:',
         err.message
@@ -555,6 +559,9 @@ const UserApiClient = {
       }
       return data.error || 'Court simulation could not be generated.';
     } catch (err) {
+      if (!['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.protocol !== 'file:') {
+        return 'Connection interrupted. Your hearing is retained; please retry this turn.';
+      }
       console.warn(
         'Backend proxy unreachable for simulation, attempting direct port 5000:',
         err.message

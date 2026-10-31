@@ -31,6 +31,10 @@ backend/data/uploads/*
 !backend/data/uploads/.gitkeep
 data/chroma_db/
 data/raw_data/
+data/search/*.sqlite3
+runtime/
+backend/data/db.json
+artifacts/
 
 # System & IDE files
 .DS_Store

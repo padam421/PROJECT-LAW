@@ -1,0 +1,17 @@
+**/.git
+**/node_modules
+**/.env
+**/.env.*
+**/__pycache__
+**/.venv
+**/venv
+.tmp-test
+.openai
+sites
+data/chroma_db
+data/raw_data
+data/search/*.sqlite3
+backend/data
+*.pptx
+*.glb
+*.log

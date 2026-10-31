@@ -1,28 +1,72 @@
 name: CI
-
 on:
   push:
     branches: [main]
   pull_request:
-
+permissions:
+  contents: read
 jobs:
-  backend:
+  application:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: synthetic-ci-password
+          MYSQL_DATABASE: hosted_qa
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -psynthetic-ci-password"
+          --health-interval=5s --health-timeout=5s --health-retries=20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Install dependencies
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
         working-directory: backend
-        run: npm ci
-      - name: Syntax-check all backend sources
-        run: for f in $(find backend/src -name '*.js'); do node --check "$f"; done
-      - name: Boot server & smoke-test API
-        working-directory: backend
+      - run: python -m pip install -r ai-service/requirements-hosted.txt
+      - name: Syntax checks
         run: |
-          node src/server.js &
-          sleep 3
-          curl -fsS http://localhost:3000/api/auth/session | grep -q "Authentication required"
-          curl -fsS -o /dev/null -w "%{http_code}" http://localhost:3000/ | grep -q 302
-          kill %1
+          find backend/src frontend -name '*.js' -print0 | xargs -0 -n1 node --check
+          python -m compileall -q ai-service/src scripts
+      - name: JavaScript regressions and durable database restart test
+        env:
+          CI_MYSQL_TEST: 'true'
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_USER: root
+          DB_PASSWORD: synthetic-ci-password
+          DB_NAME: hosted_qa
+        run: node --test tests/*.test.cjs
+      - name: Python regressions and packaged corpus verification
+        run: python -m unittest discover -s tests -p 'test_*.py'
+      - name: Build actual Render image
+        run: docker build -t nyay-setu:ci .
+      - name: Boot production image and check public routes
+        run: |
+          docker run -d --name nyay-ci --network host --memory=512m \
+            -e PORT=10000 -e STATE_STORE=mysql -e DB_HOST=127.0.0.1 -e DB_PORT=3306 \
+            -e DB_USER=root -e DB_PASSWORD=synthetic-ci-password -e DB_NAME=hosted_qa \
+            -e JWT_SECRET=synthetic-ci-secret-with-more-than-thirty-two-characters \
+            -e ADMIN_EMAIL=admin@example.invalid -e ADMIN_PASSWORD=synthetic-ci-admin-password \
+            -e BREVO_API_KEY=synthetic-not-a-real-provider-key -e MAIL_FROM=qa@example.invalid \
+            -e GEMINI_API_KEY=synthetic-not-a-real-provider-key -e SEED_DEMO_DATA=false nyay-setu:ci
+          trap 'docker logs nyay-ci; docker stop nyay-ci' EXIT
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://localhost:10000/api/ready; then break; fi
+            sleep 2
+          done
+          curl -fsS http://localhost:10000/api/ready
+          curl -fsS http://localhost:10000/frontend/user/index.html > /dev/null
+          curl -fsS http://localhost:10000/frontend/lawyer/index.html > /dev/null
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:10000/api/auth/session)" = 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' http://localhost:10000/api/ai/chat)" = 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://untrusted.example' -H 'Content-Type: application/json' -d '{}' http://localhost:10000/api/auth/login)" = 403
+          docker stats --no-stream nyay-ci

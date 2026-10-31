@@ -146,7 +146,8 @@ def official_sources(engine, query):
 
 def precedent_sources(engine, query):
     col = getattr(engine, 'collections', {}).get('narcotics')
-    if col is None:
+    portable = getattr(engine, 'portable', None)
+    if col is None and portable is None:
         return []
     # Focused searches broaden issue coverage; only this collection is queried.
     queries = [query[:10000]]
@@ -158,6 +159,10 @@ def precedent_sources(engine, query):
     candidates = []
     for question in queries:
         try:
+            if portable:
+                candidates.extend((index, match['document'], match['metadata'])
+                                  for index, match in enumerate(portable.search(question, ['narcotics'], 8)))
+                continue
             data = col.query(query_texts=[question], n_results=min(12, col.count()),
                              include=['documents', 'metadatas', 'distances'])
             for doc, meta, distance in zip(data['documents'][0], data['metadatas'][0], data['distances'][0]):

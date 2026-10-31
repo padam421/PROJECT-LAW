@@ -1,0 +1,36 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+process.env.NODE_ENV = 'development';
+process.env.DB_DISABLED = 'true';
+process.env.DATA_DIR = path.resolve('.tmp-test', 'google-auth-' + process.pid);
+process.env.UPLOADS_DIR = path.join(process.env.DATA_DIR, 'uploads');
+process.env.JWT_SECRET = 'synthetic-google-auth-regression-secret';
+process.env.GOOGLE_CLIENT_ID = 'synthetic-client-id';
+process.env.BCRYPT_ROUNDS = '4';
+const db = require('../backend/src/config/dbConfig');
+const auth = require('../backend/src/services/authService');
+test('verified Google accounts receive real revocable sessions and cannot claim another account or role', async () => {
+  const req = { headers: {}, get: () => '', ip: '127.0.0.1' };
+  const profile = { sub: 'synthetic-subject', email: 'google@example.invalid', name: 'Synthetic User' };
+  const first = await auth.loginGoogle(profile, 'user', req);
+  assert.equal(first.ok, true);
+  assert.ok(first.token);
+  assert.equal(db.get().sessions.find(s => s.id === first.sessionId).userId, first.user.id);
+  const repeated = await auth.loginGoogle(profile, 'user', req);
+  assert.equal(repeated.user.id, first.user.id);
+  assert.equal((await auth.loginGoogle({ ...profile, sub: 'different-subject' }, 'user', req)).code, 409);
+  assert.equal((await auth.loginGoogle(profile, 'lawyer', req)).code, 403);
+  db.get().users.find(u => u.id === first.user.id).accountStatus = 'suspended';
+  assert.equal((await auth.loginGoogle(profile, 'user', req)).code, 403);
+});
+test('a browser-decoded forged JWT cannot create a backend session', async () => {
+  const controller = require('../backend/src/controllers/authController');
+  let status, result;
+  const res = { status(code) { status = code; return this; }, json(data) { result = data; return this; } };
+  const count = db.get().sessions.length;
+  await controller.googleLogin({ body: { credential: 'not-a-signed-google-token', role: 'user' } }, res);
+  assert.equal(status, 401);
+  assert.ok(result.error);
+  assert.equal(db.get().sessions.length, count);
+});

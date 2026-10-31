@@ -16,7 +16,9 @@ function errorMiddleware(err, req, res, next) {
   const message =
     err.name === 'MulterError'
       ? `Upload failed: ${err.message}`
-      : err.message || 'Internal server error';
+      : process.env.NODE_ENV === 'production' && status >= 500
+        ? 'The request could not be completed. Please retry.'
+        : err.message || 'Internal server error';
   res.status(status).json({ error: message });
 }
 

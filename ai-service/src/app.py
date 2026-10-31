@@ -40,14 +40,20 @@ def health():
         except Exception:
             counts[key] = "loaded"
 
+    if getattr(engine, 'portable', None):
+        counts = engine.portable.counts
+    provider_configured = bool(os.environ.get('GEMINI_API_KEY'))
+    ready = bool(engine.total_vectors) and (provider_configured or os.environ.get('NODE_ENV') != 'production')
     return jsonify({
-        "status": "healthy",
+        "status": "healthy" if ready else "degraded",
         "service": "Nyay Setu Supreme Court AI RAG Engine",
         "total_vectors": engine.total_vectors,
         "collections": counts,
+        "retrieval_backend": getattr(engine, 'retrieval_backend', 'chroma'),
+        "provider_configured": provider_configured,
         "gemini_model": "gemini-3.1-flash-lite (with configured fallbacks)",
         "assistant_mode": "contextual-advice-and-incremental-court"
-    })
+    }), 200 if ready else 503
 
 @app.route('/api/ai/chat', methods=['POST'])
 def chat():
@@ -55,7 +61,12 @@ def chat():
     RAG Chat endpoint for both User and Advocate portals.
     Contextual advice with retrieved excerpts and a separate consistency review.
     """
-    data = request.get_json() or {}
+    data = request.get_json(silent=True)
+    if (not isinstance(data, dict) or not isinstance(data.get('message'), str)
+            or len(data['message']) > 60000 or not isinstance(data.get('language', 'auto'), str)
+            or data.get('caseContext') is not None and not isinstance(data['caseContext'], str)
+            or data.get('chatHistory') is not None and not isinstance(data['chatHistory'], list)):
+        return jsonify(ok=False, error='Provide a valid message of up to 60,000 characters.'), 400
     message = data.get('message', '').strip()
     user_role = data.get('role', 'user')  # 'user' or 'lawyer'
     case_context = data.get('caseContext', None)
@@ -91,11 +102,11 @@ def chat():
             'validation': lang_info.get('validation', {})
         })
     except Exception as e:
-        print(f"Chat error: {e}")
+        print(f"Chat error: {type(e).__name__}")
         return jsonify({
             'ok': False,
-            'error': str(e)
-        }), 500
+            'error': 'AI could not prepare a response. Your conversation is retained; retry this turn.'
+        }), 503
 
 @app.route('/api/ai/court', methods=['POST'])
 def court():

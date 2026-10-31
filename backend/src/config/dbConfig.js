@@ -15,6 +15,34 @@ const DB_FILE = path.join(config.dataDir, 'db.json');
 
 let _db = null;
 let _writeQueued = false;
+let _version = 0;
+let _persistedVersion = 0;
+let _pending = Promise.resolve();
+let _lastError = null;
+const hosted = process.env.STATE_STORE === 'mysql';
+
+async function initialize() {
+  if (!hosted) return load();
+  const state = await require('../services/hostedStore').initialize();
+  // The remote snapshot is authoritative. Never restore an unrelated local db.json.
+  _db = { ...emptyDb(), ...(state || {}) };
+  ensureDirs();
+  return _db;
+}
+
+function flushDurable() {
+  if (!hosted) return Promise.resolve();
+  _pending = _pending.catch(() => {}).then(async () => {
+    if (_version <= _persistedVersion) return;
+    const version = _version;
+    try {
+      await require('../services/hostedStore').save(JSON.stringify(_db));
+      _persistedVersion = version;
+      _lastError = null;
+    } catch (error) { _lastError = error; throw error; }
+  });
+  return _pending;
+}
 
 function ensureDirs() {
   fs.mkdirSync(config.dataDir, { recursive: true });
@@ -53,14 +81,15 @@ function load() {
       _db = emptyDb();
     }
   } catch (err) {
-    console.error('[db] Failed to load database, starting fresh:', err.message);
-    _db = emptyDb();
+    // A corrupt database must never silently become an empty database.
+    throw new Error('Database could not be loaded. Restore a verified backup.', { cause: err });
   }
   return _db;
 }
 
 /** Debounced atomic persist — batches rapid SPA syncs into one disk write. */
 function save() {
+  _version += 1;
   if (_writeQueued) return;
   _writeQueued = true;
   setTimeout(() => {
@@ -72,6 +101,7 @@ function save() {
     } catch (err) {
       console.error('[db] Persist failed:', err.message);
     }
+    if (hosted) flushDurable().catch(() => console.error('[db] Remote persistence failed; successful API writes are blocked until storage recovers.'));
   }, 120);
 }
 
@@ -119,6 +149,10 @@ function uid(prefix) {
 }
 
 module.exports = {
+  initialize,
+  flushDurable,
+  hosted,
+  persistenceHealthy: () => !_lastError,
   get,
   save,
   flushNow,

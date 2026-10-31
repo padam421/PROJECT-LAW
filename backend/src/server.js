@@ -9,11 +9,12 @@ const db = require('./config/dbConfig');
 const { seedIfEmpty } = require('./data/seed');
 
 async function main() {
-  db.load();
+  await db.initialize();
   await seedIfEmpty();
+  await db.flushDurable();
 
   const PORT = envConfig.port;
-  app.listen(PORT, envConfig.host, () => {
+  const server = app.listen(PORT, envConfig.host, () => {
     console.log('──────────────────────────────────────────────');
     console.log('  Nyay Setu — Advocate Portal API');
     console.log(`  Environment : ${envConfig.env}`);
@@ -27,6 +28,25 @@ async function main() {
     const { ensureAIServiceRunning } = require('./services/aiSupervisor');
     ensureAIServiceRunning().catch(() => {});
   });
+  let stopping = false;
+  async function shutdown() {
+    if (stopping) return;
+    stopping = true;
+    const forced = setTimeout(() => process.exit(1), 25000);
+    forced.unref();
+    server.close(async () => {
+      try {
+        db.flushNow();
+        await db.flushDurable();
+        if (db.hosted) await require('./services/hostedStore').close();
+        clearTimeout(forced);
+        process.exit(0);
+      } catch (_) { process.exit(1); }
+    });
+    server.closeIdleConnections();
+  }
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 main().catch(err => {

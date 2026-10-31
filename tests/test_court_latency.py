@@ -161,7 +161,7 @@ class CourtLatencyTests(unittest.TestCase):
         self.assertEqual(requests[1]['generationConfig']['thinkingConfig'], {'thinkingLevel':'minimal'})
         self.assertNotIn('thinkingConfig', requests[2]['generationConfig'])
 
-    def test_court_budget_is_separate_from_existing_chat_generation(self):
+    def test_court_and_chat_have_separate_bounded_provider_budgets(self):
         engine, _ = engine_fixture()
         requests = []
         with patch.object(urllib.request, 'urlopen', side_effect=lambda request, timeout: requests.append((request, timeout)) or Reply()):
@@ -169,7 +169,7 @@ class CourtLatencyTests(unittest.TestCase):
             engine.call_gemini('chat')
         self.assertEqual(json.loads(requests[0][0].data)['generationConfig']['maxOutputTokens'], 2048)
         self.assertEqual(json.loads(requests[1][0].data)['generationConfig']['maxOutputTokens'], 8192)
-        self.assertEqual(requests[1][1], 60)
+        self.assertEqual(requests[1][1], 20)
         self.assertNotIn('responseJsonSchema',json.loads(requests[1][0].data)['generationConfig'])
 
     def test_rate_limit_is_respected_by_generation_and_review_without_sharing_timeout_circuits(self):

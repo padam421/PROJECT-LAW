@@ -160,28 +160,15 @@ const AuthManager = {
         return { success: false, error: 'Google authentication failed.' };
       }
 
-      // Decode Google JWT payload
-      const base64Url = googleResponse.credential.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-
-      const profile = JSON.parse(jsonPayload);
-      const user = {
-        id: 'g_' + profile.sub,
-        email: profile.email,
-        fullName: profile.name,
-        profilePhoto: profile.picture,
-        isGoogleAuth: true,
-        emailVerified: true,
-        role: role,
-        city: 'India',
-        createdAt: new Date().toISOString()
-      };
+      const { response, data } = await this.authRequest('/api/auth/google', { credential: googleResponse.credential, role });
+      if (!response.ok || !data.user) {
+        Utils.showToast(data.error || 'Google sign-in failed.', 'error');
+        return { success: false, error: data.error || 'Google sign-in failed.' };
+      }
+      const user = data.user;
 
       this.clearPendingOTP();
-      this.setSession(user, 'g_sess_' + Date.now());
+      this.setSession(user, data.sessionId);
 
       if (window.UserStore) {
         UserStore.setUser(user);
@@ -189,17 +176,17 @@ const AuthManager = {
         UserStore.set('privacyConsentDone', true);
       }
 
-      Utils.showToast(`Signed in as ${profile.name} via Google!`, 'success');
+      Utils.showToast(`Signed in as ${user.fullName} via Google!`, 'success');
 
       if (role === 'lawyer' || window.location.href.includes('/lawyer/')) {
-        Router.navigate('/dashboard');
+        Router.navigate(user.registrationStage === 'complete' ? '/dashboard' : '/register');
       } else {
         Router.navigate('/home');
       }
 
       return { success: true, user };
     } catch (err) {
-      console.error('[AuthManager] Google Sign-In parse error:', err);
+      Utils.showToast('Google sign-in could not reach the server. Use email and password or retry.', 'error');
       return { success: false, error: 'Failed to process Google sign-in credentials.' };
     }
   },

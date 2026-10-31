@@ -8,12 +8,13 @@ router.use(authenticate, requireRole('lawyer'));
 // The shared persistence implementation derives a separate namespace from this mount.
 router.use('/assistant', require('./assistant'));
 for (const action of ['chat', 'rehearsal']) {
-  router.post('/' + action, async (req, res) => {
+  router.post('/' + action, require('../middlewares/aiCapacity'), async (req, res) => {
     try {
       const response = await fetch(`${base}/api/ai/advocate/${action}`, {
         method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(req.body), signal: AbortSignal.timeout(230000)
       });
+      if (response.headers.get('retry-after')) res.set('Retry-After', response.headers.get('retry-after'));
       res.status(response.status).json(await response.json());
     } catch (_) {
       res.status(503).json({ok:false,error:'Advocate AI is temporarily unavailable. Your brief and hearing remain saved; retry.'});
