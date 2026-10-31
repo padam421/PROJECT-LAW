@@ -32,7 +32,7 @@ function getMySQLPool() {
       user: process.env.DB_USER || 'root',
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_NAME || 'Nyay Setu',
-      ...(process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: true, minVersion: 'TLSv1.2' } } : {}),
+      ...(process.env.DB_SSL === 'true' ? { ssl: { rejectUnauthorized: true, verifyIdentity: true, minVersion: 'TLSv1.2' } } : {}),
       connectTimeout: 10000,
       waitForConnections: true,
       connectionLimit: 10,
