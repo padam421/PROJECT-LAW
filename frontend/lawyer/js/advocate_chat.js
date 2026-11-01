@@ -34,6 +34,8 @@ const AdvocateChatBot = {
       this.conversationsClosed();
     } else {
       this.saveDraft(); this.refresh(); this.refreshHistory();
+      const history = document.getElementById('adv-sidebar');
+      if (history) history.scrollTop = 0;
       this.positionConversations();
       if (!popup.open) popup.showModal();
       document.querySelector('.adv-workspace')?.classList.toggle('adv-conversations-hidden', false);
@@ -91,10 +93,15 @@ const AdvocateChatBot = {
   _emptyChat() {
     return '<div class="adv-empty"><span class="adv-eyebrow">YOUR NDPS LITIGATION DESK</span><h2>Build the case.<br>Understand both sides.</h2><p>Describe the complete incident, add case papers, or use both. Research connects your facts with available provisions, historical decisions and the opposing case.</p><div class="adv-intake-grid"><div><b>01 · Case record</b><p>Incident date, state, alleged substance/weight, search, arrest, custody and current stage.</p></div><div><b>02 · Supporting papers</b><p>FIR, seizure memo, search record, FSL report, custody orders and charge sheet.</p></div><div><b>03 · Counsel preparation</b><p>State your side and relief. Get issue-wise submissions, adverse arguments and evidence tasks.</p></div></div><p class="adv-muted">NDPS research only at present. Sources have gaps; current amendments and later treatment are identified for checking.</p></div>';
   },
+  hasConversationContent(thread) {
+    return thread.messages.length > 0 || !!thread.draft?.trim() || Object.keys(thread.courtSessions || {}).length > 0 ||
+      this.files.some(file => file.threadId === thread.id) || this.uploads.has(thread.id) || this.pending.has(thread.id);
+  },
   sidebar() {
     const active = AssistantThreads.active(false);
-    return '<button class="adv-primary" onclick="AdvocateChatBot.startNewChat()">＋ New case chat</button><h3>Case conversations</h3>' +
-      AssistantThreads.list().map(t => '<div class="adv-thread ' + (t.id === active?.id ? 'active' : '') + '"><button onclick="AdvocateChatBot.selectConversation(\'' + t.id + '\')"><strong>' + this.e(t.title) + '</strong><small>' + (t.draft?.trim() ? 'Draft · ' : '') + t.messages.length + ' messages · ' + Object.keys(t.courtSessions || {}).length + ' rehearsals</small></button><button title="Export case" onclick="AssistantThreads.export(\'' + t.id + '\')">↓</button><button title="Delete chat, retain rehearsals" onclick="AdvocateChatBot.remove(\'' + t.id + '\')">×</button></div>').join('') +
+    const threads = AssistantThreads.list().filter(t => this.hasConversationContent(t));
+    return '<button class="adv-primary" onclick="AdvocateChatBot.startNewChat()">＋ New case chat</button><h3>Chat history (' + threads.length + ')</h3>' +
+      (threads.length ? threads.map(t => '<div class="adv-thread ' + (t.id === active?.id ? 'active' : '') + '"><button onclick="AdvocateChatBot.selectConversation(\'' + t.id + '\')"><strong>' + this.e(t.title) + '</strong><small>' + (t.draft?.trim() ? 'Draft · ' : '') + t.messages.length + ' messages · ' + Object.keys(t.courtSessions || {}).length + ' rehearsals</small></button><button title="Export case" onclick="AssistantThreads.export(\'' + t.id + '\')">↓</button><button title="Delete chat, retain rehearsals" onclick="AdvocateChatBot.remove(\'' + t.id + '\')">×</button></div>').join('') : '<p class="adv-muted">Your saved chats will appear here after you type or send a message.</p>') +
       '<p class="adv-muted adv-storage-note">' + this.e(active?.conflict ? 'Save conflict — export your local copy.' : active?.dirty ? 'Saved on this device · account sync pending' : AssistantThreads._syncState === 'saved' ? 'Saved to your account' : 'Saved on this device') + '</p>';
   },
   render() {
@@ -192,7 +199,11 @@ const AdvocateChatBot = {
   },
   startNewChat() {
     this.saveCurrentConversation();
-    AssistantThreads.create();
+    const blank = AssistantThreads.list().find(t => !this.hasConversationContent(t));
+    if (blank) {
+      AssistantThreads.select(blank.id);
+      if (blank.draft) AssistantThreads.change(blank.id, t => { t.draft = ''; });
+    } else AssistantThreads.create();
     const input = document.getElementById('chat-input');
     if (input) input.value = '';
     this.refresh(); this.toggleConversations(true); input?.focus();

@@ -90,6 +90,28 @@ test('a preparation-only recovery is labelled as pending legal verification', ()
  assert.match(html,/Deepen \/ recheck/);
 });
 
+test('empty chats cannot hide saved message history, drafts or rehearsals',()=>{
+ const f=fixture();
+ f.run('this.saved=AssistantThreads.create().id;AssistantThreads.append(saved,{id:"u",sender:"user",text:"Saved case"});this.empty=[];for(let i=0;i<8;i++)empty.push(AssistantThreads.create().id);this.draft=AssistantThreads.create().id;AssistantThreads.change(draft,t=>{t.title="Draft case";t.draft="Unsent facts"});this.court=AssistantThreads.create().id;AssistantThreads.change(court,t=>{t.title="Saved hearing";t.courtSessions.s1={id:"s1"}})');
+ const html=f.run('AdvocateChatBot.sidebar()');
+ assert.match(html,/Chat history \(3\)/);
+ for(const title of ['Saved case','Draft case','Saved hearing'])assert.ok(html.includes(title));
+ for(const id of f.run('empty'))assert.ok(!html.includes("selectConversation('"+id+"')"));
+ assert.equal(f.run('AssistantThreads.list().length'),11);
+});
+
+test('repeated New chat reuses a blank conversation and keeps existing history intact',()=>{
+ const f=historyFixture();
+ f.run('this.saved=AssistantThreads.create().id;AssistantThreads.append(saved,{id:"u",sender:"user",text:"Keep this case"});this.blank=AssistantThreads.create().id;AdvocateChatBot.refresh()');
+ for(let i=0;i<4;i++)f.run('AdvocateChatBot.startNewChat()');
+ assert.equal(f.run('AssistantThreads.list().length'),2);
+ assert.equal(f.run('AssistantThreads.active().id===blank'),true);
+ f.run('AdvocateChatBot.selectConversation(saved);AdvocateChatBot.startNewChat()');
+ assert.equal(f.run('AssistantThreads.list().length'),2);
+ assert.equal(f.run('AssistantThreads.get(saved).messages[0].text'),'Keep this case');
+ assert.equal(f.run('AssistantThreads.active().id===blank'),true);
+});
+
 test('messages and an unsent follow-up reopen from Chats after New chat and a page reload',()=>{
  const f=historyFixture();
  f.run('this.old=AssistantThreads.create().id;AssistantThreads.append(old,{id:"u1",sender:"user",text:"Earlier case facts"});AssistantThreads.append(old,{id:"a1",sender:"ai",text:"Earlier research answer"});AdvocateChatBot.refresh()');
