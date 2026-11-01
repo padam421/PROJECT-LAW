@@ -1,7 +1,7 @@
 /* Advocate research desk: scoped styles; no citizen styles or behavior are modified. */
 .adv-workspace,.adv-hearing,.adv-hearing-home{--adv-ink:#163c39;--adv-muted:#617574;--adv-line:#d9e4df;--adv-paper:#fffefa;--adv-accent:#177269;color:var(--adv-ink);font-family:inherit}
 .adv-workspace *, .adv-hearing *, .adv-hearing-home *{box-sizing:border-box}
-.adv-workspace{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:calc(100vh - 150px);background:var(--adv-paper);border:1px solid var(--adv-line);border-radius:18px;overflow:hidden}
+.adv-workspace{display:grid;grid-template-columns:245px minmax(0,1fr);width:100%;min-width:0;min-height:calc(100vh - 150px);background:var(--adv-paper);border:1px solid var(--adv-line);border-radius:18px;overflow:hidden}
 .adv-sidebar{background:#eff4ef;padding:22px 14px;border-right:1px solid var(--adv-line);max-height:calc(100vh - 140px);overflow:auto}
 .adv-sidebar h3{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;margin:28px 8px 14px;color:var(--adv-muted)}
 .adv-workspace button,.adv-hearing button,.adv-hearing-home button{font:inherit;cursor:pointer;border:1px solid var(--adv-line);border-radius:9px;background:white;color:var(--adv-ink);padding:10px 13px;line-height:1.4}
@@ -17,7 +17,7 @@
 .adv-thread button:not(:first-child){padding:5px;border:0;background:transparent}
 .adv-storage-note{font-size:11px;line-height:1.7;padding:14px 8px}
 .adv-chat{min-width:0;display:flex;flex-direction:column}
-.adv-chat-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 30px;border-bottom:1px solid var(--adv-line)}
+.adv-chat-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:24px 30px;border-bottom:1px solid var(--adv-line)}
 .adv-eyebrow{display:block;font-size:10px;font-weight:700;letter-spacing:1.8px;color:var(--adv-accent);margin-bottom:8px}
 .adv-chat-header h1{font-size:22px;line-height:1.25;margin:0;font-weight:650;letter-spacing:-.5px}
 .adv-messages{flex:1;max-height:calc(100vh - 430px);min-height:340px;overflow:auto;scroll-behavior:smooth;padding:26px 34px}
@@ -72,7 +72,9 @@ body:has(.adv-focus-layout){overflow:hidden}
 .adv-research-layout .adv-thread strong{font-size:13px;line-height:1.5;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .adv-research-layout .adv-chat{min-height:0;overflow:hidden}
 .adv-research-layout .adv-chat-header{flex-shrink:0;padding:12px 22px;gap:12px;background:#fffefa}
-.adv-chat-heading{display:flex;align-items:center;gap:16px;min-width:0}
+.adv-chat-heading{display:flex;align-items:center;flex:1;gap:16px;min-width:0}
+.adv-chat-heading>div{min-width:0;overflow-wrap:anywhere}
+#adv-conversations-toggle{flex-shrink:0}
 .adv-research-layout .adv-chat-header h1{font-size:19px;letter-spacing:-.35px}
 .adv-research-layout .adv-chat-header .adv-eyebrow{font-size:9px;margin-bottom:4px;letter-spacing:1.5px}
 .adv-research-layout .adv-chat-header>button{font-size:12px;padding:9px 12px;white-space:nowrap}
@@ -93,7 +95,7 @@ body:has(.adv-focus-layout){overflow:hidden}
 .adv-research-layout .adv-compose-tools button{font-size:13px;padding:9px 12px}
 .adv-research-layout .adv-composer>small{margin-top:6px;font-size:10px}
 .adv-research-layout #adv-files{flex-shrink:0;max-height:90px;overflow-y:auto}
-.adv-research-layout .adv-workspace.adv-conversations-hidden{grid-template-columns:minmax(0,1fr)}
+.adv-workspace.adv-conversations-hidden,.adv-research-layout .adv-workspace.adv-conversations-hidden{grid-template-columns:minmax(0,1fr)}
 .adv-conversations-hidden>.adv-sidebar{display:none}
 /* Span every grid track even when an older app wrapper omits the focused layout.
    Otherwise hiding history places the chat in the narrow first column. */
@@ -108,7 +110,7 @@ body:has(.adv-focus-layout){overflow:hidden}
  .adv-research-layout .app-content{padding:5px}
  .adv-research-layout .adv-workspace{position:relative;grid-template-columns:minmax(0,1fr);border-radius:10px}
  .adv-research-layout .adv-sidebar{position:absolute;inset:61px auto 0 0;width:240px;z-index:15;border-right:1px solid #d9e4df;box-shadow:8px 0 25px #163c391a}
- .adv-research-layout .adv-chat-header{padding:10px;min-height:61px;flex-wrap:nowrap;align-items:center}
+ .adv-research-layout .adv-chat-header{padding:10px;min-height:61px;flex-wrap:wrap;align-items:center}
  .adv-research-layout .adv-chat-header h1{font-size:15px}.adv-research-layout .adv-chat-header .adv-eyebrow{font-size:8px}
  .adv-research-layout .adv-chat-header>button{font-size:11px;padding:8px}.adv-research-layout #adv-conversations-toggle>span:last-child{display:none}
  .adv-research-layout .adv-messages{padding:16px}.adv-research-layout .adv-answer{font-size:15px;line-height:1.9}
