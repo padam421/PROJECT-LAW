@@ -571,6 +571,7 @@ const VirtualCourtSimulator = {
   },
 
   submitWitnessAnswer(value = null, answerMode = 'manual') {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop();
     const stage=this._activeStage,input=document.getElementById('v3-witness-input');
     const answer=typeof value==='string'?value.trim():input?.value.trim();
     if(stage?.kind!=='await-answer'||this._interactions[stage.answerKey]?.answer||!answer||value===null&&!input.reportValidity())return;
@@ -589,6 +590,7 @@ const VirtualCourtSimulator = {
   },
 
   resolveFollowUp(ask, generatedQuestion = null, questionReviewed = false, questionReviewEpoch = 0, questionReviewKey = null) {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop();
     const stage=this._activeStage;
     if(!stage||!['choice','edit-question'].includes(stage.kind))return;
     if(!ask) {
@@ -624,6 +626,7 @@ const VirtualCourtSimulator = {
   },
 
   raiseObjection() {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop();
     const stage=this._activeStage;
     if(stage?.kind!=='await-answer')return;
     const words=this._interactionWords(),asker=stage.questioningSide||(['DEFENSE','PROSECUTION'].includes(stage.lookAt)?stage.lookAt:stage.side),opponent=asker==='DEFENSE'?'PROSECUTION':'DEFENSE';
@@ -640,6 +643,7 @@ const VirtualCourtSimulator = {
   },
 
   _renderInteraction(stage) {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop();
     const panel=document.getElementById('v3-interaction');if(!panel)return;
     const words=this._interactionWords(),answer=stage.kind==='await-answer';
     this._awaiting=answer||stage.kind==='choice'||stage.kind==='edit-question';
@@ -649,6 +653,7 @@ const VirtualCourtSimulator = {
     const key=stage.answerKey||stage.questionKey,label=answer?words.answerLabel:words.questionLabel,inputId=answer?'v3-witness-input':'v3-question-input';
     const draft=this._interactions[key]?.draft||'';
     panel.innerHTML='<label for="'+inputId+'">'+Utils.escapeHtml(label)+'</label><textarea id="'+inputId+'" dir="auto" required maxlength="4000" rows="2" aria-label="'+Utils.escapeHtml(label)+'" oninput="VirtualCourtSimulator.saveInteractionDraft(this.value)">'+Utils.escapeHtml(draft)+'</textarea><div class="v3-answer-actions">'
+      +(typeof VoiceInput!=='undefined'?VoiceInput.controls(inputId,this._detectIndianLanguage(stage.text||'',this._activeLanguage).shortCode):'')
       +'<button class="v3-answer-submit" onclick="VirtualCourtSimulator.'+(answer?'submitWitnessAnswer()':'resolveFollowUp(true)')+'">'+Utils.escapeHtml(answer?words.submit:words.ask)+'</button>'
       +(stage.kind==='choice'?'<button onclick="VirtualCourtSimulator.resolveFollowUp(false)">'+Utils.escapeHtml(words.done)+'</button>':'')
       +(answer?'<button onclick="VirtualCourtSimulator.raiseObjection()">'+Utils.escapeHtml(words.object)+'</button>':'')+'</div>';
@@ -1558,6 +1563,7 @@ const VirtualCourtSimulator = {
   },
 
   stopSimulation() {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop();
     this._saveCourtProgress();
     this._isPlaying = false; this._isPaused = false; this._ready = false;
     ++this._sceneGeneration; ++this._speechGeneration; this._speaking = false; this._activeStage = null;

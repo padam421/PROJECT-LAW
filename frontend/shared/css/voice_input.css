@@ -1,0 +1,13 @@
+/* Scoped microphone controls; existing chat and hearing layouts are retained. */
+.nyay-voice-controls{display:inline-flex;align-items:center;flex-wrap:wrap;gap:7px;max-width:100%;vertical-align:middle}
+.nyay-voice-controls select{max-width:110px;padding:7px 5px;border:1px solid #c9d7cf;border-radius:8px;background:#fff;color:#163c39;font:inherit;font-size:12px;line-height:1.4}
+.nyay-voice-controls .nyay-voice-mic{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;flex:0 0 38px;padding:8px;border:1px solid #c9d7cf;border-radius:50%;background:#fff;color:#617574;cursor:pointer}
+.nyay-voice-controls .nyay-voice-mic:hover{background:#edf5f1;color:#17655c}
+.nyay-voice-mic svg{display:block;flex-shrink:0}
+.nyay-voice-controls .nyay-voice-mic.nyay-voice-active,.nyay-voice-active{color:#b42323!important;background:#fff0ef!important;border-color:#e3a2a2!important}
+.nyay-voice-status{display:inline-block;max-width:100%;font-size:12px;line-height:1.5;color:#617574}
+.nyay-voice-status:empty{display:none}
+.nyay-voice-controls :focus-visible{outline:3px solid #c99744;outline-offset:2px}
+.v3-answer-actions .nyay-voice-controls{margin:0}
+.v3-answer-actions .nyay-voice-controls .nyay-voice-mic{padding:8px}
+.adv-compose-tools .nyay-voice-controls .nyay-voice-mic{padding:8px}

@@ -88,6 +88,7 @@ const AdvocateCourtPage = {
           <div class="u-input-group">
             <label class="u-input-label">What happened in court today?</label>
             <textarea class="u-textarea" placeholder="e.g. Judge issued notice to respondents, next date fixed for counter affidavit..." id="post-hearing-notes"></textarea>
+            ${typeof VoiceInput !== 'undefined' ? VoiceInput.controls('post-hearing-notes') : ''}
           </div>
 
           <div class="u-input-group">
@@ -98,6 +99,7 @@ const AdvocateCourtPage = {
           <div class="u-input-group">
             <label class="u-input-label">Next Hearing Purpose</label>
             <input type="text" class="u-input" placeholder="e.g. Filing of Counter Affidavit by Respondent" id="post-hearing-purpose">
+            ${typeof VoiceInput !== 'undefined' ? VoiceInput.controls('post-hearing-purpose') : ''}
           </div>
 
           <button class="u-btn u-btn-primary u-btn-block u-btn-lg u-btn-pill" style="margin-top:12px"

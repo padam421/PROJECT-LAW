@@ -54,6 +54,7 @@ const AssistantChat = {
     await AssistantThreads.remove(id);this.refresh();
   },
   async send({retryMessage=null}={}){
+    if(typeof VoiceInput!=='undefined')VoiceInput.stop('chat-input');
     const c=this.controller(),t=AssistantThreads.active(),owner=AssistantThreads.owner();
     if(this.pending.has(t.id))return;
     const input=document.getElementById('chat-input');let text=retryMessage?.text||input?.value?.trim();
@@ -104,8 +105,8 @@ const AssistantChat = {
     };
     c.sendMessage=()=>this.send();
     const stopReadout=()=>{if(typeof NyaySetuTTS!=='undefined')NyaySetuTTS.stop();else window.speechSynthesis?.cancel();};
-    c.startNewChat=()=>{if(typeof LiveCourt!=='undefined')LiveCourt.detach();stopReadout();AssistantThreads.create();this.refresh();};
-    c.selectConversation=id=>{if(typeof LiveCourt!=='undefined')LiveCourt.detach();stopReadout();AssistantThreads.select(id);this.refresh();};
+    c.startNewChat=()=>{if(typeof VoiceInput!=='undefined')VoiceInput.stop('chat-input');if(typeof LiveCourt!=='undefined')LiveCourt.detach();stopReadout();AssistantThreads.create();this.refresh();};
+    c.selectConversation=id=>{if(typeof VoiceInput!=='undefined')VoiceInput.stop('chat-input');if(typeof LiveCourt!=='undefined')LiveCourt.detach();stopReadout();AssistantThreads.select(id);this.refresh();};
     c.handleFeedback=(id,status)=>{
       const t=AssistantThreads.active(),index=t.messages.findIndex(m=>m.id===id);if(index<0)return;
       AssistantThreads.change(t.id,t=>{t.messages[index].feedback=status;});

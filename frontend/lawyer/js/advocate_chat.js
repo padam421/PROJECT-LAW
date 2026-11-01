@@ -107,7 +107,7 @@ const AdvocateChatBot = {
   render() {
     const t = AssistantThreads.active();
     return Components.AppLayout('<div class="adv-workspace adv-conversations-hidden"><dialog id="adv-conversations-dialog" class="adv-conversations-dialog" aria-labelledby="adv-conversations-title" onclose="AdvocateChatBot.conversationsClosed()" onclick="AdvocateChatBot.dismissConversations(event)"><header class="adv-conversations-header"><h2 id="adv-conversations-title">Case chats</h2><button type="button" autofocus aria-label="Close chats" onclick="AdvocateChatBot.toggleConversations(true)">✕ Close</button></header><aside class="adv-sidebar" id="adv-sidebar">' + this.sidebar() + '</aside></dialog><main class="adv-chat"><header class="adv-chat-header"><div class="adv-chat-heading"><button id="adv-conversations-toggle" type="button" aria-controls="adv-conversations-dialog" aria-haspopup="dialog" aria-expanded="false" title="Show or hide case conversations" onclick="AdvocateChatBot.toggleConversations()"><span class="material-symbols-rounded" aria-hidden="true">view_sidebar</span><span>Chats</span></button><div><span class="adv-eyebrow">NDPS RESEARCH</span><h1>Case research & strategy</h1></div></div><div class="adv-chat-actions"><button type="button" id="adv-new-chat" onclick="AdvocateChatBot.startNewChat()">＋ New chat</button><button type="button" onclick="Router.navigate(\'/court\')">Hearing practice ↗</button></div></header><div id="chat-messages" class="adv-messages" aria-live="polite">' +
-      (t.messages.length ? t.messages.map(m => this._renderMessage(m)).join('') : this._emptyChat()) + '</div><div id="adv-files" class="adv-file-chips"></div><form class="adv-composer" onsubmit="event.preventDefault();AdvocateChatBot.sendMessage()"><label class="adv-sr-only" for="chat-input">Case facts or follow-up question</label><textarea id="chat-input" rows="2" maxlength="60000" placeholder="Describe your NDPS case in detail, or ask a follow-up…" oninput="AdvocateChatBot.saveDraft()" onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey)){event.preventDefault();AdvocateChatBot.sendMessage()}">' + this.e(t.draft || '') + '</textarea><div class="adv-compose-tools"><input hidden multiple type="file" id="chat-file-input" accept=".pdf,.docx,.txt,.csv" onchange="AdvocateChatBot.handleFileAttach(event)"><button type="button" onclick="document.getElementById(\'chat-file-input\').click()">＋ Add case papers</button><span class="adv-language-note">Replies match your input language</span><button type="submit" class="adv-primary" id="chat-send-btn">Analyse case ↑</button></div><small>PDF / DOCX / TXT / CSV · up to 10 MB each · scanned documents need OCR · Ctrl + Enter to send</small></form></main></div>', 'ai-assistant', 'Advocate Research');
+      (t.messages.length ? t.messages.map(m => this._renderMessage(m)).join('') : this._emptyChat()) + '</div><div id="adv-files" class="adv-file-chips"></div><form class="adv-composer" onsubmit="event.preventDefault();AdvocateChatBot.sendMessage()"><label class="adv-sr-only" for="chat-input">Case facts or follow-up question</label><textarea id="chat-input" rows="2" maxlength="60000" placeholder="Describe your NDPS case in detail, or ask a follow-up…" oninput="AdvocateChatBot.saveDraft()" onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey)){event.preventDefault();AdvocateChatBot.sendMessage()}">' + this.e(t.draft || '') + '</textarea><div class="adv-compose-tools"><input hidden multiple type="file" id="chat-file-input" accept=".pdf,.docx,.txt,.csv" onchange="AdvocateChatBot.handleFileAttach(event)"><button type="button" onclick="document.getElementById(\'chat-file-input\').click()">＋ Add case papers</button>' + (typeof VoiceInput !== 'undefined' ? VoiceInput.controls('chat-input') : '') + '<span class="adv-language-note">Replies match your input language</span><button type="submit" class="adv-primary" id="chat-send-btn">Analyse case ↑</button></div><small>PDF / DOCX / TXT / CSV · up to 10 MB each · scanned documents need OCR · Ctrl + Enter to send</small></form></main></div>', 'ai-assistant', 'Advocate Research');
   },
   onEnter() {
     this._resizeConversations ||= () => { if (document.getElementById('adv-conversations-dialog')?.open) this.positionConversations(); };
@@ -115,6 +115,7 @@ const AdvocateChatBot = {
     this.refresh(); this.refreshHistory();
   },
   onLeave() {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop('chat-input');
     this.saveCurrentConversation();
     this.toggleConversations(true);
     window.removeEventListener('resize', this._resizeConversations);
@@ -165,6 +166,7 @@ const AdvocateChatBot = {
   },
   removeFile(id) { this.files = this.files.filter(f => f.id !== id); this.renderFiles(); },
   async sendMessage({retryMessage = null} = {}) {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop('chat-input');
     const t = AssistantThreads.active(), owner = AssistantThreads.owner(), input = document.getElementById('chat-input');
     if (this.pending.has(t.id) || this.uploads.get(t.id)) return;
     const files = this.files.filter(f => f.threadId === t.id), text = retryMessage?.text || input?.value?.trim() || (files.length ? 'Analyse the attached NDPS case papers in detail.' : '');
@@ -198,6 +200,7 @@ const AdvocateChatBot = {
     if (user) this.sendMessage({retryMessage: user});
   },
   startNewChat() {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop('chat-input');
     this.saveCurrentConversation();
     const blank = AssistantThreads.list().find(t => !this.hasConversationContent(t));
     if (blank) {
@@ -209,6 +212,7 @@ const AdvocateChatBot = {
     this.refresh(); this.toggleConversations(true); input?.focus();
   },
   selectConversation(id) {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop('chat-input');
     this.saveCurrentConversation();
     AssistantThreads.select(id); this.refresh();
     this.toggleConversations(true); document.getElementById('chat-input')?.focus();

@@ -322,9 +322,7 @@ const UserChatBot = {
 
   handleLanguageChange(event) {
     this._selectedLanguage = event.target?.value || 'auto';
-    if (this._recognition && this._isRecording) {
-      this._recognition.lang = this._getSpeechLangCode(this._selectedLanguage);
-    }
+    this.stopVoiceRecording();
   },
 
   _getSpeechLangCode(lang) {
@@ -349,113 +347,13 @@ const UserChatBot = {
     return map[lang] || 'hi-IN';
   },
 
-  toggleVoiceRecording() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      if (window.Utils && typeof window.Utils.showToast === 'function') {
-        window.Utils.showToast('Speech recognition is not supported in this browser. Please use Chrome or Edge.', 'warning');
-      } else {
-        alert('Speech recognition is not supported in your browser. Please use Google Chrome or Microsoft Edge.');
-      }
-      return;
-    }
-
-    if (this._isRecording) {
-      this.stopVoiceRecording();
-      return;
-    }
-
-    this.startVoiceRecording();
+  _voiceOptions() {
+    return {buttonId:'chat-mic-btn',languageId:'chat-lang-select',statusContainerId:'chat-status-container',onState:active=>{this._isRecording=active;}};
   },
 
-  startVoiceRecording() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    try {
-      this._recognition = new SpeechRecognition();
-      this._recognition.continuous = true;
-      this._recognition.interimResults = true;
-      const selectedLang = document.getElementById('chat-lang-select')?.value || this._selectedLanguage || 'auto';
-      this._recognition.lang = this._getSpeechLangCode(selectedLang);
-
-      const input = document.getElementById('chat-input');
-      const micBtn = document.getElementById('chat-mic-btn');
-      const statusContainer = document.getElementById('chat-status-container');
-      const initialText = input ? input.value : '';
-
-      this._recognition.onstart = () => {
-        this._isRecording = true;
-        if (micBtn) {
-          micBtn.classList.add('recording');
-          micBtn.title = 'Recording live... Click to stop';
-        }
-        if (statusContainer) {
-          const langSelectEl = document.getElementById('chat-lang-select');
-          const langLabel = langSelectEl ? langSelectEl.options[langSelectEl.selectedIndex].text : 'Selected Language';
-          statusContainer.innerHTML = `
-            <div class="u-voice-status-bar" id="voice-status-bar">
-              <div class="u-voice-status-dot"></div>
-              <span style="flex:1">🎙️ <strong>Sun raha hoon (${langLabel})...</strong> Bolte hi text type ho jayega. Click Stop when done.</span>
-              <button type="button" onclick="UserChatBot.stopVoiceRecording()" style="background:none;border:none;color:#b91c1c;cursor:pointer;font-weight:700;font-size:0.8rem;text-decoration:underline">
-                Stop Recording
-              </button>
-            </div>
-          `;
-        }
-      };
-
-      this._recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        if (input && transcript.trim()) {
-          input.value = initialText ? `${initialText.trim()} ${transcript}` : transcript;
-          input.style.height = 'auto';
-          input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-        }
-      };
-
-      this._recognition.onerror = (event) => {
-        console.warn('Speech recognition error:', event.error);
-        if (event.error === 'not-allowed') {
-          if (window.Utils) window.Utils.showToast('Microphone access blocked. Kripya browser mein microphone allow karein.', 'warning');
-        }
-        this.stopVoiceRecording();
-      };
-
-      this._recognition.onend = () => {
-        this._isRecording = false;
-        if (micBtn) {
-          micBtn.classList.remove('recording');
-          micBtn.title = 'Voice Input (Speech to Text)';
-        }
-        const statusBar = document.getElementById('voice-status-bar');
-        if (statusBar) statusBar.remove();
-        if (input) input.focus();
-      };
-
-      this._recognition.start();
-    } catch (err) {
-      console.error('Failed to start speech recognition:', err);
-      this._isRecording = false;
-    }
-  },
-
-  stopVoiceRecording() {
-    if (this._recognition && this._isRecording) {
-      try {
-        this._recognition.stop();
-      } catch (_) {}
-    }
-    this._isRecording = false;
-    const micBtn = document.getElementById('chat-mic-btn');
-    if (micBtn) {
-      micBtn.classList.remove('recording');
-      micBtn.title = 'Voice Input (Speech to Text)';
-    }
-    const statusBar = document.getElementById('voice-status-bar');
-    if (statusBar) statusBar.remove();
-  },
+  toggleVoiceRecording() { VoiceInput.toggle('chat-input',this._voiceOptions()); },
+  startVoiceRecording() { VoiceInput.start('chat-input',this._voiceOptions()); },
+  stopVoiceRecording() { VoiceInput.stop('chat-input'); },
 
   handleFileAttach(event) {
     const file = event.target?.files?.[0];

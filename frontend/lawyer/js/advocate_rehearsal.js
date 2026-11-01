@@ -13,6 +13,7 @@ const AdvocateRehearsal = {
   remember() { const {threadId, sessionId} = this.context; AssistantThreads.ensure().activeRehearsal = {threadId, sessionId}; AssistantThreads.persist(); },
   update(edit) { const c = this.context; if (!this.session()) return; AssistantThreads.changeCourt(c.threadId, t => { const s = t.courtSessions[c.sessionId]; edit(s); s.updatedAt = new Date().toISOString(); }); },
   launch(messageId) {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop();
     const t = AssistantThreads.active(), index = t.messages.findIndex(m => m.id === messageId);
     if (index < 0) return;
     const through = t.messages.slice(0, index + 1), facts = through.filter(m => m.sender === 'user').map(m => m.text + (m.caseContext ? '\n' + m.caseContext : '')).join('\n\n');
@@ -23,6 +24,7 @@ const AdvocateRehearsal = {
     this.context = {owner: AssistantThreads.owner(), threadId: t.id, sessionId: session.id}; this.remember(); Router.navigate('/court/simulate');
   },
   resume(threadId, sessionId) {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop();
     const s = AssistantThreads.getForCourt(threadId)?.courtSessions?.[sessionId];
     if (s?.kind !== 'advocate-rehearsal') return;
     this.context = {owner: AssistantThreads.owner(), threadId, sessionId}; this.remember(); Router.navigate('/court/simulate');
@@ -38,7 +40,7 @@ const AdvocateRehearsal = {
     const s = this.session();
     if (!s) return '<div class="adv-hearing-home"><h1>Select a case to rehearse</h1><p>Open a research answer and choose “Rehearse this case”, or resume a saved rehearsal.</p><button class="adv-primary" onclick="Router.navigate(\'/court\')">Open hearing library</button></div>';
     return '<section class="adv-hearing"><header class="adv-chat-header adv-rehearsal-header"><div class="adv-rehearsal-heading"><span class="material-symbols-rounded adv-rehearsal-icon" aria-hidden="true">gavel</span><h1>Hearing rehearsal</h1><span class="adv-practice-badge">Simulation</span></div><button onclick="Router.navigate(\'/court\')">Saved rehearsals</button></header><div class="adv-hearing-grid"><aside class="adv-hearing-record"><h2>Hearing setup</h2><details class="adv-case-identity"><summary>Case details</summary><p dir="auto">' + this.e(s.title) + '</p></details><label>Hearing stage<select id="adv-stage" onchange="AdvocateRehearsal.setting(\'stage\',this.value)">' +
-      [['bail','Bail submissions'],['charge','Charge-stage arguments'],['cross','Cross-examination'],['final','Final submissions']].map(([v,l]) => '<option value="' + v + '"' + (v === s.stage ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></label><label>You appear for<select onchange="AdvocateRehearsal.setting(\'side\',this.value)"><option value="defense"' + (s.side === 'defense' ? ' selected' : '') + '>Defense / applicant</option><option value="prosecution"' + (s.side === 'prosecution' ? ' selected' : '') + '>Prosecution / respondent</option></select></label><p class="adv-muted">Changing stage or side starts a separate round; earlier turns remain saved.</p><details><summary>Factual case record</summary><div dir="auto">' + AdvocateChatBot.markdown(s.record.facts) + '</div></details><details><summary>Research brief</summary><div dir="auto">' + AdvocateChatBot.markdown(s.record.research) + '</div></details><button onclick="AdvocateRehearsal.export()">Export hearing & brief ↓</button></aside><main class="adv-hearing-main"><div id="adv-transcript" class="adv-transcript">' + this.turns(s) + '</div><form class="adv-composer" onsubmit="event.preventDefault();AdvocateRehearsal.submit()"><label for="adv-submission">Your argument</label><textarea id="adv-submission" rows="4" maxlength="30000" placeholder="State your submission, respond to the bench, or ask one cross-examination question…" oninput="AdvocateRehearsal.saveDraft(this.value)">' + this.e(s.draft || '') + '</textarea><div class="adv-compose-tools"><small>Practice uses the saved case record; added facts remain counsel statements.</small><button class="adv-primary" id="adv-hearing-send"' + (this.pending.has(s.id) ? ' disabled' : '') + '>' + (s.transcript.length ? 'Submit argument →' : 'Start this hearing →') + '</button></div></form></main></div></section>';
+      [['bail','Bail submissions'],['charge','Charge-stage arguments'],['cross','Cross-examination'],['final','Final submissions']].map(([v,l]) => '<option value="' + v + '"' + (v === s.stage ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></label><label>You appear for<select onchange="AdvocateRehearsal.setting(\'side\',this.value)"><option value="defense"' + (s.side === 'defense' ? ' selected' : '') + '>Defense / applicant</option><option value="prosecution"' + (s.side === 'prosecution' ? ' selected' : '') + '>Prosecution / respondent</option></select></label><p class="adv-muted">Changing stage or side starts a separate round; earlier turns remain saved.</p><details><summary>Factual case record</summary><div dir="auto">' + AdvocateChatBot.markdown(s.record.facts) + '</div></details><details><summary>Research brief</summary><div dir="auto">' + AdvocateChatBot.markdown(s.record.research) + '</div></details><button onclick="AdvocateRehearsal.export()">Export hearing & brief ↓</button></aside><main class="adv-hearing-main"><div id="adv-transcript" class="adv-transcript">' + this.turns(s) + '</div><form class="adv-composer" onsubmit="event.preventDefault();AdvocateRehearsal.submit()"><label for="adv-submission">Your argument</label><textarea id="adv-submission" rows="4" maxlength="30000" placeholder="State your submission, respond to the bench, or ask one cross-examination question…" oninput="AdvocateRehearsal.saveDraft(this.value)">' + this.e(s.draft || '') + '</textarea><div class="adv-compose-tools">' + (typeof VoiceInput !== 'undefined' ? VoiceInput.controls('adv-submission') : '') + '<small>Practice uses the saved case record; added facts remain counsel statements.</small><button class="adv-primary" id="adv-hearing-send"' + (this.pending.has(s.id) ? ' disabled' : '') + '>' + (s.transcript.length ? 'Submit argument →' : 'Start this hearing →') + '</button></div></form></main></div></section>';
   },
   turns(s) {
     return (s.transcript.length ? s.transcript.map(turn => '<article class="adv-hearing-turn ' + (turn.actor === 'COUNSEL' ? 'adv-counsel-turn' : '') + '"><span class="adv-eyebrow">' + this.e(turn.actor === 'COUNSEL' ? 'YOUR SUBMISSION' : 'REHEARSAL ROUND') + ' · ' + this.e(turn.stage || s.stage) + ' · ' + this.e(turn.side || s.side) + '</span>' +
@@ -51,11 +53,13 @@ const AdvocateRehearsal = {
     const button = document.getElementById('adv-hearing-send'); if (button) { button.disabled = this.pending.has(s.id); button.textContent = s.transcript.length ? 'Submit argument →' : 'Start this hearing →'; }
   },
   setting(key, value) {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop();
     if (this.pending.has(this.session()?.id)) { Router.navigate('/court/simulate'); return; }
     this.update(s => { if (s[key] !== value) s.round = (s.round || 1) + 1; s[key] = value; s.error = ''; s.lastSubmission = ''; });
   },
   saveDraft(text) { this.update(s => { s.draft = text; }); },
   async submit(retry = false) {
+    if (typeof VoiceInput !== 'undefined') VoiceInput.stop();
     const s = this.session(), c = this.context && {...this.context}; if (!s || this.pending.has(s.id)) return;
     const input = document.getElementById('adv-submission');
     const submission = retry ? s.lastSubmission || '' : input?.value?.trim() || '';
