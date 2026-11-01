@@ -2,10 +2,39 @@
 const AdvocateChatBot = {
   pending: new Set(), uploads: new Map(), files: [], _viewThread: null, _viewCount: 0,
   toggleConversations(close = null) {
-    const layout = document.querySelector('.adv-workspace');
-    if (!layout) return;
-    const closed = close === null ? layout.classList.toggle('adv-conversations-hidden') : layout.classList.toggle('adv-conversations-hidden', close);
-    document.getElementById('adv-conversations-toggle')?.setAttribute('aria-expanded', String(!closed));
+    const popup = document.getElementById('adv-conversations-dialog');
+    if (!popup) return;
+    const closed = close === null ? popup.open : close;
+    if (closed) {
+      if (popup.open) popup.close();
+      this.conversationsClosed();
+    } else {
+      this.positionConversations();
+      if (!popup.open) popup.showModal();
+      document.querySelector('.adv-workspace')?.classList.toggle('adv-conversations-hidden', false);
+      document.getElementById('adv-conversations-toggle')?.setAttribute('aria-expanded', 'true');
+    }
+  },
+  conversationsClosed() {
+    if (document.getElementById('adv-conversations-dialog')?.open) return;
+    document.querySelector('.adv-workspace')?.classList.toggle('adv-conversations-hidden', true);
+    document.getElementById('adv-conversations-toggle')?.setAttribute('aria-expanded', 'false');
+  },
+  positionConversations() {
+    const popup = document.getElementById('adv-conversations-dialog'), layout = document.querySelector('.adv-workspace');
+    if (!popup || !layout) return;
+    const bounds = layout.getBoundingClientRect();
+    const top = Math.max(8, bounds.top + 1), left = Math.max(8, bounds.left + 1);
+    popup.style.setProperty('--adv-popup-top', top + 'px');
+    popup.style.setProperty('--adv-popup-left', left + 'px');
+    popup.style.setProperty('--adv-popup-width', Math.min(320, window.innerWidth - left - 8) + 'px');
+    popup.style.setProperty('--adv-popup-height', Math.max(0, Math.min(bounds.height - 2, window.innerHeight - top - 8)) + 'px');
+  },
+  dismissConversations(event) {
+    const popup = document.getElementById('adv-conversations-dialog');
+    if (!popup || event.target !== popup) return;
+    const bounds = popup.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) this.toggleConversations(true);
   },
   e(value) { return Utils.escapeHtml(String(value ?? '')); },
   markdown(text) {
@@ -45,12 +74,17 @@ const AdvocateChatBot = {
   },
   render() {
     const t = AssistantThreads.active();
-    return Components.AppLayout('<div class="adv-workspace adv-conversations-hidden"><aside class="adv-sidebar" id="adv-sidebar">' + this.sidebar() + '</aside><main class="adv-chat"><header class="adv-chat-header"><div class="adv-chat-heading"><button id="adv-conversations-toggle" type="button" aria-controls="adv-sidebar" aria-expanded="false" title="Show or hide case conversations" onclick="AdvocateChatBot.toggleConversations()"><span class="material-symbols-rounded" aria-hidden="true">view_sidebar</span><span>Chats</span></button><div><span class="adv-eyebrow">NDPS RESEARCH</span><h1>Case research & strategy</h1></div></div><button onclick="Router.navigate(\'/court\')">Hearing practice ↗</button></header><div id="chat-messages" class="adv-messages" aria-live="polite">' +
+    return Components.AppLayout('<div class="adv-workspace adv-conversations-hidden"><dialog id="adv-conversations-dialog" class="adv-conversations-dialog" aria-labelledby="adv-conversations-title" onclose="AdvocateChatBot.conversationsClosed()" onclick="AdvocateChatBot.dismissConversations(event)"><header class="adv-conversations-header"><h2 id="adv-conversations-title">Case chats</h2><button type="button" autofocus aria-label="Close chats" onclick="AdvocateChatBot.toggleConversations(true)">✕ Close</button></header><aside class="adv-sidebar" id="adv-sidebar">' + this.sidebar() + '</aside></dialog><main class="adv-chat"><header class="adv-chat-header"><div class="adv-chat-heading"><button id="adv-conversations-toggle" type="button" aria-controls="adv-conversations-dialog" aria-haspopup="dialog" aria-expanded="false" title="Show or hide case conversations" onclick="AdvocateChatBot.toggleConversations()"><span class="material-symbols-rounded" aria-hidden="true">view_sidebar</span><span>Chats</span></button><div><span class="adv-eyebrow">NDPS RESEARCH</span><h1>Case research & strategy</h1></div></div><div class="adv-chat-actions"><button type="button" id="adv-new-chat" onclick="AdvocateChatBot.startNewChat()">＋ New chat</button><button type="button" onclick="Router.navigate(\'/court\')">Hearing practice ↗</button></div></header><div id="chat-messages" class="adv-messages" aria-live="polite">' +
       (t.messages.length ? t.messages.map(m => this._renderMessage(m)).join('') : this._emptyChat()) + '</div><div id="adv-files" class="adv-file-chips"></div><form class="adv-composer" onsubmit="event.preventDefault();AdvocateChatBot.sendMessage()"><label class="adv-sr-only" for="chat-input">Case facts or follow-up question</label><textarea id="chat-input" rows="2" maxlength="60000" placeholder="Describe your NDPS case in detail, or ask a follow-up…" onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey)){event.preventDefault();AdvocateChatBot.sendMessage()}"></textarea><div class="adv-compose-tools"><input hidden multiple type="file" id="chat-file-input" accept=".pdf,.docx,.txt,.csv" onchange="AdvocateChatBot.handleFileAttach(event)"><button type="button" onclick="document.getElementById(\'chat-file-input\').click()">＋ Add case papers</button><span class="adv-language-note">Replies match your input language</span><button type="submit" class="adv-primary" id="chat-send-btn">Analyse case ↑</button></div><small>PDF / DOCX / TXT / CSV · up to 10 MB each · scanned documents need OCR · Ctrl + Enter to send</small></form></main></div>', 'ai-assistant', 'Advocate Research');
   },
   onEnter() {
-    this.closeMobileConversations();
+    this._resizeConversations ||= () => { if (document.getElementById('adv-conversations-dialog')?.open) this.positionConversations(); };
+    window.addEventListener('resize', this._resizeConversations);
     this.refresh(); AssistantThreads.hydrate();
+  },
+  onLeave() {
+    this.toggleConversations(true);
+    window.removeEventListener('resize', this._resizeConversations);
   },
   refresh() {
     const t = AssistantThreads.active(false), panel = document.getElementById('chat-messages');
@@ -122,11 +156,13 @@ const AdvocateChatBot = {
     const user = t.messages.slice(0, index).reverse().find(m => m.sender === 'user');
     if (user) this.sendMessage({retryMessage: user});
   },
-  closeMobileConversations() {
-    if (typeof matchMedia === 'function' && matchMedia('(max-width: 760px)').matches) this.toggleConversations(true);
+  startNewChat() {
+    AssistantThreads.create();
+    const input = document.getElementById('chat-input');
+    if (input) input.value = '';
+    this.refresh(); this.toggleConversations(true); input?.focus();
   },
-  startNewChat() { AssistantThreads.create(); this.refresh(); this.closeMobileConversations(); },
-  selectConversation(id) { AssistantThreads.select(id); this.refresh(); this.closeMobileConversations(); },
+  selectConversation(id) { AssistantThreads.select(id); this.refresh(); this.toggleConversations(true); document.getElementById('chat-input')?.focus(); },
   async remove(id) {
     if (this.pending.has(id) || this.uploads.get(id)) return;
     if (!confirm('Delete this case chat? Saved hearing rehearsals will remain available.')) return;

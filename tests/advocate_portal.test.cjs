@@ -4,11 +4,21 @@ function fixture(){
  const context=vm.createContext({console,Map,Set,Intl,Date,JSON,AbortSignal,Blob,URL,crypto:{randomUUID:()=>String(++serial)},setTimeout:()=>1,clearTimeout(){},confirm:()=>true,
   localStorage:{getItem:k=>local.get(k)||null,setItem:(k,v)=>local.set(k,v)},
   AuthManager:{getSession:()=>({id:owner,role:'lawyer'}),getApiUrl:p=>p},
-  document:{getElementById:id=>elements.get(id)||null},window:{addEventListener(){},dispatchEvent(){}},Event:class{},
+  document:{getElementById:id=>elements.get(id)||null},window:{addEventListener(){},removeEventListener(){},dispatchEvent(){}},Event:class{},
   Utils:{escapeHtml:s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'),showToast(){}},
   Components:{AppLayout:s=>s},Router:{navigate(){}},fetch:async()=>({ok:true,json:async()=>({threads:[]})})});
  ['frontend/shared/js/assistant_threads.js','frontend/lawyer/js/advocate_chat.js','frontend/lawyer/js/advocate_storage.js','frontend/lawyer/js/advocate_rehearsal.js'].forEach(f=>vm.runInContext(fs.readFileSync(f,'utf8'),context,{filename:f}));
  return {context,local,elements,run:code=>vm.runInContext(code,context),setOwner:v=>owner=v};
+}
+function popupFixture(){
+ const f=fixture(),classes=new Set(['adv-workspace','adv-conversations-hidden']),attributes=new Map(),styles=new Map();
+ const popup={open:false,showModal(){this.open=true},close(){this.open=false},style:{setProperty:(name,value)=>styles.set(name,value)},getBoundingClientRect:()=>({left:221,right:541,top:9,bottom:891})};
+ const layout={getBoundingClientRect:()=>({left:220,top:8,height:884}),classList:{toggle(name,force){const add=force===undefined?!classes.has(name):force;add?classes.add(name):classes.delete(name);return add;}}};
+ f.context.document.querySelector=selector=>selector==='.adv-workspace'?layout:null;
+ Object.assign(f.context.window,{innerWidth:1440,innerHeight:900});
+ f.elements.set('adv-conversations-dialog',popup);
+ f.elements.set('adv-conversations-toggle',{setAttribute:(name,value)=>attributes.set(name,value)});
+ return {...f,popup,classes,attributes,styles};
 }
 test('actual lawyer HTML loads its own chat and rehearsal, without shared citizen controllers',()=>{
  const html=fs.readFileSync('frontend/lawyer/index.html','utf8');
@@ -16,20 +26,53 @@ test('actual lawyer HTML loads its own chat and rehearsal, without shared citize
  assert.doesNotMatch(html,/src="[^\"]*(?:assistant_chat|live_court|court_simulator|chat_bot)\.js/);
  const user=fs.readFileSync('frontend/user/index.html','utf8');assert.ok(user.includes('assistant_chat.js'));assert.ok(user.includes('live_court.js'));
 });
-test('research opens with history collapsed and Chats can reopen it without changing the case', () => {
- const f=fixture(),html=f.run('AdvocateChatBot.render()');
+test('research opens full width and Chats toggles a dialog without changing the case', () => {
+ const f=popupFixture(),html=f.run('AdvocateChatBot.render()');
  assert.match(html, /class="adv-workspace adv-conversations-hidden"/);
  assert.match(html, /id="adv-conversations-toggle"[^>]*aria-expanded="false"/);
- const classes=new Set(['adv-workspace','adv-conversations-hidden']),attributes=new Map();
- f.context.document.querySelector=selector=>selector==='.adv-workspace'?{classList:{toggle(name,force){const add=force===undefined?!classes.has(name):force;add?classes.add(name):classes.delete(name);return add;}}}:null;
- f.elements.set('adv-conversations-toggle',{setAttribute:(name,value)=>attributes.set(name,value)});
+ assert.match(html, /<dialog[^>]*id="adv-conversations-dialog"/);
+ assert.match(html, /aria-label="Close chats"/);
  const original=f.run('AssistantThreads.active().id');
  for(const expanded of ['true','false','true']){
   f.run('AdvocateChatBot.toggleConversations()');
-  assert.equal(attributes.get('aria-expanded'),expanded);
-  assert.equal(classes.has('adv-conversations-hidden'),expanded==='false');
+  assert.equal(f.attributes.get('aria-expanded'),expanded);
+  assert.equal(f.popup.open,expanded==='true');
+  assert.equal(f.classes.has('adv-conversations-hidden'),expanded==='false');
   assert.equal(f.run('AssistantThreads.active().id'),original);
  }
+ assert.equal(f.styles.get('--adv-popup-left'),'221px');
+ f.context.window.innerWidth=480;
+ f.run('AdvocateChatBot.positionConversations()');
+ assert.equal(f.styles.get('--adv-popup-width'),'251px');
+});
+
+test('Close, Escape and outside clicks dismiss history while clicks inside keep it open', () => {
+ const f=popupFixture();
+ f.run('AdvocateChatBot.toggleConversations(false);AdvocateChatBot.toggleConversations(true)');
+ assert.equal(f.popup.open,false);assert.equal(f.attributes.get('aria-expanded'),'false');
+ f.run('AdvocateChatBot.toggleConversations(false)');
+ f.popup.close(); // Native Escape closes the dialog and dispatches its close event.
+ f.run('AdvocateChatBot.conversationsClosed()');
+ assert.equal(f.attributes.get('aria-expanded'),'false');
+ f.run('AdvocateChatBot.toggleConversations(false);AdvocateChatBot.dismissConversations({target:document.getElementById("adv-conversations-dialog"),clientX:300,clientY:100})');
+ assert.equal(f.popup.open,true);
+ f.run('AdvocateChatBot.dismissConversations({target:document.getElementById("adv-conversations-dialog"),clientX:800,clientY:100})');
+ assert.equal(f.popup.open,false);
+});
+
+test('the main New chat action closes the popup, clears the draft and preserves the old conversation', () => {
+ const f=popupFixture();let focused=0;
+ f.elements.set('chat-input',{value:'Unsent draft',focus(){focused++}});
+ f.run('this.old=AssistantThreads.create().id;AssistantThreads.append(old,{id:"saved",sender:"user",text:"Earlier case facts"});AdvocateChatBot.toggleConversations(false)');
+ assert.match(f.run('AdvocateChatBot.render()'),/id="adv-new-chat" onclick="AdvocateChatBot.startNewChat\(\)"/);
+ f.run('AdvocateChatBot.startNewChat()');
+ assert.equal(f.run('AssistantThreads.list().length'),2);
+ assert.equal(f.run('AssistantThreads.get(old).messages[0].text'),'Earlier case facts');
+ assert.equal(f.run('AssistantThreads.active().messages.length'),0);
+ assert.equal(f.run('AssistantThreads.active().id===old'),false);
+ assert.equal(f.elements.get('chat-input').value,'');assert.equal(focused,1);assert.equal(f.popup.open,false);
+ f.run('AdvocateChatBot.toggleConversations(false);AdvocateChatBot.selectConversation(old)');
+ assert.equal(f.run('AssistantThreads.active().id===old'),true);assert.equal(f.popup.open,false);
 });
 
 test('a preparation-only recovery is labelled as pending legal verification', () => {

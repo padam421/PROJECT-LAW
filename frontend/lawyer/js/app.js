@@ -89,7 +89,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   Router.register('/ai-assistant', () => AdvocateChatBot.render(), {
     title: 'Ask Nyay Setu',
     requiresAuth: true,
-    onEnter: () => AdvocateChatBot.onEnter && AdvocateChatBot.onEnter()
+    onEnter: () => AdvocateChatBot.onEnter && AdvocateChatBot.onEnter(),
+    onLeave: () => AdvocateChatBot.onLeave && AdvocateChatBot.onLeave()
   });
 
   Router.register('/clients', (params) => ClientsPage.render(params), {

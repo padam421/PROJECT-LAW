@@ -1,10 +1,9 @@
 /* Advocate research desk: scoped styles; no citizen styles or behavior are modified. */
 .adv-workspace,.adv-hearing,.adv-hearing-home{--adv-ink:#163c39;--adv-muted:#617574;--adv-line:#d9e4df;--adv-paper:#fffefa;--adv-accent:#177269;color:var(--adv-ink);font-family:inherit}
 .adv-workspace *, .adv-hearing *, .adv-hearing-home *{box-sizing:border-box}
-/* Flex lets the chat fill the desk even if history is hidden independently.
-   Grid auto-placement could put the chat in the empty history column. */
-.adv-workspace{--adv-history-width:245px;display:flex;width:100%;min-width:0;min-height:calc(100vh - 150px);background:var(--adv-paper);border:1px solid var(--adv-line);border-radius:18px;overflow:hidden}
-.adv-sidebar{flex:0 0 var(--adv-history-width);width:var(--adv-history-width);min-width:0;background:#eff4ef;padding:22px 14px;border-right:1px solid var(--adv-line);max-height:calc(100vh - 140px);overflow:auto}
+/* History opens in the top layer, leaving the research desk at full width. */
+.adv-workspace{display:flex;width:100%;min-width:0;min-height:calc(100vh - 150px);background:var(--adv-paper);border:1px solid var(--adv-line);border-radius:18px;overflow:hidden}
+.adv-sidebar{flex:1;min-height:0;width:100%;min-width:0;background:#eff4ef;padding:22px 14px;overflow:auto}
 .adv-sidebar h3{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;margin:28px 8px 14px;color:var(--adv-muted)}
 .adv-workspace button,.adv-hearing button,.adv-hearing-home button{font:inherit;cursor:pointer;border:1px solid var(--adv-line);border-radius:9px;background:white;color:var(--adv-ink);padding:10px 13px;line-height:1.4}
 .adv-workspace button:hover,.adv-hearing button:hover,.adv-hearing-home button:hover{background:#e8f2ec;border-color:#9dbaae}
@@ -44,8 +43,8 @@
 .adv-sr-only{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 .adv-hearing-home{padding:20px 12px}.adv-hearing-home header{max-width:800px;margin-bottom:32px}.adv-hearing-home h1{font:500 clamp(29px,3vw,42px)/1.2 Georgia,serif;margin:14px 0}.adv-hearing-home header button{margin-top:18px}.adv-stage-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:25px 0 35px}.adv-stage-grid article,.adv-session-grid article{background:var(--adv-paper);padding:22px;border:1px solid var(--adv-line);border-radius:12px}.adv-stage-grid h3,.adv-session-grid h3{font-size:16px;margin:12px 0}.adv-stage-grid p,.adv-session-grid p{font-size:13px;line-height:1.8;color:var(--adv-muted)}.adv-session-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0}.adv-session-grid button{margin:10px 6px 0 0}
 .adv-hearing{background:var(--adv-paper);border:1px solid var(--adv-line);border-radius:16px;overflow:hidden}.adv-hearing-grid{display:grid;grid-template-columns:260px minmax(0,1fr)}.adv-hearing-record{padding:24px;background:#f0f4ef;border-right:1px solid var(--adv-line);font-size:12px;line-height:1.8}.adv-hearing-record label{display:block;margin:18px 0}.adv-hearing-record select{margin-top:8px;font-size:12px}.adv-hearing-record details{margin:20px 0}.adv-hearing-record summary{font-weight:650;cursor:pointer}.adv-hearing-record details>div{max-height:330px;overflow:auto;overflow-wrap:anywhere}.adv-hearing-main{min-width:0}.adv-bench-banner{display:flex;gap:15px;align-items:center;background:#173d39;color:#f9f4e5;padding:24px 30px}.adv-bench-banner>span{font-size:32px}.adv-bench-banner small{display:block;margin-top:8px;opacity:.75;font-size:11px}.adv-transcript{min-height:300px;max-height:calc(100vh - 450px);overflow:auto;padding:24px 30px}.adv-hearing-turn{border-bottom:1px solid var(--adv-line);padding:18px 0;font-size:14px;line-height:1.85;overflow-wrap:anywhere}.adv-counsel-turn{background:#edf4ee;border-radius:10px;padding:18px;margin:10px 0}.adv-role-block{margin:18px 0;padding:15px;border-left:3px solid #c7a15a;background:#fbf8ef}.adv-role-block h3{font-size:14px;font-weight:700;margin:0 0 10px}.adv-role-bench{border-color:#247b70;background:#eef5f0}.adv-role-coaching{border-color:#829caa;background:#f0f4f7}
-@media(max-width:1100px){.adv-workspace{--adv-history-width:200px}.adv-messages{padding:20px}.adv-intake-grid{grid-template-columns:1fr}.adv-stage-grid{grid-template-columns:repeat(2,1fr)}.adv-session-grid{grid-template-columns:repeat(2,1fr)}.adv-hearing-grid{grid-template-columns:220px minmax(0,1fr)}}
-@media(max-width:760px){.adv-workspace{flex-direction:column}.adv-sidebar{flex-basis:auto;width:100%;border-right:0;border-bottom:1px solid var(--adv-line);max-height:190px}.adv-sidebar h3{margin:15px 8px 8px}.adv-storage-note{margin:0;padding:6px}.adv-chat-header{padding:18px;align-items:flex-start;flex-wrap:wrap}.adv-chat-header h1{font-size:20px}.adv-messages{max-height:65vh;min-height:300px;padding:18px}.adv-composer{padding:15px}.adv-compose-tools label{font-size:11px}.adv-stage-grid,.adv-session-grid{grid-template-columns:1fr}.adv-hearing-grid{grid-template-columns:1fr}.adv-hearing-record{border-right:0;border-bottom:1px solid var(--adv-line)}.adv-hearing-record details{margin:10px 0}.adv-transcript{max-height:65vh;padding:16px}.adv-bench-banner{padding:18px}}
+@media(max-width:1100px){.adv-messages{padding:20px}.adv-intake-grid{grid-template-columns:1fr}.adv-stage-grid{grid-template-columns:repeat(2,1fr)}.adv-session-grid{grid-template-columns:repeat(2,1fr)}.adv-hearing-grid{grid-template-columns:220px minmax(0,1fr)}}
+@media(max-width:760px){.adv-workspace{flex-direction:column}.adv-sidebar h3{margin:15px 8px 8px}.adv-storage-note{margin:0;padding:6px}.adv-chat-header{padding:18px;align-items:flex-start;flex-wrap:wrap}.adv-chat-header h1{font-size:20px}.adv-messages{max-height:65vh;min-height:300px;padding:18px}.adv-composer{padding:15px}.adv-compose-tools label{font-size:11px}.adv-stage-grid,.adv-session-grid{grid-template-columns:1fr}.adv-hearing-grid{grid-template-columns:1fr}.adv-hearing-record{border-right:0;border-bottom:1px solid var(--adv-line)}.adv-hearing-record details{margin:10px 0}.adv-transcript{max-height:65vh;padding:16px}.adv-bench-banner{padding:18px}}
 @media(prefers-reduced-motion:reduce){.adv-messages{scroll-behavior:auto}}
 
 /* Research occupies the viewport. Navigation, history and answers each scroll
@@ -67,7 +66,7 @@ body:has(.adv-focus-layout){overflow:hidden}
 .adv-focus-layout .app-content{display:flex;flex-direction:column;min-height:0;max-width:none;width:100%;padding:8px;margin:0;overflow:hidden}
 .adv-focus-layout .doc-comparison-banner{flex-shrink:0;margin:0 0 6px!important;padding:6px 12px;font-size:11px}
 .adv-mobile-nav{display:none}
-.adv-research-layout .adv-workspace{--adv-history-width:210px;flex:1;min-height:0;height:100%;border-radius:14px;box-shadow:0 4px 20px #163c3906}
+.adv-research-layout .adv-workspace{flex:1;min-height:0;height:100%;border-radius:14px;box-shadow:0 4px 20px #163c3906}
 .adv-research-layout .adv-sidebar{min-height:0;max-height:none;padding:16px 10px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
 .adv-research-layout .adv-sidebar>button{width:100%;padding:11px 8px}
 .adv-research-layout .adv-sidebar h3{font-size:10px;margin:24px 6px 12px}
@@ -79,7 +78,8 @@ body:has(.adv-focus-layout){overflow:hidden}
 #adv-conversations-toggle{flex-shrink:0}
 .adv-research-layout .adv-chat-header h1{font-size:19px;letter-spacing:-.35px}
 .adv-research-layout .adv-chat-header .adv-eyebrow{font-size:9px;margin-bottom:4px;letter-spacing:1.5px}
-.adv-research-layout .adv-chat-header>button{font-size:12px;padding:9px 12px;white-space:nowrap}
+.adv-chat-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-left:auto}
+.adv-research-layout .adv-chat-actions>button{font-size:12px;padding:9px 12px;white-space:nowrap}
 #adv-conversations-toggle{display:flex;align-items:center;gap:6px;font-size:12px;padding:8px;border-color:#dbe5df;background:#f2f6f2}
 #adv-conversations-toggle .material-symbols-rounded{font-size:19px}
 .adv-research-layout .adv-messages{position:relative;flex:1 1 0;min-height:0;max-height:none;overflow-y:auto;padding:24px clamp(20px,3vw,52px);overscroll-behavior:contain;scrollbar-gutter:stable;scroll-behavior:auto}
@@ -97,20 +97,25 @@ body:has(.adv-focus-layout){overflow:hidden}
 .adv-research-layout .adv-compose-tools button{font-size:13px;padding:9px 12px}
 .adv-research-layout .adv-composer>small{margin-top:6px;font-size:10px}
 .adv-research-layout #adv-files{flex-shrink:0;max-height:90px;overflow-y:auto}
-.adv-conversations-hidden>.adv-sidebar{display:none}
+.adv-conversations-dialog{position:fixed;inset:auto;top:var(--adv-popup-top,8px);left:var(--adv-popup-left,8px);width:var(--adv-popup-width,320px);height:var(--adv-popup-height,calc(100dvh - 16px));max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);margin:0;padding:0;overflow:hidden;border:1px solid var(--adv-line);border-radius:14px;background:#eff4ef;color:var(--adv-ink);box-shadow:0 14px 48px #163c3933}
+.adv-conversations-dialog:not([open]){display:none}
+.adv-conversations-dialog[open]{display:flex;flex-direction:column}
+.adv-conversations-dialog::backdrop{background:#163c3924}
+.adv-conversations-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px;padding:14px 16px;border-bottom:1px solid var(--adv-line);background:var(--adv-paper)}
+.adv-conversations-header h2{margin:0;font-size:16px;font-weight:650}
+.adv-conversations-header button{font-size:12px;white-space:nowrap}
 .adv-research-layout .adv-empty{padding:20px 0}
 .adv-research-layout .adv-empty>p{font-size:15px}
 .adv-research-layout .adv-intake-grid p{font-size:13px}
 .adv-research-layout :is(.adv-messages,.adv-sidebar,.sidebar-nav){scrollbar-width:thin;scrollbar-color:#b8c9c0 transparent}
-@media(max-width:1200px){.adv-focus-layout{--sidebar-width:210px}.adv-research-layout .adv-workspace{--adv-history-width:185px}.adv-research-layout .adv-chat-header{padding:12px 16px}.adv-research-layout .adv-chat-heading{gap:10px}}
+@media(max-width:1200px){.adv-focus-layout{--sidebar-width:210px}.adv-research-layout .adv-chat-header{padding:12px 16px}.adv-research-layout .adv-chat-heading{gap:10px}}
 @media(max-width:1024px){.adv-focus-layout .app-main{margin-left:0}.adv-focus-layout .sidebar{width:240px}.adv-mobile-nav{display:flex;align-items:center;gap:6px;align-self:flex-start;flex-shrink:0;margin:0 0 6px;padding:6px 10px;border:1px solid #d9e4df;border-radius:8px;background:white;color:#163c39;font:inherit;font-size:13px;cursor:pointer}}
 @media(max-width:760px){
  .adv-research-layout .app-content{padding:5px}
  .adv-research-layout .adv-workspace{position:relative;flex-direction:row;border-radius:10px}
- .adv-research-layout .adv-sidebar{position:absolute;inset:61px auto 0 0;width:240px;z-index:15;border-right:1px solid #d9e4df;box-shadow:8px 0 25px #163c391a}
  .adv-research-layout .adv-chat-header{padding:10px;min-height:61px;flex-wrap:wrap;align-items:center}
  .adv-research-layout .adv-chat-header h1{font-size:15px}.adv-research-layout .adv-chat-header .adv-eyebrow{font-size:8px}
- .adv-research-layout .adv-chat-header>button{font-size:11px;padding:8px}.adv-research-layout #adv-conversations-toggle>span:last-child{display:none}
+ .adv-research-layout .adv-chat-actions>button{font-size:11px;padding:8px}.adv-research-layout #adv-conversations-toggle>span:last-child{display:none}
  .adv-research-layout .adv-messages{padding:16px}.adv-research-layout .adv-answer{font-size:15px;line-height:1.9}
  .adv-research-layout .adv-answer h3{font-size:18px}.adv-research-layout .adv-composer{padding:10px}
  .adv-research-layout .adv-composer textarea{min-height:68px;max-height:110px}.adv-research-layout .adv-compose-tools{gap:6px}
