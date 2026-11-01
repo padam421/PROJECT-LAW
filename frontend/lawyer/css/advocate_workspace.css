@@ -115,7 +115,7 @@ body:has(.adv-focus-layout){overflow:hidden}
  .adv-research-layout .adv-workspace{position:relative;flex-direction:row;border-radius:10px}
  .adv-research-layout .adv-chat-header{padding:10px;min-height:61px;flex-wrap:wrap;align-items:center}
  .adv-research-layout .adv-chat-header h1{font-size:15px}.adv-research-layout .adv-chat-header .adv-eyebrow{font-size:8px}
- .adv-research-layout .adv-chat-actions>button{font-size:11px;padding:8px}.adv-research-layout #adv-conversations-toggle>span:last-child{display:none}
+ .adv-research-layout .adv-chat-actions>button{font-size:11px;padding:8px}
  .adv-research-layout .adv-messages{padding:16px}.adv-research-layout .adv-answer{font-size:15px;line-height:1.9}
  .adv-research-layout .adv-answer h3{font-size:18px}.adv-research-layout .adv-composer{padding:10px}
  .adv-research-layout .adv-composer textarea{min-height:68px;max-height:110px}.adv-research-layout .adv-compose-tools{gap:6px}
