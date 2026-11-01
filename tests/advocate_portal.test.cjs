@@ -16,6 +16,22 @@ test('actual lawyer HTML loads its own chat and rehearsal, without shared citize
  assert.doesNotMatch(html,/src="[^\"]*(?:assistant_chat|live_court|court_simulator|chat_bot)\.js/);
  const user=fs.readFileSync('frontend/user/index.html','utf8');assert.ok(user.includes('assistant_chat.js'));assert.ok(user.includes('live_court.js'));
 });
+test('research opens with history collapsed and Chats can reopen it without changing the case', () => {
+ const f=fixture(),html=f.run('AdvocateChatBot.render()');
+ assert.match(html, /class="adv-workspace adv-conversations-hidden"/);
+ assert.match(html, /id="adv-conversations-toggle"[^>]*aria-expanded="false"/);
+ const classes=new Set(['adv-workspace','adv-conversations-hidden']),attributes=new Map();
+ f.context.document.querySelector=selector=>selector==='.adv-workspace'?{classList:{toggle(name,force){const add=force===undefined?!classes.has(name):force;add?classes.add(name):classes.delete(name);return add;}}}:null;
+ f.elements.set('adv-conversations-toggle',{setAttribute:(name,value)=>attributes.set(name,value)});
+ const original=f.run('AssistantThreads.active().id');
+ for(const expanded of ['true','false','true']){
+  f.run('AdvocateChatBot.toggleConversations()');
+  assert.equal(attributes.get('aria-expanded'),expanded);
+  assert.equal(classes.has('adv-conversations-hidden'),expanded==='false');
+  assert.equal(f.run('AssistantThreads.active().id'),original);
+ }
+});
+
 test('a preparation-only recovery is labelled as pending legal verification', () => {
  const f=fixture();
  const html=f.run("AdvocateChatBot._renderMessage({id:'limited',sender:'ai',text:'Saved preparation tasks',validation:{mode:'preparation_only',reviewed:false}})");
