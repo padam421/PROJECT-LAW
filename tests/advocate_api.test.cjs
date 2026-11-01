@@ -19,8 +19,13 @@ test('advocate APIs require a session and use a different history owner namespac
   assert.equal((await fetch(base+'/api/advocate/assistant/threads',{headers:{'qa-role':'lawyer'}})).status,200);
   assert.equal((await fetch(base+'/api/assistant/threads',{headers:{'qa-role':'lawyer'}})).status,200);
   assert.deepEqual(owners.slice(0,3),['advocate:same-account','advocate:same-account','same-account']);
-  const thread={id:'case_1',title:'NDPS',messages:[{id:'m1',sender:'user',text:'Case facts'}],courtSessions:{}};
+  const thread={id:'case_1',title:'NDPS',messages:[{id:'m1',sender:'user',text:'Case facts'}],draft:'Unsent follow-up',courtSessions:{}};
   const saved=await fetch(base+'/api/advocate/assistant/threads/case_1',{method:'PUT',headers:{'qa-role':'lawyer','Content-Type':'application/json'},body:JSON.stringify({thread})});
   assert.equal(saved.status,200);assert.equal(owners.at(-1),'advocate:same-account');
+  assert.equal((await saved.json()).thread.draft,'Unsent follow-up');
+  for(const draft of [42,'x'.repeat(60001)]){
+   const invalid=await fetch(base+'/api/advocate/assistant/threads/case_1',{method:'PUT',headers:{'qa-role':'lawyer','Content-Type':'application/json'},body:JSON.stringify({thread:{...thread,draft}})});
+   assert.equal(invalid.status,400);
+  }
  }finally{await new Promise(r=>server.close(r));}
 });

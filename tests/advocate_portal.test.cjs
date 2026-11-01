@@ -20,6 +20,13 @@ function popupFixture(){
  f.elements.set('adv-conversations-toggle',{setAttribute:(name,value)=>attributes.set(name,value)});
  return {...f,popup,classes,attributes,styles};
 }
+function historyFixture(){
+ const f=fixture();
+ for(const id of ['chat-messages','adv-sidebar','adv-files'])f.elements.set(id,{innerHTML:'',scrollTop:0,insertAdjacentHTML(position,html){this.innerHTML+=html;}});
+ f.elements.set('chat-send-btn',{disabled:false});
+ f.elements.set('chat-input',{value:'',focus(){}});
+ return f;
+}
 test('actual lawyer HTML loads its own chat and rehearsal, without shared citizen controllers',()=>{
  const html=fs.readFileSync('frontend/lawyer/index.html','utf8');
  for(const name of ['advocate_chat','advocate_storage','advocate_rehearsal'])assert.ok(html.includes(name+'.js'));
@@ -81,6 +88,52 @@ test('a preparation-only recovery is labelled as pending legal verification', ()
  assert.match(html,/LEGAL VERIFICATION PENDING/);
  assert.doesNotMatch(html,/RESPONSE UNAVAILABLE|verified legal opinion/i);
  assert.match(html,/Deepen \/ recheck/);
+});
+
+test('messages and an unsent follow-up reopen from Chats after New chat and a page reload',()=>{
+ const f=historyFixture();
+ f.run('this.old=AssistantThreads.create().id;AssistantThreads.append(old,{id:"u1",sender:"user",text:"Earlier case facts"});AssistantThreads.append(old,{id:"a1",sender:"ai",text:"Earlier research answer"});AdvocateChatBot.refresh()');
+ f.elements.get('chat-input').value='Follow-up still being written';
+ f.run('AdvocateChatBot.saveDraft();AdvocateChatBot.startNewChat()');
+ assert.equal(f.elements.get('chat-input').value,'');
+ assert.equal(f.run('AssistantThreads.get(old).draft'),'Follow-up still being written');
+ f.run('AdvocateChatBot.selectConversation(old)');
+ assert.match(f.elements.get('chat-messages').innerHTML,/Earlier case facts/);
+ assert.match(f.elements.get('chat-messages').innerHTML,/Earlier research answer/);
+ assert.equal(f.elements.get('chat-input').value,'Follow-up still being written');
+ f.run('AssistantThreads._data=null;AssistantThreads._owner=null;AdvocateChatBot._viewThread=null;AdvocateChatBot.refresh()');
+ assert.equal(f.elements.get('chat-input').value,'Follow-up still being written');
+ assert.match(f.elements.get('chat-messages').innerHTML,/Earlier research answer/);
+});
+
+test('an unsent first message is saved under its own title and safely rendered as a draft',()=>{
+ const f=historyFixture();f.run('AssistantThreads.create();AdvocateChatBot.refresh()');
+ f.elements.get('chat-input').value='Draft NDPS facts </textarea><script>bad()</script>';
+ f.run('AdvocateChatBot.saveDraft()');
+ assert.match(f.run('AdvocateChatBot.sidebar()'),/Draft NDPS facts/);
+ assert.match(f.run('AdvocateChatBot.sidebar()'),/Draft · 0 messages/);
+ const html=f.run('AdvocateChatBot.render()');
+ assert.match(html,/&lt;\/textarea&gt;&lt;script&gt;/);assert.doesNotMatch(html,/<script>bad/);
+});
+
+test('opening history again loads newly saved server conversations and refreshes active messages',async()=>{
+ const f=historyFixture(),id=f.run('AssistantThreads.create().id');
+ f.run('AssistantThreads.active().dirty=false;AssistantThreads.active().revision=1');
+ let loads=0;
+ f.context.fetch=async()=>{loads++;return {ok:true,json:async()=>({threads:[{id,title:'Saved case',messages:[{id:'remote1',sender:'ai',text:'Saved response '+loads}],courtSessions:{},draft:'',revision:loads+1}]})}};
+ await f.run('AdvocateChatBot.refreshHistory()');assert.match(f.elements.get('chat-messages').innerHTML,/Saved response 1/);
+ await f.run('AdvocateChatBot.refreshHistory()');assert.match(f.elements.get('chat-messages').innerHTML,/Saved response 2/);
+ assert.equal(loads,2);
+});
+
+test('sending a saved draft clears only that draft and retains the sent question and answer',async()=>{
+ const f=historyFixture();f.run('AssistantThreads.create();AdvocateChatBot.refresh()');
+ f.elements.get('chat-input').value='Synthetic NDPS question';f.run('AdvocateChatBot.saveDraft()');
+ f.context.fetch=async()=>({ok:true,json:async()=>({ok:true,message:'Synthetic response'})});
+ await f.run('AdvocateChatBot.sendMessage()');
+ assert.equal(f.run('AssistantThreads.active().draft'),'');
+ assert.equal(f.run('AssistantThreads.active().messages.length'),2);
+ assert.equal(f.elements.get('chat-input').value,'');
 });
 test('lawyer history uses a separate local key and API namespace, and reload preserves it',()=>{
  const f=fixture();f.run('AssistantThreads.create();AssistantThreads.append(AssistantThreads.active().id,{id:"m1",sender:"user",text:"NDPS case"})');

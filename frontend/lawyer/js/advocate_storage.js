@@ -13,6 +13,6 @@ AssistantThreads.api = async function(path, body) {
 };
 window.addEventListener('nyay-threads-updated', () => {
   const sidebar = document.getElementById('adv-sidebar');
-  if (sidebar) sidebar.innerHTML = AdvocateChatBot.sidebar();
+  if (sidebar) AdvocateChatBot.refresh();
 });
 window.addEventListener('online', () => { AssistantThreads._hydration = null; AssistantThreads.hydrate(); });

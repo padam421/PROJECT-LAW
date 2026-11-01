@@ -1,6 +1,30 @@
 /* Advocate-only NDPS case research. Citizen chat and simulation are independent. */
 const AdvocateChatBot = {
-  pending: new Set(), uploads: new Map(), files: [], _viewThread: null, _viewCount: 0,
+  pending: new Set(), uploads: new Map(), files: [], _viewThread: null, _viewCount: 0, _historyLoads: new Map(),
+  saveDraft() {
+    const thread = AssistantThreads.active(false), input = document.getElementById('chat-input');
+    if (!thread || !input || (thread.draft || '') === input.value) return;
+    AssistantThreads.change(thread.id, t => {
+      t.draft = input.value;
+      if (!t.messages.length) t.title = input.value.trim().slice(0, 80) || 'New conversation';
+    });
+  },
+  saveCurrentConversation() {
+    this.saveDraft();
+    const thread = AssistantThreads.active(false);
+    if (thread?.dirty && !thread.conflict) AssistantThreads.sync(thread.id);
+  },
+  refreshHistory() {
+    const owner = AssistantThreads.owner();
+    if (!owner) return Promise.resolve();
+    if (this._historyLoads.has(owner)) return this._historyLoads.get(owner);
+    AssistantThreads._hydration = null;
+    const request = AssistantThreads.hydrate().then(() => {
+      if (AssistantThreads.owner() === owner) this.refresh();
+    }).finally(() => this._historyLoads.delete(owner));
+    this._historyLoads.set(owner, request);
+    return request;
+  },
   toggleConversations(close = null) {
     const popup = document.getElementById('adv-conversations-dialog');
     if (!popup) return;
@@ -9,6 +33,7 @@ const AdvocateChatBot = {
       if (popup.open) popup.close();
       this.conversationsClosed();
     } else {
+      this.saveDraft(); this.refresh(); this.refreshHistory();
       this.positionConversations();
       if (!popup.open) popup.showModal();
       document.querySelector('.adv-workspace')?.classList.toggle('adv-conversations-hidden', false);
@@ -69,20 +94,21 @@ const AdvocateChatBot = {
   sidebar() {
     const active = AssistantThreads.active(false);
     return '<button class="adv-primary" onclick="AdvocateChatBot.startNewChat()">＋ New case chat</button><h3>Case conversations</h3>' +
-      AssistantThreads.list().map(t => '<div class="adv-thread ' + (t.id === active?.id ? 'active' : '') + '"><button onclick="AdvocateChatBot.selectConversation(\'' + t.id + '\')"><strong>' + this.e(t.title) + '</strong><small>' + t.messages.length + ' messages · ' + Object.keys(t.courtSessions || {}).length + ' rehearsals</small></button><button title="Export case" onclick="AssistantThreads.export(\'' + t.id + '\')">↓</button><button title="Delete chat, retain rehearsals" onclick="AdvocateChatBot.remove(\'' + t.id + '\')">×</button></div>').join('') +
+      AssistantThreads.list().map(t => '<div class="adv-thread ' + (t.id === active?.id ? 'active' : '') + '"><button onclick="AdvocateChatBot.selectConversation(\'' + t.id + '\')"><strong>' + this.e(t.title) + '</strong><small>' + (t.draft?.trim() ? 'Draft · ' : '') + t.messages.length + ' messages · ' + Object.keys(t.courtSessions || {}).length + ' rehearsals</small></button><button title="Export case" onclick="AssistantThreads.export(\'' + t.id + '\')">↓</button><button title="Delete chat, retain rehearsals" onclick="AdvocateChatBot.remove(\'' + t.id + '\')">×</button></div>').join('') +
       '<p class="adv-muted adv-storage-note">' + this.e(active?.conflict ? 'Save conflict — export your local copy.' : active?.dirty ? 'Saved on this device · account sync pending' : AssistantThreads._syncState === 'saved' ? 'Saved to your account' : 'Saved on this device') + '</p>';
   },
   render() {
     const t = AssistantThreads.active();
     return Components.AppLayout('<div class="adv-workspace adv-conversations-hidden"><dialog id="adv-conversations-dialog" class="adv-conversations-dialog" aria-labelledby="adv-conversations-title" onclose="AdvocateChatBot.conversationsClosed()" onclick="AdvocateChatBot.dismissConversations(event)"><header class="adv-conversations-header"><h2 id="adv-conversations-title">Case chats</h2><button type="button" autofocus aria-label="Close chats" onclick="AdvocateChatBot.toggleConversations(true)">✕ Close</button></header><aside class="adv-sidebar" id="adv-sidebar">' + this.sidebar() + '</aside></dialog><main class="adv-chat"><header class="adv-chat-header"><div class="adv-chat-heading"><button id="adv-conversations-toggle" type="button" aria-controls="adv-conversations-dialog" aria-haspopup="dialog" aria-expanded="false" title="Show or hide case conversations" onclick="AdvocateChatBot.toggleConversations()"><span class="material-symbols-rounded" aria-hidden="true">view_sidebar</span><span>Chats</span></button><div><span class="adv-eyebrow">NDPS RESEARCH</span><h1>Case research & strategy</h1></div></div><div class="adv-chat-actions"><button type="button" id="adv-new-chat" onclick="AdvocateChatBot.startNewChat()">＋ New chat</button><button type="button" onclick="Router.navigate(\'/court\')">Hearing practice ↗</button></div></header><div id="chat-messages" class="adv-messages" aria-live="polite">' +
-      (t.messages.length ? t.messages.map(m => this._renderMessage(m)).join('') : this._emptyChat()) + '</div><div id="adv-files" class="adv-file-chips"></div><form class="adv-composer" onsubmit="event.preventDefault();AdvocateChatBot.sendMessage()"><label class="adv-sr-only" for="chat-input">Case facts or follow-up question</label><textarea id="chat-input" rows="2" maxlength="60000" placeholder="Describe your NDPS case in detail, or ask a follow-up…" onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey)){event.preventDefault();AdvocateChatBot.sendMessage()}"></textarea><div class="adv-compose-tools"><input hidden multiple type="file" id="chat-file-input" accept=".pdf,.docx,.txt,.csv" onchange="AdvocateChatBot.handleFileAttach(event)"><button type="button" onclick="document.getElementById(\'chat-file-input\').click()">＋ Add case papers</button><span class="adv-language-note">Replies match your input language</span><button type="submit" class="adv-primary" id="chat-send-btn">Analyse case ↑</button></div><small>PDF / DOCX / TXT / CSV · up to 10 MB each · scanned documents need OCR · Ctrl + Enter to send</small></form></main></div>', 'ai-assistant', 'Advocate Research');
+      (t.messages.length ? t.messages.map(m => this._renderMessage(m)).join('') : this._emptyChat()) + '</div><div id="adv-files" class="adv-file-chips"></div><form class="adv-composer" onsubmit="event.preventDefault();AdvocateChatBot.sendMessage()"><label class="adv-sr-only" for="chat-input">Case facts or follow-up question</label><textarea id="chat-input" rows="2" maxlength="60000" placeholder="Describe your NDPS case in detail, or ask a follow-up…" oninput="AdvocateChatBot.saveDraft()" onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey)){event.preventDefault();AdvocateChatBot.sendMessage()}">' + this.e(t.draft || '') + '</textarea><div class="adv-compose-tools"><input hidden multiple type="file" id="chat-file-input" accept=".pdf,.docx,.txt,.csv" onchange="AdvocateChatBot.handleFileAttach(event)"><button type="button" onclick="document.getElementById(\'chat-file-input\').click()">＋ Add case papers</button><span class="adv-language-note">Replies match your input language</span><button type="submit" class="adv-primary" id="chat-send-btn">Analyse case ↑</button></div><small>PDF / DOCX / TXT / CSV · up to 10 MB each · scanned documents need OCR · Ctrl + Enter to send</small></form></main></div>', 'ai-assistant', 'Advocate Research');
   },
   onEnter() {
     this._resizeConversations ||= () => { if (document.getElementById('adv-conversations-dialog')?.open) this.positionConversations(); };
     window.addEventListener('resize', this._resizeConversations);
-    this.refresh(); AssistantThreads.hydrate();
+    this.refresh(); this.refreshHistory();
   },
   onLeave() {
+    this.saveCurrentConversation();
     this.toggleConversations(true);
     window.removeEventListener('resize', this._resizeConversations);
   },
@@ -92,6 +118,10 @@ const AdvocateChatBot = {
     const previousScroll = panel.scrollTop;
     const changedThread = this._viewThread !== t.id;
     const addedMessage = t.messages.length > this._viewCount;
+    if (changedThread) {
+      const input = document.getElementById('chat-input');
+      if (input) input.value = t.draft || '';
+    }
     panel.innerHTML = t.messages.length ? t.messages.map(m => this._renderMessage(m)).join('') : this._emptyChat();
     if (this.pending.has(t.id)) panel.insertAdjacentHTML('beforeend', '<div class="adv-progress" role="status">Reading the case record, researching sources and checking the analysis…</div>');
     document.getElementById('adv-sidebar').innerHTML = this.sidebar();
@@ -137,6 +167,10 @@ const AdvocateChatBot = {
     const documentOnly = retryMessage ? !!retryMessage.documentOnly : !input?.value?.trim() && files.length > 0;
     const history = t.messages.filter(m => !m.error).map(m => ({sender: m.sender, text: m.text, caseContext: m.caseContext, documentOnly: !!m.documentOnly}));
     if (!retryMessage) {
+      AssistantThreads.change(t.id, current => {
+        current.draft = '';
+        if (!current.messages.some(m => m.sender === 'user')) current.title = text.slice(0, 80);
+      });
       AssistantThreads.append(t.id, {id: AssistantThreads.id('msg'), sender: 'user', text, caseContext: context, documentOnly,
         attachments: files.map(f => ({name: f.name, characters: f.characters, warnings: f.warnings})), time: new Date().toISOString()});
       this.files = this.files.filter(f => f.threadId !== t.id); if (input) input.value = '';
@@ -157,12 +191,17 @@ const AdvocateChatBot = {
     if (user) this.sendMessage({retryMessage: user});
   },
   startNewChat() {
+    this.saveCurrentConversation();
     AssistantThreads.create();
     const input = document.getElementById('chat-input');
     if (input) input.value = '';
     this.refresh(); this.toggleConversations(true); input?.focus();
   },
-  selectConversation(id) { AssistantThreads.select(id); this.refresh(); this.toggleConversations(true); document.getElementById('chat-input')?.focus(); },
+  selectConversation(id) {
+    this.saveCurrentConversation();
+    AssistantThreads.select(id); this.refresh();
+    this.toggleConversations(true); document.getElementById('chat-input')?.focus();
+  },
   async remove(id) {
     if (this.pending.has(id) || this.uploads.get(id)) return;
     if (!confirm('Delete this case chat? Saved hearing rehearsals will remain available.')) return;

@@ -41,7 +41,7 @@ module.exports = {
     const [rows]=await pool.query('SELECT revision,payload FROM ai_conversation_threads WHERE owner_id=? AND id=?',[String(owner),id]);
     if(!rows.length)return null;
     const thread=decode(rows[0]);
-    return this.put(owner,{...thread,deleted:true,messages:[],updatedAt:new Date().toISOString()},thread.revision);
+    return this.put(owner,{...thread,deleted:true,messages:[],draft:'',updatedAt:new Date().toISOString()},thread.revision);
   },
   async removeCourt(owner,id,sessionId) {
     const pool=await database();

@@ -52,8 +52,9 @@ test('no signed-out durable conversations are created',()=>{const {s,owner}=stor
 
 test('deleting chat messages preserves court preparation and its exact progress across reload',async()=>{
  const {s}=store(),chat=s.create();s.append(chat.id,{id:'m1',sender:'user',text:'Delete this chat message'});
- s.change(chat.id,t=>{t.courtSessions.s1={id:'s1',title:'Saved preparation',summary:'Facts needed for the hearing',script:[{actor:'JUDGE',text:'Opening'}],transcript:[{text:'Witness answer'}],rooms:{HIGH:{timeline:12,elapsed:3}}};});
+ s.change(chat.id,t=>{t.draft='An unsent follow-up';t.courtSessions.s1={id:'s1',title:'Saved preparation',summary:'Facts needed for the hearing',script:[{actor:'JUDGE',text:'Opening'}],transcript:[{text:'Witness answer'}],rooms:{HIGH:{timeline:12,elapsed:3}}};});
  await s.remove(chat.id);assert.equal(s.get(chat.id),undefined);assert.equal(s.getForCourt(chat.id).messages.length,0);
+ assert.equal(s.getForCourt(chat.id).draft,'');
  s._data=null;s.ensure();assert.equal(s.savedCourts().length,1);assert.equal(s.savedCourts()[0].chatDeleted,true);
  assert.equal(s.getForCourt(chat.id).courtSessions.s1.rooms.HIGH.timeline,12);
  s.changeCourt(chat.id,t=>{t.courtSessions.s1.rooms.HIGH.timeline=13;});assert.equal(s.getForCourt(chat.id).courtSessions.s1.rooms.HIGH.timeline,13);

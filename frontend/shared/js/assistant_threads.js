@@ -93,7 +93,7 @@ const AssistantThreads = {
     const t=this.get(id);if(!t)return;
     // Delete messages, not the separately retained preparation snapshots. Tombstone
     // prevents an old tab bringing deleted chat messages back after reconnecting.
-    this.change(id,t=>{t.deleted=true;t.messages=[];});clearTimeout(this._timers.get(id));
+    this.change(id,t=>{t.deleted=true;t.messages=[];t.draft='';});clearTimeout(this._timers.get(id));
     if(this._data.active===id)this._data.active=null;
     this.persist();await this.sync(id);
     window.dispatchEvent(new Event('nyay-threads-updated'));
